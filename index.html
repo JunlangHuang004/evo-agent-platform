@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>EvoMAC · 多智能体协作平台</title>
+  <link rel="stylesheet" href="./styles.css">
+  <link rel="stylesheet" href="./panels.css">
+</head>
+<body>
+  <a class="skip-link" href="#mainContent">跳到主要内容</a>
+  <div class="app-shell">
+    <aside class="app-sidebar" aria-label="主导航">
+      <a class="brand" href="#workspace"><span class="brand-mark" aria-hidden="true">E</span><span><strong>EvoMAC</strong><small>多智能体协作平台</small></span></a>
+      <nav class="main-nav">
+        <a href="#workspace" data-route="workspace"><span aria-hidden="true">▤</span><span>工作台</span></a>
+        <a href="#agents" data-route="agents"><span aria-hidden="true">◇</span><span>Agents 与记忆</span></a>
+        <a href="#evaluation" data-route="evaluation"><span aria-hidden="true">▥</span><span>评测</span></a>
+      </nav>
+      <div class="sidebar-note"><span class="tag muted">协作平台</span><p>真实任务调度与工具执行。<br>人工审批与独立记忆。</p><span class="text-small muted">DeepSeek / HKGAI</span></div>
+    </aside>
+
+    <div class="app-main">
+      <header class="page-header">
+        <div><h1 id="pageTitle">工作台</h1><p id="pageDescription">提出任务，查看协作过程和执行结果。</p></div>
+        <div class="connection-area"><span id="connectionState" class="connection-state"><span aria-hidden="true"></span>正在连接后端…</span><span id="modelState" class="text-small muted"></span></div>
+      </header>
+      <div id="connectionError" class="connection-error" role="status" hidden><span id="connectionErrorText"></span><button id="retryConnection" class="button quiet small" type="button">重试连接</button></div>
+      <main id="mainContent">
+        <section id="workspacePage" data-page="workspace" aria-label="工作台">
+          <div class="workspace-toolbar">
+            <label class="channel-picker" for="channelSelect"><span class="muted text-small">对话范围</span><select id="channelSelect"><option value="group">群聊 · 协作团队</option><option value="coordinator">私聊 · Coordinator</option><option value="research">私聊 · Research</option><option value="executor">私聊 · Executor</option><option value="reviewer">私聊 · Reviewer</option></select></label>
+            <details id="participantsControl" class="participants-control">
+              <summary>参与 Agent <span id="participantCount">4/4</span></summary>
+              <div class="participants-menu">
+                <fieldset id="participantOptions" class="participant-options"><legend class="sr-only">选择参与本次群聊任务的 Agent</legend></fieldset>
+                <p id="participantHelp" class="text-small muted" aria-live="polite">至少选择 1 个 Agent；任务开始后锁定本次成员。</p>
+              </div>
+            </details>
+            <label class="mode-picker" for="modeSelect"><span class="muted text-small">模式</span><select id="modeSelect"><option value="task">执行任务</option><option value="chat">普通聊天</option></select></label><label class="memory-toggle"><input id="memoryEnabled" type="checkbox" checked><span>使用已确认记忆</span></label>
+            <span id="channelPrivacy" class="text-small muted">群聊任务可由所选 Agent 分工协作。</span>
+          </div>
+          <div class="workspace-grid">
+            <section class="panel conversation" aria-label="对话">
+              <div class="panel-head"><div><h2 id="conversationTitle">群聊</h2><p id="conversationHint" class="muted text-small">任务与对话</p></div><button id="resetConversation" class="button quiet small" type="button">重置会话</button></div>
+              <div id="messageList" class="message-list" role="log" aria-live="polite" aria-relevant="additions text"></div>
+              <div id="approvalArea" aria-live="polite"></div>
+              <form id="messageForm" class="composer">
+                <label class="sr-only" for="messageInput">任务或消息</label>
+                <textarea id="messageInput" rows="3" placeholder="输入消息…"></textarea>
+                <div class="composer-actions"><span id="composerHint" class="muted text-small">Enter 发送 · Shift + Enter 换行</span><button id="sendMessage" class="button primary" type="submit">发送消息 <span aria-hidden="true">↗</span></button></div>
+                <p class="composer-note">执行任务可调用工具和请求人工介入；普通聊天仅生成模型回复。</p>
+              </form>
+            </section>
+
+            <aside class="panel task-inspector" aria-label="当前任务详情">
+              <div class="panel-head"><div><h2>当前任务</h2><p id="runMeta" class="text-small muted">等待新任务</p></div><div class="run-actions"><button id="pauseRun" class="button quiet small" type="button" disabled>暂停</button><button id="cancelRun" class="button quiet small" type="button" disabled>取消</button></div></div>
+              <div class="run-overview"><div class="run-status-row"><span id="runStatus" class="tag muted">待开始</span><span id="runElapsed" class="text-small muted"></span></div><p id="runTitle" class="run-title">发送消息后，这里会展示执行详情。</p><p id="runParticipants" class="text-small muted" hidden></p><p id="runProgress" class="text-small muted"></p></div>
+              <div id="inspectorTabs" class="tabs" role="tablist" aria-label="任务详情">
+                <button type="button" id="tab-tasks" role="tab" data-inspector-tab="tasks" aria-controls="inspectorContent" aria-selected="true">子任务</button>
+                <button type="button" id="tab-calls" role="tab" data-inspector-tab="calls" aria-controls="inspectorContent" aria-selected="false">调用记录</button>
+                <button type="button" id="tab-memory" role="tab" data-inspector-tab="memory" aria-controls="inspectorContent" aria-selected="false">本次记忆</button>
+              </div>
+              <div id="inspectorContent" class="inspector-content" role="tabpanel" aria-labelledby="tab-tasks"></div>
+            </aside>
+          </div>
+        </section>
+        <section id="agentsPage" data-page="agents" aria-label="Agents 与记忆" hidden></section>
+        <section id="evaluationPage" data-page="evaluation" aria-label="评测" hidden></section>
+      </main>
+      <footer class="app-footer">EvoMAC · 通用多智能体协作平台 <span>运行状态与成果由后端保存</span></footer>
+    </div>
+  </div>
+  <dialog id="detailDialog" class="detail-dialog" aria-labelledby="dialogTitle"><div class="dialog-head"><h2 id="dialogTitle">详情</h2><button id="closeDialog" class="button quiet small" type="button" aria-label="关闭详情">关闭</button></div><div id="dialogBody" class="dialog-body"></div></dialog>
+  <script type="module" src="./js/main.js"></script>
+</body>
+</html>
