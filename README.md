@@ -116,4 +116,32 @@ python3 -m unittest discover -s tests -v
 
 代码任务只有取得 Reviewer 自己的成功 code.test 调用证据，且对应目标当前修订和 Artifact SHA，才能通过独立验收。缺证据、借用 Executor 的测试或返工后未复验时，运行显示部分完成并列出验收缺口。纯文档任务不强制代码测试。
 
-当前 54 项回归已通过。另已完成脚本模型驱动的四角色真实工具联调：Research 抓取 CPython 官方资料，Executor 在 Docker 中执行及测试，Reviewer 在独立 Docker 中复核，只读 Artifact 逐步交接，Coordinator 生成最终报告。该联调仍不等同于真实模型全流程验收。
+当前 61 项回归已通过。另已完成脚本模型驱动的四角色真实工具联调：Research 抓取 CPython 官方资料，Executor 在 Docker 中执行及测试，Reviewer 在独立 Docker 中复核，只读 Artifact 逐步交接，Coordinator 生成最终报告。该联调仍不等同于真实模型全流程验收。
+
+## 论文启发的记忆检索优化（2026-10-29）
+
+采用按字段加权的 BM25F 风格词项排序：适用触发条件、使用条件、标题和经验内容分别参与评分，保留置信度和时间因素。先过滤未验证、不可见及未授权共享的记忆，再计算语料统计。只有 owner、范围、类型及全部检索字段相同的策略才在召回结果中去重；大小写、路径和适用条件保持区分，原记录与证据不会合并或删除。重复记录也不会改变 IDF 或字段长度统计。
+
+研究依据包括 [A-Mem（NeurIPS 2025）](https://proceedings.neurips.cc/paper_files/paper/2025/hash/19909c36f51abc4856b4560aff3d36d6-Abstract-Conference.html) 的结构化记忆组织，以及 [ACE（ICLR 2026）](https://proceedings.iclr.cc/paper_files/paper/2026/hash/8a94ff6f922d995d7d3f4ebf4143e442-Abstract-Conference.html) 对保留有效策略细节的重视。本实现是轻量工程改动，没有复现论文的模型、训练或记忆图，也不继承论文报告的收益。
+
+在人工构建、独立审核相关性标签后冻结的 **55 条策略 / 24 个中英查询**上，对比 `94b7030`：
+
+| 指标 | 基线 | 当前版本 |
+| --- | ---: | ---: |
+| Top-1 命中率 | 83.33% | 91.67% |
+| MRR | 0.899306 | 0.940972 |
+| Precision@3 | 0.722222 | 0.763889 |
+| 前三条中的重复槽位 | 5 | 0 |
+
+这只是小型检索回归集；不是标准学术基准，也不是端到端 Agent 成功率。单条查询仍可能退步，平均注入上下文字符数没有减少。v2 标签纠正了 v1 的 8 个漏标及 4 个过度相关标注，修改原因记录在 fixture 的 `labelReview`，两个版本均使用同一 v2 标签重新评测。固定分母的 P@3 理论上限为 0.944444，因为两题只有一个直接相关策略。
+
+```sh
+python3 benchmarks/memory_retrieval.py
+python3 -m unittest discover -s tests -v
+```
+
+基准保留完整逐题排名、v2 fixture 哈希与基线结果。也可用 `--source /path/to/baseline-checkout --output /path/to/results.json` 对另一检出目录复测，不调用模型或网络。
+
+按 [ToolScope（ACL 2026）](https://aclanthology.org/2026.acl-long.1573/) 和 [MCP-Zero（2025 预印本）](https://arxiv.org/abs/2506.01056) 的思路试验过按需动作/工具说明，但 9 个合成场景各重复两次的交替 A/B 中，有效动作由 12/18 降至 9/18，含发现轮次的耗时增加，**该生产改动已撤下**。`benchmarks/protocol_live.py` 保留通用对比工具，仅在显式 `--live` 时请求课程 API；超时同样计为失败，不执行模型返回的工具。
+
+`benchmarks/four_agent_live.py` 是另一个需要显式 `--live` 的真实模型、网页和 Docker 联调入口，需指定新的独立 `--data-dir`、本机 `--config-root` 和 `--output`。它不会自动批准任何动作，也不会配置 Git。本次真实 HKGAI 联调仍在规划阶段超时；该限制尚未解决。

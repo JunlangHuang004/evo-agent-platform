@@ -7,6 +7,7 @@ not count as usage; feedback records one real outcome per subsequent task.
 import copy
 import datetime as dt
 import hashlib
+import math
 import sqlite3
 import time
 import uuid
@@ -88,6 +89,19 @@ class MemoryService:
     def list(self, agent_id):
         return self.repo.memories(self._owner(agent_id))
 
+    @staticmethod
+    def _retrieval_key(item):
+        # Retrieval deduplication never edits records or merges provenance. A
+        # shared strategy and a private one (or different owners) stay distinct.
+        # Conditions and identifier case can change the meaning of a strategy.
+        # Only trim outer whitespace; never normalize code/path spelling or
+        # collapse distinct applicability rules into one retrieved entry.
+        lesson = str(item.get('lesson', '')).strip()
+        return (item.get('owner'), item.get('visibility'), item.get('channelId'), item.get('kind'),
+                str(item.get('title', '')).strip(),
+                lesson or item.get('id'), str(item.get('trigger', '')).strip(),
+                str(item.get('conditions', '')).strip())
+
     def recall(self, agent_id, query, channel_id='group', limit=4):
         owner = self._owner(agent_id)
         query_terms = tokens(query)
@@ -97,21 +111,52 @@ class MemoryService:
         # Cross-owner retrieval requires an explicit, audited sharing operation.
         candidates += [item for item in self.repo.all_memories()
                        if item.get('owner') != owner and item.get('visibility') == 'shared' and item.get('shareConfirmation')]
+        # Filter before computing corpus statistics: private/unverified records
+        # must not influence another context's ranking, even indirectly.
+        eligible = [item for item in candidates
+                    if _verified(item) and _scoped(item, channel_id)
+                    and float(item.get('confidence', 0)) >= self.min_confidence]
+        if not eligible:
+            return []
+        # Lightweight BM25F-style lexical retrieval, not an embedding model.
+        # Fixed conventional k1/b avoid tuning against the regression fixture;
+        # applicability fields carry more weight than a lesson mentioning a
+        # different failure as a counterexample. Existing CJK tokens are kept.
+        weights = {'trigger': 3.0, 'conditions': 2.0, 'title': 1.0, 'lesson': 1.0}
+        fields = [{field: tokens(item.get(field, '')) for field in weights} for item in eligible]
+        # Repeated receipts must not change either IDF or length normalization.
+        # Count the same complete strategy once in both corpus statistics.
+        unique_fields = {}
+        for item, record in zip(eligible, fields):
+            unique_fields.setdefault(self._retrieval_key(item), record)
+        averages = {field: max(1, sum(len(record[field]) for record in unique_fields.values()) / len(unique_fields))
+                    for field in weights}
+        documents = {key: set().union(*record.values()) for key, record in unique_fields.items()}
+        document_count = len(documents)
+        idf = {term: math.log(1 + (document_count - frequency + .5) / (frequency + .5))
+               for term in query_terms
+               for frequency in [sum(term in document for document in documents.values())]}
         ranked = []
         now = self._now()
-        for item in candidates:
-            if not _verified(item) or not _scoped(item, channel_id):
-                continue
-            confidence = float(item.get('confidence', 0))
-            if confidence < self.min_confidence:
-                continue
-            terms = tokens(' '.join(str(item.get(field, '')) for field in ('title', 'lesson', 'trigger', 'conditions')))
-            overlap = len(query_terms & terms)
-            if overlap:
+        for item, record in zip(eligible, fields):
+            score = 0
+            for term in query_terms:
+                frequency = sum(weight / (.25 + .75 * len(record[field]) / averages[field])
+                                for field, weight in weights.items() if term in record[field])
+                if frequency:
+                    score += idf[term] * 2.2 * frequency / (1.2 + frequency)
+            if score:
                 age = max(0, now - self._epoch(item.get('lastActivityAt'), now)) / 86400
-                score = overlap / len(query_terms) * confidence * (.5 + .5 / (1 + age / 30))
+                score *= float(item.get('confidence', 0)) * (.5 + .5 / (1 + age / 30))
                 ranked.append((score, item))
-        return [copy.deepcopy(item) for _, item in sorted(ranked, key=lambda pair: pair[0], reverse=True)[:max(0, min(int(limit), 100))]]
+        selected, seen = [], set()
+        maximum = max(0, min(int(limit), 100))
+        for _, item in sorted(ranked, key=lambda pair: pair[0], reverse=True):
+            key = self._retrieval_key(item)
+            if key not in seen and len(selected) < maximum:
+                selected.append(copy.deepcopy(item))
+                seen.add(key)
+        return selected
 
     def record_episode(self, agent_id, run, task, success, reason, call_ids, channel_id):
         if not isinstance(run, dict) or not run.get('id') or type(success) is not bool:
