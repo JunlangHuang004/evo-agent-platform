@@ -92,7 +92,7 @@ tests/                      # 单元和回归检查
 - `GET /api/health`：服务、模型与 Docker 能力。
 - `GET /api/state`：频道、任务、工具、审批、Artifact 和记忆。
 - `GET /api/runs/<run-id>`：历史运行的公开信息。
-- `POST /api/action`：`send / participants / pause / resume / recover / cancel / reset / approval / memory_confirm / refresh_capabilities`。
+- `POST /api/action`：`send / participants / pause / resume / recover / cancel / reset / approval / memory_confirm / memory_share / refresh_capabilities`。
 
 POST 必须使用 `Content-Type: application/json` 和 `X-EvoMAC-Client: 1`；服务只监听本机，拒绝异源请求。静态白名单不能下载 `.env`、数据库或后端源文件。公开部署前需要补充身份认证。
 
@@ -101,3 +101,19 @@ python3 -m unittest discover -s tests -v
 ```
 
 测试默认使用脚本模型、临时数据库和工具替身，不消耗模型额度。Docker/搜索/真实模型联调应单独运行。真实服务不可用会明确失败，不以测试替身作为实际系统的回退。
+
+## 本次验证记录
+
+回归检查覆盖调度并行、依赖、恢复、审批、预算、记忆与工具权限。另已用脚本模型配合真实 Docker、真实文件和 Artifact 验证跨 Agent 交接与审批；此项不代表真实模型端到端验收。真实公开搜索与网页抓取、Docker 隔离和本地 Git commit 均已单独验证。
+
+真实 HKGAI 聊天、短 JSON 动作生成和结构化规划已成功返回；完整模型驱动的编码—测试—独立复核流程仍因执行阶段 API 超时未通过。DeepSeek 和真实 Git push 尚未联调。模型接入可用与多轮任务稳定完成需分别验收，建议演示前先测试课程服务状态。
+
+进程正常运行时会跟踪并清理自己的 Docker 容器；后端被强制终止时，仍需人工检查遗留容器。
+
+## 四角色协作验收
+
+任务模式选齐四个 Agent 时，计划必须覆盖 Research、Executor、Reviewer 和 Coordinator 的实际任务。Coordinator 的最终汇总必须依赖另外三个角色的结果；缺失角色的计划会要求模型修正。明确指定的角色由能力约束绑定，不能由其他角色冒名完成。
+
+代码任务只有取得 Reviewer 自己的成功 code.test 调用证据，且对应目标当前修订和 Artifact SHA，才能通过独立验收。缺证据、借用 Executor 的测试或返工后未复验时，运行显示部分完成并列出验收缺口。纯文档任务不强制代码测试。
+
+当前 54 项回归已通过。另已完成脚本模型驱动的四角色真实工具联调：Research 抓取 CPython 官方资料，Executor 在 Docker 中执行及测试，Reviewer 在独立 Docker 中复核，只读 Artifact 逐步交接，Coordinator 生成最终报告。该联调仍不等同于真实模型全流程验收。
