@@ -45,6 +45,13 @@ _MAX_BYTES = 256 * 1024
 _MAX_RUN_BYTES = 4 * 1024 * 1024
 _MAX_RUN_COUNT = 40
 _INDEX = "artifacts.json"
+_TERMINAL_RUNS = {"done", "partial", "failed", "cancelled", "skipped", "rejected"}
+_SENSITIVE_NAME = re.compile(
+    r"(?:^|[-_.])(?:credentials?|secrets?|passwords?|tokens?|api[-_]?keys?|id_rsa|id_ed25519)(?:[-_.]|$)", re.I)
+_SENSITIVE_CONTENT = re.compile(
+    r"-----BEGIN (?:[A-Z ]+ )?PRIVATE KEY-----|"
+    r"(?im:^\s*(?:export\s+)?(?:[A-Z_]*(?:API_KEY|ACCESS_TOKEN|PRIVATE_KEY|PASSWORD|SECRET|GIT_TOKEN))\s*=\s*\S+)|"
+    r'''["'](?:api_key|access_token|private_key|password|client_secret|git_token)["']\s*:\s*["'][^"']+["']''', re.I)
 
 
 def _identifier(value, label):
@@ -53,9 +60,9 @@ def _identifier(value, label):
     return value
 
 
-def _agent(value):
+def _agent(value, agents=None):
     _identifier(value, "Agent ID")
-    if value not in AGENTS:
+    if value not in (AGENTS if agents is None else agents):
         raise ArtifactError("未知 Agent。")
     return value
 
@@ -124,7 +131,12 @@ def _text(raw):
 
 
 class ArtifactStore:
-    def __init__(self, data_dir: Path):
+    def __init__(self, data_dir: Path, agents=None):
+        self.agents = copy.deepcopy(AGENTS if agents is None else agents)
+        if not isinstance(self.agents, dict) or not self.agents:
+            raise ArtifactError("需要非空的 Agent 注册表。")
+        for agent_id in self.agents:
+            _identifier(agent_id, "Agent ID")
         requested = Path(data_dir).absolute()
         if requested.is_symlink():
             raise ArtifactError("数据目录不能是符号链接。")
@@ -186,7 +198,7 @@ class ArtifactStore:
                 if not isinstance(item, dict):
                     raise ArtifactError("产物索引记录无效。")
                 artifact_id = _identifier(item.get("id"), "产物 ID")
-                _agent(item.get("ownerAgentId"))
+                _agent(item.get("ownerAgentId"), self.agents)
                 run_id = _identifier(item.get("runId"), "Run ID")
                 _task(item.get("taskId"))
                 parts = _safe_parts(item.get("path", ""))
@@ -209,11 +221,25 @@ class ArtifactStore:
                 if count + 1 > _MAX_RUN_COUNT or size + len(raw) > _MAX_RUN_BYTES:
                     raise ArtifactError("产物索引超过每次运行的配额。")
                 self._artifacts[artifact_id] = item
+            for item in self._artifacts.values():
+                if not item.get("carriedForward"):
+                    continue
+                source = self._artifacts.get(_identifier(item.get("sourceArtifactId"), "源产物 ID"))
+                origin = self._artifacts.get(_identifier(item.get("originArtifactId"), "原始产物 ID"))
+                _identifier(item.get("teamId"), "团队 ID")
+                if (source is None or origin is None or source["id"] == item["id"]
+                        or item.get("sourceRunId") != source["runId"] or source["runId"] == item["runId"]
+                        or item.get("originRunId") != origin["runId"] or item.get("channelId") != "group"
+                        or item.get("sourceTaskId") != source["taskId"]
+                        or item.get("sourceSha256") != source["sha256"] or item["sha256"] != source["sha256"]
+                        or item["sha256"] != origin["sha256"] or item["ownerAgentId"] != source["ownerAgentId"]
+                        or item.get("inheritedReadOnly") is not True):
+                    raise ArtifactError("继承产物的来源链或只读属性无效。")
             for grant in payload.get("grants", []):
                 if not isinstance(grant, dict) or grant.get("id") not in self._artifacts:
                     raise ArtifactError("共享记录格式无效。")
                 original = self._artifacts[grant["id"]]
-                _agent(grant.get("toAgentId"))
+                _agent(grant.get("toAgentId"), self.agents)
                 _authorizer(grant.get("authorizedBy"))
                 if (grant.get("runId") != original["runId"] or
                         grant.get("path") != original["id"] + "/" + original["name"]):
@@ -268,7 +294,7 @@ class ArtifactStore:
         return _safe_parts(raw)
 
     def register(self, owner, run_id, path, task_id):
-        owner = _agent(owner)
+        owner = _agent(owner, self.agents)
         run_id = _identifier(run_id, "Run ID")
         task_id = _task(task_id)
         parts = self._relative_path(owner, run_id, path)
@@ -305,7 +331,7 @@ class ArtifactStore:
 
     def grant(self, artifact_id, to_agent, run_id, authorized_by):
         _identifier(artifact_id, "产物 ID")
-        to_agent = _agent(to_agent)
+        to_agent = _agent(to_agent, self.agents)
         run_id = _identifier(run_id, "Run ID")
         _authorizer(authorized_by)
         with self.lock:
@@ -361,6 +387,112 @@ class ArtifactStore:
                 self._grants.pop()
                 raise
             return copy.deepcopy(metadata)
+
+    def carry_forward(self, source_run, target_run, participants):
+        """Inherit published snapshots for the next task in one trusted team/group.
+
+        The runtime supplies its persisted run records, never model-supplied run
+        metadata. Only the previous owner and existing explicit grantees retain
+        access; a new DAG may grant the new immutable artifact to another member.
+        No source workspace is read, and no file is copied into a writable tree.
+        """
+        if not isinstance(source_run, dict) or not isinstance(target_run, dict):
+            raise ArtifactError("继承需要可信的前后两次运行记录。")
+        source_id = _identifier(source_run.get("id"), "源 Run ID")
+        target_id = _identifier(target_run.get("id"), "目标 Run ID")
+        team = _identifier(source_run.get("teamId"), "团队 ID")
+        if (source_id == target_id or target_run.get("previousRunId") != source_id
+                or target_run.get("teamId") != team
+                or source_run.get("channelId") != "group" or target_run.get("channelId") != "group"
+                or source_run.get("mode") != "task" or target_run.get("mode") != "task"
+                or source_run.get("status") not in _TERMINAL_RUNS):
+            raise ArtifactError("只允许同团队群聊中已结束的上一任务继承已发布产物。")
+        if not isinstance(participants, (list, tuple)) or not participants:
+            raise ArtifactError("继承必须指定当前运行的参与者。")
+        recipients = {_agent(agent, self.agents) for agent in participants}
+        if len(recipients) != len(participants) or not isinstance(target_run.get("participants"), list) or set(target_run["participants"]) != recipients:
+            raise ArtifactError("继承参与者必须与目标运行一致且不能重复。")
+        previous_participants = source_run.get("participants")
+        if not isinstance(previous_participants, list) or not previous_participants:
+            raise ArtifactError("源运行缺少参与者记录。")
+        for agent in previous_participants:
+            _agent(agent, self.agents)
+        published = source_run.get("artifacts", [])
+        if not isinstance(published, list):
+            raise ArtifactError("源运行产物记录格式无效。")
+        result = {"artifacts": [], "grants": [], "skipped": []}
+        with self.lock:
+            candidates = []
+            seen = set()
+            for reference in published:
+                if not isinstance(reference, dict):
+                    raise ArtifactError("源运行产物记录格式无效。")
+                artifact_id = _identifier(reference.get("id"), "源产物 ID")
+                if artifact_id in seen:
+                    continue
+                seen.add(artifact_id)
+                item = self._artifacts.get(artifact_id)
+                if item is None or item["runId"] != source_id or item["ownerAgentId"] not in previous_participants:
+                    raise ArtifactError("源产物不属于指定的上一运行及参与者。")
+                if reference.get("sha256", item["sha256"]) != item["sha256"]:
+                    raise ArtifactError("源运行产物证据与已发布快照不一致。")
+                # Inheritance is deliberately more restrictive than publishing:
+                # credential material must not propagate into another run.
+                if (any(_SENSITIVE_NAME.search(part) for part in _safe_parts(item["path"]))
+                        or _SENSITIVE_CONTENT.search(item["content"])):
+                    result["skipped"].append({"id": artifact_id, "name": item["name"], "reason": "credential_material"})
+                    continue
+                allowed = {item["ownerAgentId"]}
+                allowed.update(grant["toAgentId"] for grant in self._grants if grant["id"] == artifact_id)
+                allowed &= recipients
+                if not allowed:
+                    continue
+                inherited = next((entry for entry in self._artifacts.values()
+                                  if entry["runId"] == target_id and entry.get("sourceArtifactId") == artifact_id
+                                  and entry.get("sourceRunId") == source_id), None)
+                candidates.append((item, inherited, sorted(allowed)))
+            records = [item for item in self._artifacts.values() if item["runId"] == target_id]
+            fresh = [item for item, inherited, _ in candidates if inherited is None]
+            if len(records) + len(fresh) > _MAX_RUN_COUNT or sum(item["size"] for item in records + fresh) > _MAX_RUN_BYTES:
+                raise ArtifactError("继承会超过目标运行的产物配额。")
+            created_ids = []
+            created_imports = []
+            old_grants = copy.deepcopy(self._grants)
+            try:
+                for item, inherited, allowed in candidates:
+                    if inherited is None:
+                        inherited = copy.deepcopy(item)
+                        inherited.update(id="artifact-" + uuid.uuid4().hex, runId=target_id,
+                                         createdAt=int(time.time() * 1000), carriedForward=True,
+                                         inheritedReadOnly=True, teamId=team, channelId="group",
+                                         sourceArtifactId=item["id"], sourceRunId=source_id,
+                                         sourceTaskId=item["taskId"], sourceSha256=item["sha256"],
+                                         originArtifactId=item.get("originArtifactId", item["id"]),
+                                         originRunId=item.get("originRunId", source_id))
+                        self._artifacts[inherited["id"]] = inherited
+                        created_ids.append(inherited["id"])
+                    for recipient in allowed:
+                        already_granted = any(grant["id"] == inherited["id"] and grant["toAgentId"] == recipient
+                                              for grant in old_grants)
+                        if not already_granted:
+                            created_imports.append((recipient, inherited["id"], inherited["name"]))
+                        result["grants"].append(self.grant(inherited["id"], recipient, target_id,
+                                                          "orchestrator:carry-" + source_id))
+                    result["artifacts"].append(copy.deepcopy(inherited))
+                self._save()
+            except Exception:
+                for recipient, artifact_id, name in created_imports:
+                    try:
+                        with self._directory(["imports", recipient, target_id, artifact_id]) as directory_fd:
+                            os.unlink(name, dir_fd=directory_fd)
+                    except (ArtifactError, FileNotFoundError):
+                        pass
+                for artifact_id in created_ids:
+                    self._artifacts.pop(artifact_id, None)
+                self._grants = old_grants
+                self._save()
+                raise
+        return result
 
     def list_for_run(self, run_id):
         run_id = _identifier(run_id, "Run ID")

@@ -30,7 +30,8 @@
       <main id="mainContent">
         <section id="workspacePage" data-page="workspace" aria-label="工作台">
           <div class="workspace-toolbar">
-            <label class="channel-picker" for="channelSelect"><span class="muted text-small">对话范围</span><select id="channelSelect"><option value="group">群聊 · 协作团队</option><option value="coordinator">私聊 · Coordinator</option><option value="research">私聊 · Research</option><option value="executor">私聊 · Executor</option><option value="reviewer">私聊 · Reviewer</option></select></label>
+            <label class="team-picker" for="teamSelect"><span class="muted text-small">团队场景</span><select id="teamSelect"><option value="default">连接后加载团队…</option></select></label>
+            <label class="channel-picker" for="channelSelect"><span class="muted text-small">对话范围</span><select id="channelSelect"><option value="group">群聊 · 协作团队</option></select></label>
             <details id="participantsControl" class="participants-control">
               <summary>参与 Agent <span id="participantCount">4/4</span></summary>
               <div class="participants-menu">
@@ -41,6 +42,8 @@
             <label class="mode-picker" for="modeSelect"><span class="muted text-small">模式</span><select id="modeSelect"><option value="task">执行任务</option><option value="chat">普通聊天</option></select></label><label class="memory-toggle"><input id="memoryEnabled" type="checkbox" checked><span>使用已确认记忆</span></label>
             <span id="channelPrivacy" class="text-small muted">群聊任务可由所选 Agent 分工协作。</span>
           </div>
+          <p id="teamDescription" class="team-description text-small muted">同一团队的后续任务保留协作上下文；不同团队的数据分别保存。</p>
+          <details class="history-control"><summary>历史任务与导出</summary><div class="history-toolbar"><label for="historyRunSelect" class="sr-only">历史任务</label><select id="historyRunSelect"><option value="">暂无历史任务</option></select><button id="refreshHistory" class="button quiet small" type="button">刷新</button><button id="openHistoryRun" class="button quiet small" type="button" disabled>查看 / 导出</button></div><p id="historyError" class="text-small muted" role="status"></p></details>
           <div class="workspace-grid">
             <section class="panel conversation" aria-label="对话">
               <div class="panel-head"><div><h2 id="conversationTitle">群聊</h2><p id="conversationHint" class="muted text-small">任务与对话</p></div><button id="resetConversation" class="button quiet small" type="button">重置会话</button></div>
@@ -56,11 +59,12 @@
 
             <aside class="panel task-inspector" aria-label="当前任务详情">
               <div class="panel-head"><div><h2>当前任务</h2><p id="runMeta" class="text-small muted">等待新任务</p></div><div class="run-actions"><button id="pauseRun" class="button quiet small" type="button" disabled>暂停</button><button id="cancelRun" class="button quiet small" type="button" disabled>取消</button></div></div>
-              <div class="run-overview"><div class="run-status-row"><span id="runStatus" class="tag muted">待开始</span><span id="runElapsed" class="text-small muted"></span></div><p id="runTitle" class="run-title">发送消息后，这里会展示执行详情。</p><p id="runParticipants" class="text-small muted" hidden></p><p id="runProgress" class="text-small muted"></p></div>
+              <div class="run-overview"><div class="run-status-row"><span id="runStatus" class="tag muted">待开始</span><span id="runElapsed" class="text-small muted"></span></div><p id="runTitle" class="run-title">发送消息后，这里会展示执行详情。</p><p id="runParticipants" class="text-small muted" hidden></p><p id="runProgress" class="text-small muted"></p><div id="runIssue" role="status" hidden></div></div>
               <div id="inspectorTabs" class="tabs" role="tablist" aria-label="任务详情">
                 <button type="button" id="tab-tasks" role="tab" data-inspector-tab="tasks" aria-controls="inspectorContent" aria-selected="true">子任务</button>
                 <button type="button" id="tab-calls" role="tab" data-inspector-tab="calls" aria-controls="inspectorContent" aria-selected="false">调用记录</button>
                 <button type="button" id="tab-memory" role="tab" data-inspector-tab="memory" aria-controls="inspectorContent" aria-selected="false">本次记忆</button>
+                <button type="button" id="tab-dialogue" role="tab" data-inspector-tab="dialogue" aria-controls="inspectorContent" aria-selected="false">协作与问答</button>
               </div>
               <div id="inspectorContent" class="inspector-content" role="tabpanel" aria-labelledby="tab-tasks"></div>
             </aside>

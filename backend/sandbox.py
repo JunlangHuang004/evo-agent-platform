@@ -1,5 +1,6 @@
 """Path confinement and bounded Docker execution; no host-code fallback."""
 from pathlib import Path, PurePosixPath
+import copy
 import errno
 import os
 import re
@@ -227,8 +228,13 @@ def run_process(argv, *, cwd=None, env=None, timeout=20):
 
 
 class SandboxManager:
-    def __init__(self, config):
+    def __init__(self, config, agents=None):
         self.data_dir = Path(config.data_dir)
+        self.agents = copy.deepcopy(AGENTS if agents is None else agents)
+        if not isinstance(self.agents, dict) or not self.agents:
+            raise ToolError('parameter', 'A nonempty agent registry is required.')
+        for agent_id in self.agents:
+            identifier(agent_id, 'agent_id')
         self.image = getattr(config, 'docker_image', 'python:3.11-alpine')
         if not isinstance(self.image, str) or not _IMAGE.fullmatch(self.image):
             raise ToolError('parameter', 'Invalid Docker image name.')
@@ -238,13 +244,13 @@ class SandboxManager:
         self._lock = threading.RLock()
 
     def workspace(self, agent_id, run_id):
-        if agent_id not in AGENTS:
+        if agent_id not in self.agents:
             raise ToolError('permission', 'Unknown agent.')
         identifier(run_id, 'run_id')
         return secure_directory(self.data_dir, 'workspaces', agent_id, run_id)
 
     def imports(self, agent_id, run_id):
-        if agent_id not in AGENTS:
+        if agent_id not in self.agents:
             raise ToolError('permission', 'Unknown agent.')
         identifier(run_id, 'run_id')
         return secure_directory(self.data_dir, 'imports', agent_id, run_id)

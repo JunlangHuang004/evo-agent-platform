@@ -41,16 +41,27 @@ class Config:
         self.git_username = values.get('GIT_USERNAME', 'x-access-token')
         self.max_model_calls = max(2, min(60, int(values.get('MAX_MODEL_CALLS', '28'))))
         self.max_agent_turns = max(2, min(16, int(values.get('MAX_AGENT_TURNS', '8'))))
-        self.model_timeout = max(5, min(180, int(values.get('MODEL_TIMEOUT', '90'))))
-        self.max_completion_tokens = max(256, min(8000, int(values.get('MODEL_MAX_TOKENS', '400'))))
+        self.model_timeout = max(5, min(180, int(values.get('MODEL_TIMEOUT', '120'))))
+        self.max_completion_tokens = max(256, min(8000, int(values.get('MODEL_MAX_TOKENS', '3000'))))
+        self.planning_max_tokens = int(values.get('PLANNING_MAX_TOKENS', '1200'))
         self.max_run_seconds = max(10, min(3600, int(values.get('MAX_RUN_SECONDS', '600'))))
         self.max_run_tokens = max(1000, min(500000, int(values.get('MAX_RUN_TOKENS', '48000'))))
         self.max_tasks = max(2, min(32, int(values.get('MAX_TASKS', '12'))))
         self.max_depth = max(1, min(5, int(values.get('MAX_DELEGATION_DEPTH', '3'))))
         self.parallel_tasks = max(1, min(4, int(values.get('PARALLEL_TASKS', '2'))))
-        self.max_retries = max(0, min(3, int(values.get('MAX_RETRIES', '2'))))
+        self.max_retries = max(0, min(3, int(values.get('MAX_RETRIES', '1'))))
         self.approval_ttl = max(30, min(86400, int(values.get('APPROVAL_TTL_SECONDS', '900'))))
         self.max_context_chars = max(4000, min(80000, int(values.get('MAX_CONTEXT_CHARS', '28000'))))
+
+    @property
+    def planning_max_tokens(self):
+        # Harnesses may raise the completion budget after loading configuration.
+        # Keep the requested planning setting, but never exceed the current cap.
+        return min(self._planning_max_tokens, self.max_completion_tokens)
+
+    @planning_max_tokens.setter
+    def planning_max_tokens(self, value):
+        self._planning_max_tokens = max(128, min(8000, int(value)))
 
     def scrub(self, value):
         if isinstance(value, str):

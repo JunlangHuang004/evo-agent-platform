@@ -1,12 +1,17 @@
 """Persistent task DAG, bounded agent runtimes, human gates and explicit handoffs."""
 import copy
+import hashlib
+import inspect
 import json
 import threading
 import time
 import uuid
 
 from .agents import AGENTS
+from .teams import TEAM_DEFINITIONS
+from .task_output import build_task_output, task_output_for_context
 from .artifacts import ArtifactStore
+from .contracts import normalize_output_contract, validate_task_output
 from .memory import MemoryService
 from .persistence import Repository
 from .provider import ModelClient, ProviderError
@@ -35,12 +40,21 @@ class BudgetExceeded(Exception): pass
 
 
 class Platform:
-    def __init__(self, config, provider=None, tools=None, artifacts=None, memory=None):
+    def __init__(self, config, provider=None, tools=None, artifacts=None, memory=None, agents=None, team_id='default'):
         self.config = config
+        if not isinstance(team_id, str) or not team_id or len(team_id)>80:
+            raise ValueError('Invalid team id.')
+        self.team_id = team_id
+        self.agents = copy.deepcopy(AGENTS if agents is None else agents)
+        if not isinstance(self.agents,dict) or not self.agents or any(
+                not isinstance(key,str) or key=='group' or not key.replace('_','').replace('-','').isalnum()
+                or not isinstance(value,dict) for key,value in self.agents.items()):
+            raise ValueError('A nonempty server-owned agent registry is required.')
+        self.channels = ['group', *self.agents]
         self.provider = provider or ModelClient(config)
         self.repo = Repository(config.data_dir)
-        self.tools = tools or ToolGateway(config)
-        self.artifacts = artifacts or ArtifactStore(config.data_dir)
+        self.tools = tools or ToolGateway(config, agents=self.agents)
+        self.artifacts = artifacts or ArtifactStore(config.data_dir, agents=self.agents)
         self.memory = memory or MemoryService(self.repo)
         self.lock = threading.RLock()
         self.changed = threading.Condition(self.lock)
@@ -50,8 +64,15 @@ class Platform:
         self.closing = False
         self._capabilities = self.tools.capabilities()
         self._capability_at = time.monotonic()
-        self.state = self.repo.load_state() or {'activeChannel': 'group', 'selectedAgentIds': list(AGENTS), 'sessions': {}}
-        for channel in CHANNELS:
+        self.state = self.repo.load_state() or {'activeChannel': 'group', 'selectedAgentIds': list(self.agents), 'sessions': {}, 'teamId': team_id}
+        if self.state.get('teamId','default') != team_id:
+            self.repo.close()
+            raise ValueError('This data directory belongs to another team.')
+        self.state['teamId'] = team_id
+        self.state['sessions'] = {key: value for key,value in self.state['sessions'].items() if key in self.channels}
+        if not set(self.state.get('selectedAgentIds',[])).issubset(self.agents):
+            self.state['selectedAgentIds'] = list(self.agents)
+        for channel in self.channels:
             session = self.state['sessions'].setdefault(channel, {'channelId': channel, 'messages': [], 'run': None})
             run = session.get('run')
             if not run or run.get('status') not in ACTIVE:
@@ -95,7 +116,15 @@ class Platform:
         item = {'id': uid('msg'), 'role': role, 'text': self.config.scrub(str(text)), 'time': iso_time(), 'runId': (session.get('run') or {}).get('id')}
         if agent_id: item['agentId'] = agent_id
         session['messages'].append(item)
-        session['messages'] = session['messages'][-200:]
+        if session.get('run'):
+            session['run'].setdefault('conversation',[]).append(copy.deepcopy(item))
+            session['run'].setdefault('transcript',[]).append(copy.deepcopy(item))
+
+    def _transcript(self, run, role, text, agent_id=None, **metadata):
+        item={'id':uid('dialogue'),'role':role,'text':self.config.scrub(str(text)),
+              'time':iso_time(),'runId':run['id'],**self.config.scrub(metadata)}
+        if agent_id: item['agentId']=agent_id
+        run.setdefault('transcript',[]).append(item)
 
     def _event(self, run, kind, agent_id, message, payload=None):
         event = {'id': uid('evt'), 'time': iso_time(), 'type': kind, 'agentId': agent_id, 'actor': agent_id,
@@ -116,7 +145,17 @@ class Platform:
         self.changed.notify_all() if getattr(self.lock, '_is_owned', lambda: False)() else None
 
     def _public(self, value):
-        if isinstance(value, dict): return {k: self._public(v) for k, v in value.items() if not k.startswith('_')}
+        if isinstance(value, dict):
+            result={k:self._public(v) for k,v in value.items() if not k.startswith('_')}
+            if isinstance(value.get('steps'),list) and 'id' in value and ('calls' in value or 'participants' in value):
+                for original,exported in zip(value['steps'],result['steps']):
+                    if (isinstance(original,dict) and isinstance(exported,dict)
+                            and not original.get('_planning') and original.get('kind')!='planning'
+                            and original.get('agentId') in self.agents):
+                        # Derived at read time: a later review/rework must not
+                        # leave the public history with a cached prior verdict.
+                        exported['taskOutput']=build_task_output(original,value)
+            return result
         if isinstance(value, list): return [self._public(v) for v in value]
         return value
 
@@ -126,9 +165,9 @@ class Platform:
             self._capabilities = self.tools.capabilities()
         with self.lock:
             state = self._public(copy.deepcopy(self.state))
-        state['learnedMemories'] = {agent: self.memory.list(agent) for agent in AGENTS}
+        state['learnedMemories'] = {agent: self.memory.list(agent) for agent in self.agents}
         state['agents'] = []
-        for agent_id, agent in AGENTS.items():
+        for agent_id, agent in self.agents.items():
             meta = copy.deepcopy(agent)
             meta['id'] = agent_id
             meta['tools'] = self.tools.definitions(agent_id)
@@ -140,13 +179,16 @@ class Platform:
             **caps, 'features': {'multiAgent': True, 'memory': True, 'tools': True,
                                 'sandbox': bool(caps.get('dockerAvailable') and caps.get('dockerImageReady'))}}
         state['evaluation'] = {'mode': 'real', 'runs': self.repo.evaluation_runs()}
+        profile=TEAM_DEFINITIONS.get(self.team_id,{})
+        state.update(teamId=self.team_id,teamName=profile.get('name',self.team_id),
+                     teamDescription=profile.get('description',''),
+                     transcript=copy.deepcopy(state['sessions']['group']['messages']))
         return self.config.scrub(state)
 
-    @staticmethod
-    def _participants(value):
-        if not isinstance(value, list) or not value or any(not isinstance(x, str) or x not in AGENTS for x in value):
+    def _participants(self, value):
+        if not isinstance(value, list) or not value or any(not isinstance(x, str) or x not in self.agents for x in value):
             raise ActionError('至少选择一个有效 Agent。')
-        return [agent for agent in AGENTS if agent in value]
+        return [agent for agent in self.agents if agent in value]
 
     def action(self, payload):
         if not isinstance(payload, dict): raise ActionError('请求必须为 JSON 对象。')
@@ -158,7 +200,7 @@ class Platform:
             if action in ('memory_confirm','memory_share'):
                 agent = payload.get('agentId')
                 memory_id = payload.get('memoryId')
-                if agent not in AGENTS or not isinstance(memory_id, str) or not isinstance(payload.get('confirmed'), bool):
+                if agent not in self.agents or not isinstance(memory_id, str) or not isinstance(payload.get('confirmed'), bool):
                     raise ActionError('经验确认参数无效。')
                 receipt={'type':'human','id':uid('confirmation')}
                 try:
@@ -181,7 +223,7 @@ class Platform:
                 self._persist()
                 return self.snapshot()
             channel = payload.get('channelId', 'group')
-            if not isinstance(channel, str) or channel not in CHANNELS: raise ActionError('无效频道。')
+            if not isinstance(channel, str) or channel not in self.channels: raise ActionError('无效频道。')
             session = self.state['sessions'][channel]
             run = session.get('run')
             if payload.get('runId') and (not run or payload['runId'] != run['id']):
@@ -233,8 +275,13 @@ class Platform:
             mode = payload.get('mode', 'task' if channel == 'group' else 'chat')
             if mode not in ('task', 'chat'): raise ActionError('mode 必须为 task 或 chat。')
             if channel == 'group': self.state['selectedAgentIds'] = participants
-            actor = 'coordinator' if 'coordinator' in participants else participants[0]
+            actor = next((agent for agent in participants if 'planning' in self.agents[agent].get('capabilities', [])), participants[0])
+            previous_run=run
             run = {'id': uid('run'), 'title': text.strip(), 'mode': mode, 'status': 'running',
+                   'teamId':self.team_id,'channelId':channel,
+                   'previousRunId':previous_run['id'] if previous_run else None,
+                   'groupHistory':copy.deepcopy(session['messages']) if channel=='group' else [],
+                   'conversation':[],'transcript':[],
                    'startedAt': clock_ms(), 'finishedAt': None, 'participants': participants, 'respondingAgentId': actor,
                    'memoryEnabled': bool(payload.get('memoryEnabled', True)), 'userPaused': False,
                    'steps': [], 'calls': [], 'memoryHits': [], 'events': [], 'approvals': [], 'artifacts': [],
@@ -245,6 +292,27 @@ class Platform:
             if mode == 'chat':
                 run['steps'] = [self._new_task('基础对话', text.strip(), actor, participants, agent=actor)]
             session['run'] = run
+            if (channel=='group' and mode=='task' and previous_run and previous_run.get('mode')=='task'
+                    and previous_run.get('artifacts') and hasattr(self.artifacts,'carry_forward')):
+                # Explicit continuity uses immutable published snapshots, never another run's workspace.
+                source={**previous_run,'teamId':previous_run.get('teamId',self.team_id),
+                        'channelId':previous_run.get('channelId','group')}
+                try:
+                    carried=self.artifacts.carry_forward(source,run,participants)
+                except (ValueError,ToolError) as exc:
+                    session['run']=previous_run
+                    raise ActionError('无法安全继承上一任务成果：'+self.config.scrub(str(exc))[:700]) from None
+                run['artifacts'].extend(carried['artifacts'])
+                run['previousArtifacts']=[{key:artifact.get(key) for key in
+                    ('id','name','ownerAgentId','sourceRunId','sourceArtifactId','sourceSha256','inheritedReadOnly')}
+                    for artifact in carried['artifacts']]
+                for grant in carried.get('grants',[]):
+                    self._event(run,'artifact_granted','orchestrator:continuation','将上一任务已发布快照显式授权为只读输入。',
+                                {'artifactId':grant['id'],'toAgent':grant['toAgentId'],'grant':grant})
+                self._event(run,'artifacts_carried_forward','orchestrator:continuation','延续同组上一任务的不可变成果。',
+                            {'previousRunId':previous_run['id'],'artifactIds':[a['id'] for a in carried['artifacts']]})
+                if carried.get('skipped'):
+                    self._event(run,'artifact_carry_skipped','orchestrator:continuation','未继承包含凭证材料的快照。',{'skipped':carried['skipped']})
             self._message(session, 'human', text.strip())
             self._event(run, 'run_created', 'human', '创建任务并保存参与者和资源预算。', {'mode': mode, 'participants': participants})
             self._persist()
@@ -296,7 +364,7 @@ class Platform:
                 self._event(run, 'budget_extended', 'human', '用户批准本任务预算扩展一次。')
                 self._persist()
 
-    def _model(self, channel, run_id, task, messages):
+    def _model(self, channel, run_id, task, messages, max_tokens=None):
         # Full tool/audit records remain persisted; the model receives bounded working context.
         if sum(len(m.get('content', '')) for m in messages) > self.config.max_context_chars:
             messages[:] = compress_messages(messages, self.config.max_context_chars)
@@ -304,7 +372,8 @@ class Platform:
                 self._event(self._current(channel, run_id), 'context_compressed', task.get('agentId'),
                             '压缩工作上下文；大内容已明确截断，完整工具结果仍在调用记录中。',
                             {'characters': sum(len(item['content']) for item in messages)})
-        estimate = sum(len(m.get('content','').encode('utf-8')) for m in messages)//2 + self.config.max_completion_tokens + 128
+        requested_tokens=min(self.config.max_completion_tokens,max_tokens if max_tokens is not None else self.config.max_completion_tokens)
+        estimate = sum(len(m.get('content','').encode('utf-8')) for m in messages)//2 + requested_tokens + 128
         while True:
             self._budget(channel, run_id, task, estimate)
             with self.lock:
@@ -316,7 +385,8 @@ class Platform:
                 run['modelCalls'] += 1
                 run['_reservedTokens'] = run.get('_reservedTokens',0)+estimate
                 call = {'id': uid('call'), 'taskId': task['id'], 'agentId': task['agentId'], 'tool': 'llm.chat',
-                        'args': {'provider': self.config.provider, 'model': self.config.model}, 'status': 'running',
+                        'args': {'provider': self.config.provider, 'model': self.config.model,'max_tokens':requested_tokens},
+                        'requestedMaxTokens':requested_tokens,'status': 'running',
                         'result': '等待模型响应。', 'durationMs': 0, 'sandboxId': 'model-gateway'}
                 run['calls'].append(call)
                 self._persist()
@@ -325,8 +395,17 @@ class Platform:
         settled=False
         time_accounted=False
         try:
-            response = self.provider.complete(messages)
-            if not isinstance(response, dict) or not isinstance(response.get('content'), str) or not response['content'].strip():
+            complete=self.provider.complete
+            try:
+                inspect.signature(complete).bind(messages,max_tokens=requested_tokens)
+                accepts_budget=True
+            except (TypeError,ValueError):
+                accepts_budget=False
+            # Decide compatibility before invoking: never retry a request after
+            # catching a TypeError raised inside a provider implementation.
+            response=complete(messages,max_tokens=requested_tokens) if accepts_budget else complete(messages)
+            truncated=isinstance(response,dict) and response.get('finish_reason')=='length'
+            if not isinstance(response, dict) or not isinstance(response.get('content'), str) or (not response['content'].strip() and not truncated):
                 raise ProviderError('模型响应格式无效。', 'protocol')
             with self.lock:
                 current = self._current(channel, run_id)
@@ -339,9 +418,13 @@ class Platform:
                 current['activeMs'] += max(0,clock_ms()-started)
                 time_accounted=True
                 task['tokenUsage'] += used
-                call.update(status='success', result='已收到真实模型响应。', usage=usage, durationMs=clock_ms()-started)
+                call.update(status='failed' if truncated else 'success', result='模型响应达到输出上限并被截断。' if truncated else '已收到真实模型响应。',
+                            usage=usage, reportedModel=response.get('model'),finishReason=response.get('finish_reason'), durationMs=clock_ms()-started)
+                self._transcript(current,'agent',response['content'],task['agentId'],kind='model_response',callId=call['id'],taskId=task['id'])
                 self._persist()
             self._gate(channel, run_id)
+            if truncated:
+                raise ProviderError('模型响应达到 max_tokens='+str(requested_tokens)+' 输出上限，JSON/内容被截断；请调整规划预算或缩短输出，未把截断内容当作有效结果。','output_truncated',False)
             return self.config.scrub(response['content'])
         except Exception as exc:
             with self.lock:
@@ -361,9 +444,9 @@ class Platform:
                 self._persist()
             raise
 
-    def _model_retry(self, channel, run_id, task, messages):
+    def _model_retry(self, channel, run_id, task, messages, max_tokens=None):
         for attempt in range(self.config.max_retries+1):
-            try: return self._model(channel, run_id, task, messages)
+            try: return self._model(channel, run_id, task, messages,max_tokens=max_tokens)
             except ProviderError as exc:
                 if not exc.retryable or attempt >= self.config.max_retries: raise
                 with self.changed:
@@ -451,7 +534,7 @@ class Platform:
             # to its original owner. Reassignment is only valid before any actions were taken.
             if (task.get('_pendingTool') or task.get('_uncertainCalls') or task.get('_messages')) and task.get('agentId') and agent_id!=task['agentId']:
                 continue
-            agent = AGENTS[agent_id]
+            agent = self.agents[agent_id]
             if not set(task.get('requiredTools',[])).issubset(set(agent['tools'])): continue
             if not set(task.get('requiredCapabilities',[])).issubset(set(agent.get('capabilities',[]))): continue
             if agent_id in busy_agents: continue
@@ -467,15 +550,21 @@ class Platform:
             planning = next((t for t in run['steps'] if t.get('_planning')),None)
             if not planning:
                 planning = self._new_task('任务拆解与依赖规划',run['title'], 'human',run['participants'],actor)
-                planning.update(_planning=True,status='running')
+                planning.update(_planning=True,kind='planning',status='running')
                 run['steps'].append(planning)
-            agents=[{'id':agent,**AGENTS[agent]} for agent in run['participants']]
-            messages = [{'role':'system','content':planning_prompt(agents,self.config.max_tasks-1)}, {'role':'user','content':run['title']}]
+            planning['kind']='planning'
+            agents=[{'id':agent,**self.agents[agent]} for agent in run['participants']]
+            planning_context={'runGoal':run['title'],'currentDateUTC':iso_time()[:10],
+                              'previousRunId':run.get('previousRunId'),'previousArtifacts':run.get('previousArtifacts',[]),
+                              'groupHistory':run.get('groupHistory',[])}
+            # Preserve the legacy plain goal for default scripted clients without prior context.
+            user_context=json.dumps(planning_context,ensure_ascii=False) if run.get('groupHistory') or self.team_id!='default' else run['title']
+            messages = [{'role':'system','content':planning_prompt(agents,self.config.max_tasks-1)}, {'role':'user','content':user_context}]
         for attempt in range(3):
-            content = self._model_retry(channel,run_id,planning,messages)
+            content = self._model_retry(channel,run_id,planning,messages,max_tokens=getattr(self.config,'planning_max_tokens',1200))
             try:
                 plan=parse_object(content)
-                tasks=normalize_plan(plan,run['participants'],uid,self.config.max_tasks-1)
+                tasks=normalize_plan(plan,run['participants'],uid,self.config.max_tasks-1,agents=self.agents)
                 break
             except ProtocolError as exc:
                 if attempt==2: raise
@@ -496,7 +585,8 @@ class Platform:
             actor=task['agentId']
             task['status']='running'
             history=self.state['sessions'][channel]['messages'][-16:]
-            messages=[{'role':'system','content':f'你是{AGENTS[actor]["name"]}，职责：{AGENTS[actor]["role"]}。当前是普通对话模式，不启动工具或多Agent调度。直接回答用户；不要声称已经执行工具。'}]
+            identity=self.agents[actor].get('rolePrompt',f'你是{self.agents[actor]["name"]}，职责：{self.agents[actor]["role"]}。')
+            messages=[{'role':'system','content':identity+'\n当前是普通对话模式，不启动工具或多Agent调度。直接回答用户；不要声称已经执行工具。'}]
             messages.extend({'role':'user' if item['role']=='human' else 'assistant','content':item['text']} for item in history if item['role'] in ('human','agent'))
         try:
             content=self._model_retry(channel,run_id,task,messages)
@@ -603,7 +693,9 @@ class Platform:
                     self._event(run,'memory_applied',actor,'检索并采用已确认经验。',{'taskId':task['id'],'memoryId':memory['id']})
             deps=[{'id':d['id'],'title':d['title'],'agentId':d.get('agentId'),'acceptanceCriteria':d.get('acceptanceCriteria',[]),
                    'revision':d.get('revision',0),'validation':copy.deepcopy(d.get('validation')),
-                   'result':d.get('result',''),'outputs':d.get('outputs',[])} for d in run['steps'] if d['id'] in dependency_ids]
+                   'result':d.get('result',''),'outputs':d.get('outputs',[]),
+                   'taskOutput':task_output_for_context(build_task_output(d,run))}
+                  for d in run['steps'] if d['id'] in dependency_ids]
             source_refs=[]
             for call in run['calls']:
                 if call.get('taskId') not in dependency_ids or call.get('status')!='success' or call.get('tool') not in ('web.search','web.fetch'):
@@ -614,15 +706,18 @@ class Platform:
                         source_refs.append({'url':source['url'],'title':source.get('title',''),'callId':call['id'],'agentId':call['agentId']})
                 if receipt.get('url') and not any(ref['url']==receipt['url'] for ref in source_refs):
                     source_refs.append({'url':receipt['url'],'title':receipt.get('title',''),'callId':call['id'],'agentId':call['agentId']})
-            context={'runGoal':run['title'],'task':{key:task[key] for key in ('id','title','goal','acceptanceCriteria','feedback','inputs','childIds','finalSummary') if key in task},'participants':run['participants'],
+            context={'runGoal':run['title'],'task':{key:task[key] for key in ('id','title','goal','acceptanceCriteria','outputContract','feedback','inputs','childIds','finalSummary') if key in task},'participants':run['participants'],
                      'dependencyResults':deps,'sourceReferences':source_refs,'memories':memories,
-                     'ownArtifacts':[a for a in run['artifacts'] if a.get('ownerAgentId',a.get('owner'))==actor],
+                     'ownArtifacts':[a for a in run['artifacts'] if a.get('ownerAgentId',a.get('owner'))==actor and not a.get('inheritedReadOnly')],
                      'authorizedArtifacts':[{'id':a['id'],'name':a['name'],'path':'imports/'+a['id']+'/'+a['name']}
                         for a in run['artifacts'] if any(e['type']=='artifact_granted' and e['payload'].get('artifactId')==a['id'] and e['payload'].get('toAgent')==actor for e in run['events'])],
-                     'artifactRule':'只有显式授权的文件可在imports/...读取，容器中对应/imports。其他Agent workspace不可访问。',
+                     'artifactRule':'只有显式授权的文件可在imports/...读取，容器中对应/imports。上一run成果也是只读imports，修改前复制到自己的workspace。其他Agent workspace不可访问。',
+                     'teamId':self.team_id,'currentDateUTC':iso_time()[:10],
+                     'previousRunId':run.get('previousRunId'),'groupHistory':run.get('groupHistory',[]),
+                     'previousArtifacts':run.get('previousArtifacts',[]),
                      'recentCalls':[{'id':c['id'],'tool':c['tool'],'status':c['status'],'result':c.get('result')} for c in run['calls'] if c['taskId']==task['id'] and c['tool']!='llm.chat'][-8:]}
             if not task.get('_messages'):
-                task['_messages']=[{'role':'system','content':action_prompt(AGENTS[actor],self.tools.definitions(actor))},
+                task['_messages']=[{'role':'system','content':action_prompt(self.agents[actor],self.tools.definitions(actor))},
                                    {'role':'user','content':json.dumps(self.config.scrub(context),ensure_ascii=False)}]
             else:
                 task['_messages'].append({'role':'user','content':'断点恢复/返工上下文：'+json.dumps(self.config.scrub(context),ensure_ascii=False)})
@@ -645,13 +740,42 @@ class Platform:
             try:
                 action=parse_object(content)
             except ProtocolError as exc:
-                task['_messages'].append({'role':'user','content':str(exc)+' 请按系统协议只返回一个JSON对象。'})
+                with self.lock:
+                    # Retain the failed generation as well as the actual parser
+                    # error. A format repair is a new model turn, never a replay
+                    # of tools already executed in this task.
+                    clean=self.config.scrub(content)
+                    call=next((item for item in reversed(run['calls'])
+                               if item.get('taskId')==task['id'] and item.get('tool')=='llm.chat'),None)
+                    repairs=task.get('_protocolRepairs',0)
+                    failure={'id':uid('protocol'),'taskId':task['id'],'revision':task.get('revision',0),
+                             'callId':call['id'] if call else None,'code':'invalid_action_json',
+                             'message':str(exc),'responseSha256':hashlib.sha256(clean.encode('utf-8',errors='replace')).hexdigest(),
+                             'responseChars':len(clean),'repairAttempt':repairs+1,'maxRepairs':2,'retrying':repairs<2}
+                    task['_messages'].append({'role':'assistant','content':clean})
+                    task.setdefault('protocolErrors',[]).append(failure)
+                    if call:
+                        call.update(protocolStatus='invalid_json',protocolErrorId=failure['id'])
+                    self._event(run,'protocol_parse_failed',task['agentId'],'模型动作 JSON 解析失败；保留原响应和具体错误。',failure)
+                    if repairs>=2:
+                        self._persist()
+                        raise ProtocolError('动作 JSON 已用完 2 次格式修复机会；最后解析错误：'+str(exc)) from None
+                    task['_protocolRepairs']=repairs+1
+                    feedback={'ok':False,'error':{'code':'invalid_action_json','message':str(exc)},
+                              'repairAttempt':repairs+1,'maxRepairs':2,'responseSha256':failure['responseSha256'],
+                              'instruction':'上一条 assistant 是真实的无效输出。仅修复为一个符合系统协议的 JSON 对象，不要声称或重放已执行的工具；已有工具结果仍在上下文。'}
+                    task['_messages'].append({'role':'user','content':'动作协议错误：'+json.dumps(feedback,ensure_ascii=False)})
+                    self._transcript(run,'system',json.dumps(feedback,ensure_ascii=False),task['agentId'],
+                                     kind='protocol_feedback',taskId=task['id'],callId=failure['callId'])
+                    self._persist()
                 continue
             with self.lock:
                 task['_messages'].append({'role':'assistant','content':content})
                 key=fingerprint(action)
                 task.setdefault('_actions',[]).append(key)
-                if task['_actions'][-3:]==[key]*3: raise ProtocolError('检测到重复动作循环，已停止。')
+                repairing_contract=action.get('type')=='final' and task.get('outputContract') is not None and task.get('_outputContractRepairs',0)<=2
+                if task['_actions'][-3:]==[key]*3 and not repairing_contract:
+                    raise ProtocolError('检测到重复动作循环，已停止。')
                 self._persist()
             try:
                 kind=action.get('type')
@@ -660,8 +784,27 @@ class Platform:
                     status=action.get('status','done')
                     if not isinstance(text,str) or not text.strip() or status not in ('done','partial','failed'):
                         raise ProtocolError('final 必须有有效 text 和 status。')
-                    return {'text':text[:18000],'status':status,'reflection':action.get('reflection')}
-                if kind=='tool':
+                    delivered=text[:18000]
+                    if status=='done':
+                        validation=validate_task_output(task,run,self.artifacts,delivered)
+                        with self.lock:
+                            task['outputValidation']=validation
+                            self._event(run,'output_validation_'+validation['status'],task['agentId'],
+                                        '记录交付契约的格式/产物证据检查；语义质量未评估。',{'taskId':task['id'],'validation':validation})
+                            self._persist()
+                        if validation['status']=='failed':
+                            repairs=task.get('_outputContractRepairs',0)
+                            if repairs>=2:
+                                return {'text':delivered+'\n\n交付契约未满足：'+'；'.join(validation['issues']),
+                                        'status':'partial','reflection':action.get('reflection')}
+                            task['_outputContractRepairs']=repairs+1
+                            result={'ok':False,'error':{'code':'output_contract','message':'交付契约未满足，请修复实际产物/格式后再提交final。'},
+                                    'outputValidation':validation,'repairAttempt':repairs+1,'maxRepairs':2}
+                        else:
+                            return {'text':delivered,'status':status,'reflection':action.get('reflection')}
+                    else:
+                        return {'text':delivered,'status':status,'reflection':action.get('reflection')}
+                elif kind=='tool':
                     name=action.get('name'); args=action.get('args')
                     if not isinstance(name,str) or not isinstance(args,dict): raise ProtocolError('工具动作需要name和args对象。')
                     result=self._tool(channel,run_id,task,name,args)
@@ -688,6 +831,7 @@ class Platform:
                     with self.lock:
                         record={'id':uid('handoff'),'fromAgent':task['agentId'],'toAgent':target,'text':self.config.scrub(text[:5000]),'taskId':task['id'],'time':iso_time()}
                         run['messages'].append(record)
+                        self._transcript(run,'agent',record['text'],task['agentId'],kind='agent_message',toAgent=target,taskId=task['id'])
                         self._event(run,'agent_message',task['agentId'],'向其他成员交接信息。',record)
                         self._persist()
                     result={'ok':True,'messageId':record['id']}
@@ -720,6 +864,7 @@ class Platform:
                     self._event(run,'action_rejected',task['agentId'],result['error']['message'],{'taskId':task['id'],'action':action.get('type')})
             with self.lock:
                 task['_messages'].append({'role':'user','content':'动作的真实结果：'+json.dumps(self.config.scrub(result),ensure_ascii=False)[:24000]})
+                self._transcript(run,'tool',json.dumps(result,ensure_ascii=False),task['agentId'],kind='action_result',action=kind,taskId=task['id'])
                 self._persist()
         raise BudgetExceeded('该Agent达到动作轮数预算，保留当前产物与记录。')
 
@@ -750,12 +895,15 @@ class Platform:
             task['acceptanceCriteria']=strings(spec.get('acceptanceCriteria',task['acceptanceCriteria']))
             task['requiredTools']=strings(spec.get('requiredTools',[]))
             task['requiredCapabilities']=strings(spec.get('requiredCapabilities',[]))
+            task['outputContract']=normalize_output_contract(spec.get('outputContract'))
+            if target and self.agents[target].get('primaryCapability'):
+                task['requiredCapabilities']=list(dict.fromkeys(task['requiredCapabilities']+[self.agents[target]['primaryCapability']]))
             dependencies=spec.get('dependsOn',[])
             if not isinstance(dependencies,list) or any(not isinstance(x,str) or not self._task(run,x) for x in dependencies):
                 raise ProtocolError('委派依赖不存在。')
             if parent['id'] in dependencies: raise ProtocolError('子任务不能等待尚未交付的父任务。')
             task['dependsOn']=dependencies
-            task['candidateAgentIds']=[a for a in run['participants'] if a!=parent['agentId']]
+            task['candidateAgentIds']=[target] if target else [a for a in run['participants'] if a!=parent['agentId']]
             validate_dag([*run['steps'],task])
             run['steps'].append(task)
             parent['childIds'].append(task['id'])
@@ -785,7 +933,8 @@ class Platform:
             task['status']='running'
             for artifact_id in child['outputs']: self._grant(run,artifact_id,task['agentId'],'orchestrator:'+task['id'])
             self._persist()
-            return {'ok':child['status']=='done','taskId':child_id,'status':child['status'],'result':child['result'],'outputs':child['outputs']}
+            return {'ok':child['status']=='done','taskId':child_id,'status':child['status'],'result':child['result'],'outputs':child['outputs'],
+                    'taskOutput':task_output_for_context(build_task_output(child,run))}
 
     @staticmethod
     def _review_snapshot(run, task):
@@ -801,17 +950,20 @@ class Platform:
                     and validation.get('targetRevision')==snapshot['targetRevision']
                     and validation.get('artifactHashes')==snapshot['artifactHashes'])
 
-    @staticmethod
-    def _has_code_work(run, task):
+    def _has_code_work(self, run, task):
         if set(task.get('requiredTools',[])) & {'code.run','code.test'}:
             return True
         if any(call.get('taskId')==task['id'] and call.get('tool') in ('code.run','code.test') for call in run.get('calls',[])):
             return True
-        return any(artifact['id'] in task.get('outputs',[]) and artifact.get('name','').lower().endswith(('.py','.js','.mjs','.ts','.tsx','.jsx','.c','.cpp','.java','.rs','.go','.sh'))
+        extensions=('.py','.js','.mjs','.ts','.tsx','.jsx','.c','.cpp','.java','.rs','.go','.sh')
+        if 'coding' in self.agents.get(task.get('agentId'),{}).get('capabilities',[]):
+            extensions=(*extensions,'.html')
+        return any(artifact['id'] in task.get('outputs',[]) and artifact.get('name','').lower().endswith(extensions)
                    for artifact in run.get('artifacts',[]))
 
     def _review(self, run, reviewer, action):
-        if reviewer['agentId']!='reviewer': raise ProtocolError('只有Reviewer可提交审查决定。')
+        if 'review' not in self.agents[reviewer['agentId']].get('capabilities',[]):
+            raise ProtocolError('只有具有review能力的成员可提交审查决定。')
         verdict=action.get('verdict')
         if verdict not in ('pass','rework','reject'): raise ProtocolError('审查决定无效。')
         evidence_ids=strings(action.get('evidenceCallIds',[]))
@@ -823,26 +975,39 @@ class Platform:
                 raise ProtocolError('该子任务已达到返工次数上限。')
             snapshot=self._review_snapshot(run,target)
             evidence=[call for call in run['calls'] if call['id'] in evidence_ids and call['taskId']==reviewer['id']
-                      and call.get('agentId')=='reviewer' and call['tool']=='code.test' and call['status']=='success'
+                      and call.get('agentId')==reviewer['agentId'] and call['tool']=='code.test' and call['status']=='success'
                       and isinstance(call.get('result'),dict) and call['result'].get('ok') is True and call['result'].get('exitCode')==0
                       and call.get('reviewTargets',{}).get(target['id'])==snapshot]
             validation={'verdict':verdict,'feedback':str(action.get('feedback',''))[:3000],
                         'verified':bool(evidence) and verdict=='pass','evidenceCallIds':[call['id'] for call in evidence],
                         'reviewerTaskId':reviewer['id'],**snapshot}
+            code_work=self._has_code_work(run,target)
+            validation.update(kind='code_test' if code_work else 'editorial_assessment',
+                              assessed=bool(str(action.get('feedback','')).strip()))
+            # Text/fact/risk review is a recorded assessment, not fake executable evidence.
+            if not code_work:
+                validation['verified']=False
+                validation['evidenceCallIds']=[call['id'] for call in run['calls']
+                    if call['id'] in evidence_ids and call.get('taskId')==reviewer['id']
+                    and call.get('agentId')==reviewer['agentId'] and call.get('status')=='success'
+                    and call.get('tool') in ('web.search','web.fetch','file.read')]
             if verdict=='rework':
                 target.setdefault('validationHistory',[]).append(validation)
                 target['revision']+=1
                 target['feedback'].append(validation['feedback'])
                 target.update(status='pending',result='',error=None,outputs=[])
                 target.pop('validation',None)
+                target.pop('outputValidation',None)
+                target.pop('_outputContractRepairs',None)
+                target.pop('_protocolRepairs',None)
                 target['_messages']=[]
             else:
                 target['validation']=validation
                 if verdict=='reject':
                     target.update(status='failed',error={'code':'review','message':validation['feedback']})
-            self._event(run,'review_'+verdict,'reviewer','审核员给出审查决定。',{'taskId':target['id'],'validation':validation})
+            self._event(run,'review_'+verdict,reviewer['agentId'],'审核角色给出审查决定。',{'taskId':target['id'],'validation':validation})
             self._persist()
-            accepted=verdict!='pass' or validation['verified']
+            accepted=verdict!='pass' or validation['verified'] or (not code_work and validation['assessed'])
             result={'ok':accepted,'validation':validation,'status':target['status']}
             if not accepted:
                 result['error']={'code':'verification','message':'独立验收未通过：需要审核员本任务成功的 code.test 证据，且目标 revision 与产物 SHA256 必须匹配。'}
@@ -913,6 +1078,7 @@ class Platform:
         elif choice not in allowed:
             raise ActionError('请选择此请求允许的操作。')
         approval.update(status='resolved',resolvedAt=clock_ms(),response={'choiceId':choice,'answer':answer})
+        self._message(self.state['sessions'][channel],'human',answer.strip() or '人工选择：'+str(choice))
         self._event(run,'human_replied','human','用户回复人工请求。',{'approvalId':approval['id'],'choiceId':choice})
         self._aggregate_status(run)
         self._persist()
@@ -920,7 +1086,7 @@ class Platform:
     def _tool(self, channel, run_id, task, name, args, pending=None):
         self._gate(channel,run_id)
         self._budget(channel,run_id,task)
-        if name not in AGENTS[task['agentId']]['tools']:
+        if name not in self.agents[task['agentId']]['tools']:
             raise ToolError('permission','该Agent没有此工具权限。')
         with self.lock:
             run=self._current(channel,run_id)
@@ -935,7 +1101,7 @@ class Platform:
             else:
                 call={'id':uid('call'),'taskId':task['id'],'agentId':task['agentId'],'tool':name,'args':args,
                       'status':'running','result':None,'durationMs':0,'sandboxId':f'{task["agentId"]}/{run_id}'}
-                if task['agentId']=='reviewer' and name=='code.test':
+                if 'review' in self.agents[task['agentId']].get('capabilities',[]) and name=='code.test':
                     call['reviewTargets']={target['id']:self._review_snapshot(run,target) for target in run['steps']
                                            if target['id']!=task['id'] and target.get('status') in ('done','partial')}
                 run['calls'].append(call)
@@ -1027,7 +1193,7 @@ class Platform:
         if task.get('_episodeRecordedRevision')==task['revision']: return
         task['_episodeRecordedRevision']=task['revision']
         actor=task.get('agentId')
-        if actor not in AGENTS: return
+        if actor not in self.agents: return
         calls=[call for call in run['calls'] if call['taskId']==task['id'] and call['tool']!='llm.chat']
         success=task['status']=='done'
         reason=task.get('result') or (task.get('error') or {}).get('message','没有完成')
@@ -1042,8 +1208,28 @@ class Platform:
                 self._event(run,'memory_candidate',actor,'反思已保存为候选经验，需要真实结果或人工确认后才能长期检索。',{'memoryId':memory['id'],'taskId':task['id']})
             except (ValueError,KeyError,TypeError) as exc:
                 self._event(run,'reflection_rejected',actor,'不采用无效的反思，不影响已完成产物。',{'taskId':task['id'],'reason':str(exc)[:500]})
-        validated=any(c['tool']=='code.test' and c['status']=='success' and isinstance(c.get('result'),dict) and c['result'].get('exitCode')==0 for c in calls)
-        if validated:
+        # Feedback is settled after the final review, rather than rewarding an
+        # agent's provisional "done" before another role rejects its delivery.
+
+    def _feedback_memories(self, run, task):
+        actor=task.get('agentId')
+        if actor not in self.agents or task.get('_memoryFeedbackSettled'):
+            return
+        task['_memoryFeedbackSettled']=True
+        calls=[call for call in run['calls'] if call.get('taskId')==task['id'] and call.get('tool')=='code.test'
+               and isinstance(call.get('result'),dict) and isinstance(call['result'].get('exitCode'),int)]
+        validation=task.get('validation') or {}
+        if validation.get('verdict')=='reject':
+            success=False
+        elif self._has_code_work(run,task) and any('review' in self.agents[a].get('capabilities',[]) for a in run['participants'] if a!=actor):
+            if not self._valid_review(run,task):
+                return  # Missing independent evidence is not proof a strategy succeeded/failed.
+            success=task['status']=='done'
+        elif calls:
+            success=task['status']=='done' and calls[-1]['status']=='success' and calls[-1]['result'].get('ok') is True and calls[-1]['result']['exitCode']==0
+        else:
+            return  # Text assessments and model assertions do not fabricate objective outcomes.
+        if calls or validation.get('verdict')=='reject' or self._valid_review(run,task):
             for hit in run['memoryHits']:
                 if hit['taskId']==task['id']:
                     owner=hit.get('ownerAgentId',actor)
@@ -1071,11 +1257,12 @@ class Platform:
             done=[t for t in tasks if t['status']=='done']
             status='done' if len(done)==len(tasks) else 'partial' if done or any(t['status']=='partial' or t.get('outputs') for t in tasks) else 'failed'
             gaps=[]
-            four_role=run.get('mode')=='task' and set(run.get('participants',[]))==set(AGENTS)
+            four_role=run.get('mode')=='task' and set(run.get('participants',[]))==set(self.agents)
             if four_role:
                 for task in tasks:
-                    if task.get('agentId')=='executor' and task.get('status') in ('done','partial') and self._has_code_work(run,task) and not self._valid_review(run,task):
-                        gaps.append(task['title']+'：最新代码 revision / 产物尚无匹配的 Reviewer 独立验收。')
+                    if ('review' not in self.agents.get(task.get('agentId'),{}).get('capabilities',[])
+                            and task.get('status') in ('done','partial') and self._has_code_work(run,task) and not self._valid_review(run,task)):
+                        gaps.append(task['title']+'：最新代码 revision / 产物尚无匹配的审核角色独立验收。')
                 if gaps and status=='done': status='partial'
             summaries=[f"- {t['title']} [{t['status']}]：{t.get('result') or (t.get('error') or {}).get('message','未交付')}" for t in tasks]
             synthesis=next((task for task in reversed(tasks) if task.get('finalSummary') and task['status']=='done'),None)
@@ -1086,6 +1273,8 @@ class Platform:
                 output+='\n\n可下载产物：'+ '、'.join(a['name'] for a in run['artifacts'])
             output+='\n\n执行状态由真实调用记录产生；任务验收与记忆策略有效性需要独立验证。'
             run.update(status=status,finishedAt=clock_ms(),summary=output[:20000],acceptanceGaps=gaps)
+            for task in tasks:
+                self._feedback_memories(run,task)
             self._event(run,'run_finished',run['respondingAgentId'],'所有可调度子任务已结束。',{'status':status,'done':len(done),'total':len(tasks),'acceptanceGaps':gaps})
             self._message(self.state['sessions'][channel],'agent',run['summary'],run['respondingAgentId'])
             self.memory.maintenance()

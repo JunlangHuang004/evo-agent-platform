@@ -1,7 +1,7 @@
 import { mountWorkbench } from './workbench.js';
 import { mountAgents, mountEvaluation } from './panels.js';
 import { closeDrawer } from './view.js';
-import { getState, subscribe, startClient, refreshState, stopClient } from './store.js';
+import { getState, subscribe, startClient, refreshTeams, refreshState, stopClient } from './store.js';
 
 const pages = {
   workspace: {title: '工作台', description: '提出任务，查看协作过程和执行结果。'},
@@ -42,12 +42,13 @@ function renderConnection(){
 }
 subscribe(renderConnection);
 renderConnection();
-document.getElementById('retryConnection').addEventListener('click',()=>{void refreshState();});
-await startClient();
+document.getElementById('retryConnection').addEventListener('click',async()=>{await refreshTeams();await refreshState();});
 mountWorkbench();
 mountAgents(document.getElementById('agentsPage'));
 mountEvaluation(document.getElementById('evaluationPage'));
+void startClient();
 window.addEventListener('pagehide',stopClient);
+window.addEventListener('pageshow',event=>{if(event.persisted)void startClient();});
 document.querySelector('.skip-link').addEventListener('click', event => {
   event.preventDefault();
   const main = document.getElementById('mainContent');

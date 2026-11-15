@@ -109,3 +109,23 @@
   .agent-option-role { font-size: 12px; }
   .sandbox-details summary .text-small { display: block; margin: 5px 0 0 17px; }
 }
+.team-description { margin: -4px 0 12px; line-height: 1.65; }
+.team-picker { display: flex; align-items: center; gap: 8px; }
+.team-picker select { max-width: 270px; }
+.history-control { margin-bottom: 16px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; }
+.history-control > summary { cursor: pointer; font-size: 13px; }
+.history-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 10px; }
+.history-toolbar select { flex: 1; min-width: 160px; }
+.dialogue-entry { padding: 12px 0; border-bottom: 1px solid var(--border); }
+.dialogue-entry .message-text { white-space: pre-wrap; overflow-wrap: anywhere; margin-top: 7px; }
+.dialogue-entry > .muted { margin-top: 6px; }
+.dialogue-section + .dialogue-section { margin-top: 18px; }
+.export-actions { display: flex; gap: 8px; margin: 12px 0; }
+.tabs { flex-wrap: wrap; }
+#historyError:not(:empty) { margin-top: 8px; }
+.run-issue { margin-top: 12px; padding: 10px 12px; border: 1px solid #665139; border-radius: 8px; background: #27231e; line-height: 1.65; }
+.run-issue > p { margin-top: 6px; overflow-wrap: anywhere; }
+.run-issue .message-text { white-space: pre-wrap; }
+.task-output-contract { margin: 16px 0; padding: 12px; border: 1px solid var(--border); border-radius: 8px; }
+.task-output-contract > p, .task-output-contract > details { margin-top: 8px; }
+.task-output-contract ul { margin: 8px 0; padding-left: 20px; overflow-wrap: anywhere; }

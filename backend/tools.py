@@ -4,6 +4,7 @@ from pathlib import Path
 from urllib.parse import urlsplit, urlunsplit, urljoin, urlencode, parse_qs
 import hashlib
 import base64
+import copy
 import http.client
 import ipaddress
 import json
@@ -166,9 +167,14 @@ def _validate_url(url):
 
 
 class ToolGateway:
-    def __init__(self, config):
+    def __init__(self, config, agents=None):
         self.data_dir = Path(config.data_dir)
-        self.sandbox = SandboxManager(config)
+        self.agents = copy.deepcopy(AGENTS if agents is None else agents)
+        self.sandbox = SandboxManager(config, agents=self.agents)
+        for agent in self.agents.values():
+            allowed = agent.get('tools') if isinstance(agent, dict) else None
+            if not isinstance(allowed, list) or any(name not in _SCHEMAS for name in allowed):
+                raise ToolError('parameter', 'Each agent needs an explicit allowlist of supported tools.')
         self.git_remote = getattr(config, 'git_remote', '')
         self._git_token = getattr(config, 'git_token', '')
         self._git_username = getattr(config, 'git_username', 'x-access-token')
@@ -191,14 +197,14 @@ class ToolGateway:
         return {**self.sandbox.capabilities(), 'gitInstalled': bool(self.git), 'gitRemoteConfigured': bool(self.git_remote), 'gitTokenConfigured': bool(self._git_token), 'fileSizeLimit': MAX_FILE_BYTES, 'webByteLimit': MAX_WEB_BYTES}
 
     def definitions(self, agent_id):
-        if agent_id not in AGENTS:
+        if agent_id not in self.agents:
             raise ToolError('permission', 'Unknown agent.')
         return [
             {'name': name, 'description': _DESCRIPTIONS[name], 'parameters': _SCHEMAS[name],
              'risk': 'high' if name in ('git.push', 'file.delete') else 'medium' if name in ('file.write', 'file.patch', 'code.run', 'code.test', 'git.commit') else 'low',
              'permission': 'human_approval' if name in ('git.push', 'file.delete', 'file.patch') else 'approval_on_overwrite' if name == 'file.write' else 'agent_allowlist',
              'idempotent': name in ('file.read', 'file.list', 'file.write', 'web.search', 'web.fetch', 'git.status'), 'timeout': 60 if name.startswith('code.') else self.timeout}
-            for name in AGENTS[agent_id]['tools']
+            for name in self.agents[agent_id]['tools']
         ]
 
     def cancel(self, run_id):
@@ -239,7 +245,7 @@ class ToolGateway:
                     raise ToolError('parameter', f'{key} must be a bounded string array.')
 
     def execute(self, agent_id, run_id, name, args, approved=False):
-        if agent_id not in AGENTS or name not in AGENTS[agent_id]['tools'] or name not in _SCHEMAS:
+        if agent_id not in self.agents or name not in self.agents[agent_id]['tools'] or name not in _SCHEMAS:
             raise ToolError('permission', 'This agent is not allowed to use that tool.')
         identifier(run_id, 'run_id')
         self._validate_args(name, args)

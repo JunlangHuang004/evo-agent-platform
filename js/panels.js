@@ -9,9 +9,10 @@ function memoriesFor(agent){return [...(agent.memories || []),...(getState().lea
 const memoryBadge=memory=>memory.status==='verified'?'<span class="tag info">已确认可检索</span>':memory.status==='episodic'?'<span class="tag muted">任务经历</span>':badge(memory.status);
 
 export function mountAgents(container){
-  let selectedId=AGENTS[0]?.id,previous='';
+  let selectedId=AGENTS[0]?.id,previous='',teamId='';
   function render(){
-    const selected=AGENTS.find(agent=>agent.id===selectedId) || AGENTS[0];if(!selected)return;
+    if(teamId!==getState().teamId){teamId=getState().teamId;selectedId=AGENTS[0]?.id;previous='';}
+    const selected=AGENTS.find(agent=>agent.id===selectedId) || AGENTS[0];if(!selected){container.innerHTML='<div class="empty-state"><p>正在等待本团队的 Agent 配置。请先连接后端。</p></div>';previous='';return;}
     const state=getState(),connection=state.connection,memories=memoriesFor(selected);
     const docker=connection.dockerAvailable && connection.dockerImageReady;
     const next=JSON.stringify([AGENTS,state.learnedMemories,connection,Boolean(state.client.pendingAction),state.client.reachable,selected.id]);if(next===previous)return;previous=next;
