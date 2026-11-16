@@ -1,0 +1,369 @@
+{
+  "schemaVersion": 1,
+  "round": 12,
+  "recordedAtUTC": "2026-11-16T10:46:52.618106+00:00",
+  "sourceCommit": "7d2ebd321f6113012970fdee898cde42678017fd",
+  "kind": "complete_live_six_task_test_and_post_run_independent_QA",
+  "originalTasksAndRolesUnchanged": true,
+  "freshStateAndMemory": true,
+  "task2ContinuesExactSameTeamTask1": true,
+  "configuredSettings": {
+    "max_model_calls": null,
+    "max_agent_turns": null,
+    "max_run_tokens": null,
+    "max_run_seconds": 2700,
+    "max_retries": 1,
+    "model_timeout": 60,
+    "model_generation_retries": 2,
+    "max_context_chars": 120000,
+    "max_completion_tokens": 6000,
+    "planning_max_tokens": 3000,
+    "transport_mode": "compatible",
+    "thinking_mode": "disabled",
+    "json_mode": "json_object",
+    "browser_image": "evo-agent-browser:1.64.1",
+    "initial_context_chars": 40000,
+    "execution_profile": "time_only",
+    "model": "t2_hkgai-v3_fp8_1m_e7"
+  },
+  "analyzedOnlyAfterAllSixSettled": true,
+  "allSixNaturallyTerminalAndRawSettled": true,
+  "allSixUniqueExportsPreserved": true,
+  "all227CommittedSourceFilesUnchanged": true,
+  "sourceCommitManifestSha256": "836781a37e190651c12ab81de4af61896bf86e5598d2fa4ffcde5be2df04933f",
+  "manualProductEdits": false,
+  "budgetExtensions": 0,
+  "cases": [
+    {
+      "case": "software-1",
+      "runId": "run-1579143f9486496e",
+      "workflowStatus": "partial",
+      "elapsedMinutes": 44.853,
+      "modelCalls": 149,
+      "reportedTokens": 4072079,
+      "unknownUsageCalls": 5,
+      "terminalExportSha256": "16c9ee5048cbcbf9adebd17e133fdaa666a834436100e4777df52a731e35d52d",
+      "newArtifacts": 5,
+      "inheritedArtifacts": 0,
+      "formalPackages": 0,
+      "candidatePackages": 1,
+      "bundles": [
+        {
+          "id": "delivery-87ac6e1a64c94748a741b1084350262b",
+          "status": "candidate",
+          "entrypoint": "app/index.html",
+          "path": "evidence/product-snapshots/software-1/delivery-87ac6e1a64c94748a741b1084350262b.zip",
+          "sha256": "8326f388cd68ed3393d025a21cdaab3e18244bf0079ba02b98b1c8467cce41f9",
+          "bytes": 8560,
+          "CRCVerified": true,
+          "allPublishedBytesMatch": true,
+          "fileCount": 4,
+          "semanticQuality": "unassessed"
+        }
+      ],
+      "product": "可下载预约候选包；正常预约、取消、刷新重选日期、预开双标签冲突保护及离线打开可用。",
+      "issues": [
+        "读取存储失败后新增预约可能覆盖旧数据。",
+        "83次旧断言失败反馈消耗进度；43.218分钟才发布候选，QA43.618分钟才开始，未完成独立验收。"
+      ],
+      "improvedFromR11": "写入和取消写入失败能保留旧记录并提示错误；读失败数据丢失仍存在。",
+      "qa": {
+        "observationsPassed": 18,
+        "observationsFailed": 1,
+        "countsAreQualityScores": false
+      }
+    },
+    {
+      "case": "software-2",
+      "runId": "run-21196ca5560643e6",
+      "workflowStatus": "partial",
+      "elapsedMinutes": 37.432,
+      "modelCalls": 118,
+      "reportedTokens": 3367857,
+      "unknownUsageCalls": 3,
+      "terminalExportSha256": "61f54e68549f095402d1cc76b45943ac218ed158049be717cc3c334d7996c7c6",
+      "newArtifacts": 7,
+      "inheritedArtifacts": 5,
+      "formalPackages": 0,
+      "candidatePackages": 1,
+      "bundles": [
+        {
+          "id": "delivery-32d93d5a0ede41afaec2aa35ebeb3f5d",
+          "status": "candidate",
+          "entrypoint": "app/index.html",
+          "path": "evidence/product-snapshots/software-2/delivery-32d93d5a0ede41afaec2aa35ebeb3f5d.zip",
+          "sha256": "1566949d7327eacadeaa0dc5350dab729494ebc7aef585f0e42ca4db13f1f7a0",
+          "bytes": 15193,
+          "CRCVerified": true,
+          "allPublishedBytesMatch": true,
+          "fileCount": 6,
+          "semanticQuality": "unassessed"
+        }
+      ],
+      "product": "已发布完整预约＋统计看板候选包，八项核心统计观察通过，兼容S1活动预约。",
+      "issues": [
+        "继承存储读失败覆盖旧数据的问题；看板读失败显示零用量，旧取消历史范围说明不足。",
+        "内部QA使用修改过的私有HTML，反复采用错误预期；最终旧断言恢复规则停止QA，无正式包。",
+        "有30天与自定义范围，无此前偏好的7/90快捷键；本轮未询问该偏好。"
+      ],
+      "improvedFromR11": "从只有新设计说明和未发布代码，改善为真正可下载、可运行的看板。",
+      "qa": {
+        "observationsPassed": 29,
+        "observationsFailed": 3,
+        "dashboardCorePassed": 8,
+        "countsAreQualityScores": false
+      }
+    },
+    {
+      "case": "newsroom-1",
+      "runId": "run-c9f67bf5c2114fd2",
+      "workflowStatus": "partial",
+      "elapsedMinutes": 10.299,
+      "modelCalls": 38,
+      "reportedTokens": 361122,
+      "unknownUsageCalls": 3,
+      "terminalExportSha256": "770ea9d213542ab3ffec7519e42286edb73e0d028be4cbe72c3cfd924cc79754",
+      "newArtifacts": 2,
+      "inheritedArtifacts": 0,
+      "formalPackages": 0,
+      "candidatePackages": 0,
+      "bundles": [],
+      "product": "只有选题和研究简报，没有正文、社交稿或ZIP。",
+      "issues": [
+        "12次来源获取仅1次成功，11次DNS失败；选题时效和相关性未确定。",
+        "研究partial使撰稿、事实核查和打包全部跳过，结束时仍剩约35分钟。"
+      ],
+      "improvedFromR11": "交付退步：上一轮已有文章和正式包，本轮未形成目标产品。"
+    },
+    {
+      "case": "newsroom-2",
+      "runId": "run-97498243861b4514",
+      "workflowStatus": "partial",
+      "elapsedMinutes": 20.042,
+      "modelCalls": 84,
+      "reportedTokens": 1512121,
+      "unknownUsageCalls": 4,
+      "terminalExportSha256": "4b0da19d9e114a8f971aae39af072f176d5b157a6fd49aa914eb68b7d98515b4",
+      "newArtifacts": 9,
+      "inheritedArtifacts": 2,
+      "formalPackages": 0,
+      "candidatePackages": 1,
+      "bundles": [
+        {
+          "id": "delivery-b3495aca22764f5bb7a9dbb57b9c22e8",
+          "status": "candidate",
+          "entrypoint": "web/index.html",
+          "path": "evidence/product-snapshots/newsroom-2/delivery-b3495aca22764f5bb7a9dbb57b9c22e8.zip",
+          "sha256": "2de056dd42db80dc148942c5af2040a42490ce86a67293e5a199becad8683b89",
+          "bytes": 7167,
+          "CRCVerified": true,
+          "allPublishedBytesMatch": true,
+          "fileCount": 3,
+          "semanticQuality": "unassessed"
+        }
+      ],
+      "product": "约947词核查文章、59词社交稿、响应式HTML与真实候选ZIP；桌面及手机显示正常。",
+      "issues": [
+        "新HTML/社交TXT/README没有匹配最终字节的独立验收；未提出正式package_delivery，并非ZIP工具报错。",
+        "审核者未读取三份原始正文，却声称已核查；结论仍过度推广旧研究，未充分处理已获取综述中的相反发现。",
+        "社交稿仍有待替换的链接占位符。"
+      ],
+      "improvedFromR11": "增加响应式HTML，当前正文/社交稿读取证据更完整；但正式交付退回候选，来源核验仍不足。"
+    },
+    {
+      "case": "fund-1",
+      "runId": "run-f2df8b446e3a4f6f",
+      "workflowStatus": "done",
+      "elapsedMinutes": 27.301,
+      "modelCalls": 83,
+      "reportedTokens": 1471328,
+      "unknownUsageCalls": 5,
+      "terminalExportSha256": "815f29cffec7ae480cadda965bb876e819e3305a1f7eae9aed339148fd459c10",
+      "newArtifacts": 14,
+      "inheritedArtifacts": 0,
+      "formalPackages": 1,
+      "candidatePackages": 0,
+      "bundles": [
+        {
+          "id": "delivery-7966f3ffe25a4c53960e41923db83095",
+          "status": "packaged",
+          "entrypoint": "README.md",
+          "path": "evidence/product-snapshots/fund-1/delivery-7966f3ffe25a4c53960e41923db83095.zip",
+          "sha256": "2ececa692c15fcc12dca6608b5dfcfba5c9bcbb9d92d21ec035133278e8835bf",
+          "bytes": 20765,
+          "CRCVerified": true,
+          "allPublishedBytesMatch": true,
+          "fileCount": 6,
+          "semanticQuality": "unassessed"
+        }
+      ],
+      "product": "模拟投资方案、客户介绍和六文件正式ZIP；配置/介绍均100%，金额HKD1,000,000且逐项一致。",
+      "issues": [
+        "45%单一核心基金违反自身设定的单基金不超过40%约束。",
+        "30–40%风险已披露，但模拟假设只建立30%的承受能力，40%条件尚未建立；并非已知真实用户偏好被违反。",
+        "集中度估计缺推导，现金部署路径不够明确；打包引入未列出的HKMA来源域名改动，最终文本未重审。"
+      ],
+      "improvedFromR11": "由partial/无ZIP变为done/正式包；股票95%降至80%，增加10%债券、10%现金，但内容仍需一致性修正。",
+      "qa": {
+        "allocationWeightSum": 100,
+        "introductionAmountHKD": 1000000,
+        "rowWeightsAndAmountsAgree": true
+      }
+    },
+    {
+      "case": "fund-2",
+      "runId": "run-e78705d08b394f51",
+      "workflowStatus": "done",
+      "elapsedMinutes": 26.977,
+      "modelCalls": 80,
+      "reportedTokens": 1783733,
+      "unknownUsageCalls": 4,
+      "terminalExportSha256": "99216c517adbed8bd08aeb8e9433734e90ea9121146de107385d9fc34aaaa94d",
+      "newArtifacts": 8,
+      "inheritedArtifacts": 14,
+      "formalPackages": 1,
+      "candidatePackages": 1,
+      "bundles": [
+        {
+          "id": "delivery-66e58f73d577472f9917b140ed388ba7",
+          "status": "candidate",
+          "entrypoint": "deck/index.html",
+          "path": "evidence/product-snapshots/fund-2/delivery-66e58f73d577472f9917b140ed388ba7.zip",
+          "sha256": "79479baa4526a6389f396eeab6eafbd728facca60a1746fe9369e7e6174d9a84",
+          "bytes": 11979,
+          "CRCVerified": true,
+          "allPublishedBytesMatch": true,
+          "fileCount": 5,
+          "semanticQuality": "unassessed"
+        },
+        {
+          "id": "delivery-9a84241b011f4fb39ea8f4416356e84d",
+          "status": "packaged",
+          "entrypoint": "deck/index.html",
+          "path": "evidence/product-snapshots/fund-2/delivery-9a84241b011f4fb39ea8f4416356e84d.zip",
+          "sha256": "0dda00c7fd30022189f06b76c2d052a341fb82a37165aafc7d6e5f48e1eb0dd2",
+          "bytes": 12874,
+          "CRCVerified": true,
+          "allPublishedBytesMatch": true,
+          "fileCount": 5,
+          "semanticQuality": "unassessed"
+        }
+      ],
+      "product": "16页离线HTML简报，候选和正式包采用同一组已审核文件；桌面翻页、键盘、新窗口深链接可用。",
+      "issues": [
+        "手机越界和页脚被导航遮挡；同页面直接修改hash不切页，冷启动深链接正常。",
+        "实际已获取CSIS原文为9月17日，却记成最新来源7月30日；同一来源内2000亿/超过2500亿美元口径未协调。",
+        "研究主要集中于存储，估值/先进制程/政策细节证据仍有限；手机适配属于额外质量检查，非原题明确最低标准。"
+      ],
+      "improvedFromR11": "仍能完成正式交付，估值缺口披露更清楚；本轮更慢，手机遮挡问题更明显。",
+      "qa": {
+        "functionalPassed": 70,
+        "functionalFailed": 0,
+        "layoutPassed": 43,
+        "layoutFailed": 5,
+        "footerOcclusionObservations": 32,
+        "footerOcclusionExcludedFromLayoutCount": true,
+        "countsAreQualityScores": false
+      }
+    }
+  ],
+  "totals": {
+    "modelCalls": 552,
+    "reportedTokens": 12568240,
+    "unknownUsageCalls": 24,
+    "deliveryRecords": 6,
+    "candidateDeliveryRecords": 4,
+    "formalDeliveryRecords": 2,
+    "duplicateSameVersionReviewPassEvents": 0,
+    "workflowStatuses": {
+      "partial": 4,
+      "done": 2
+    },
+    "requestedProductFormsPresent": 5,
+    "requestedProductFormsExpected": 6,
+    "bundlesCoverCases": 5,
+    "downloadedZipCount": 6,
+    "allZipCrcAndPublishedBytesVerified": true,
+    "failedModelRequests": 25,
+    "failedRequestsWithUnknownUsage": 24,
+    "failedRequestsWithKnownTruncatedOutput": 1
+  },
+  "softwareRecovery": {
+    "newExecutionDiagnosticFeedbacks": 0,
+    "legacyS1Feedbacks": 83,
+    "sameLatestPairRejectedProposals": 79,
+    "reportedTokensOfS1RejectedProposals": 2855884,
+    "cause": "assert_text locator exceptions produce a failed assertion without actual and a failed step without passed; scoped assertion and new execution classifier reject that receipt shape, while the older identical-proposal fallback has no closing counter. S2 uses the older bounded assertion stop, not the new diagnostic final handoff.",
+    "interpretation": "The R12 offline cases did not cover this real runner assertion-exception shape or the legacy fallback interaction. This round does not establish effective real-model recovery of the new branch."
+  },
+  "comparisonWithR11": {
+    "workflowDone": {
+      "R11": 3,
+      "R12": 2
+    },
+    "formalPackages": {
+      "R11": 3,
+      "R12": 2
+    },
+    "candidatePackages": {
+      "R11": 2,
+      "R12": 4
+    },
+    "productForms": {
+      "R11": 5,
+      "R12": 5
+    },
+    "reportedTokens": {
+      "R11": 7315647,
+      "R12": 12568240
+    },
+    "modelCalls": {
+      "R11": 420,
+      "R12": 552
+    },
+    "unknownUsageCalls": {
+      "R11": 33,
+      "R12": 24
+    },
+    "duplicateSameVersionReviewPassEvents": {
+      "R11": 0,
+      "R12": 0
+    },
+    "causalAttributionEstablished": false,
+    "stableSixTaskDeliveryEstablished": false
+  },
+  "priorities": [
+    "Unify bounded correction and truthful handoff across execution errors, assertion exceptions and legacy fallbacks; include actual runner receipt shapes in regression coverage.",
+    "Make browser tests preserve intended dates/state, use stable DOM/actual generated data, and validate exact published bytes; protect time for downstream independent QA.",
+    "Treat storage-read failures as unavailable data, block unsafe writes and retain cancellation-history coverage metadata.",
+    "Plan independent review of final rendered bytes before formal packaging; record and recheck any release edits.",
+    "Let reviewers inspect actual source bodies and precise claim/date locations; handle partial research with an explicit bounded editorial replan, not false completion.",
+    "Check self-declared numerical constraints and mobile geometry in addition to arithmetic totals and basic slide counters."
+  ],
+  "references": {
+    "crewaiPinnedCommit": "bf6fd3a0972dd72fe1ff568c243e87e3b8408d35",
+    "newCrewAICodeImportedThisRound": false
+  },
+  "localEvidenceSha256": {
+    "workflow-metrics.json": "506ae29d8911d60648579280cf6e660b67c080ac4644dcbda1878c1e8fe2057d",
+    "r11-r12-workflow-comparison.json": "a02137db730280d7906f05e8c731cc55408d43a8f4d36ac856d9f364b8312908",
+    "r11-r12-wait-comparison.json": "58d199ea0ac51a0532096fe9a816cd7912c18a80842fa141e320d7ed4a4fcdbd",
+    "software-recovery-audit.json": "44650f8b64623337c415df0894e846d95cda500bc338f2cc18cc6bfef1124a59",
+    "software-qa/software-final-analysis.json": "e1c2d07389c3b034514f587791e651d5a8d27aad94eae4259fbf427775d00062",
+    "newsroom-qa/summary.json": "8420fe1a862f6f0e9f8d5be55a3bbc7c96bdc89ca7e20543c304aba0cdaa7577",
+    "fund-qa/summary.json": "8661f680f4d25ff330419f3f5966dd84ee6a6080120f55aecee7fc830a1e94ce",
+    "final-freeze-and-export-check.json": "3637bfed86cf7eea009e957f8c878fbad10d0ed62cf29cd8e8bc2ccc86730cd1",
+    "full-commit-source-check.json": "a9976f0b941150fa9ada733edfc707f81205d09c4d0c2c69dd7b31e083dee3f1",
+    "server-stopped.json": "494468601942a998faa88d604d30c8b9298ec59aa112d3e3e2c5d10be0e385ea"
+  },
+  "limits": [
+    "A single stochastic round is not a stable success-rate estimate.",
+    "Workflow done, formal ZIP and actual semantic/product quality are separate outcomes.",
+    "Independent QA observations are coverage counts, not quality percentages, and do not retroactively create platform acceptance.",
+    "Unknown request usage is not zero. Approval and failed-request durations can overlap and are not an isolated causal latency estimate.",
+    "No new platform fix or live rerun was performed after these results."
+  ],
+  "githubPushed": false,
+  "user8080ServiceChanged": false,
+  "dedicated8101TestServiceStopped": true
+}
