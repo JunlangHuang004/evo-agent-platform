@@ -1,0 +1,106 @@
+{
+  "schemaVersion": 1,
+  "round": "R12",
+  "date": "2026-11-16",
+  "kind": "local_platform_repair_and_offline_validation",
+  "baseCommit": "7e9b0b81738b9c0b923df3f13ef51787b8b82d9b",
+  "localBranch": "local/software-diagnostics-round12",
+  "changes": [
+    "Diagnose repeated actual browser page errors and failed interaction steps before generic identical-action termination.",
+    "Provide bounded platform observations and role-aware developer or independent reviewer guidance; no added model call or fifth agent.",
+    "Keep current diagnosis through read-only source inspection and include matching evidence in real rework handoffs.",
+    "Invalidate stale producer revisions, changed source, foreign ownership and unresolved execution outcomes.",
+    "After two ignored diagnostic replies, require one actual final; no repeated completion clarification, synthetic success or extra tool execution."
+  ],
+  "validation": {
+    "fullRegression": {
+      "tests": 925,
+      "passed": 925,
+      "skipped": 0,
+      "seconds": 280.1,
+      "browserDockerEnabled": true,
+      "agentSandboxDockerEnabled": true,
+      "exitCode": 0,
+      "wallSeconds": 280.585,
+      "sourceManifestSha256": "02fa23fb1119dd76790c383ecae7c0c2d8e09324f78868d1ebb9c157883d453c",
+      "sourceUnchanged": true,
+      "changedFiles": [],
+      "logSha256": "ae6143336f5c9cc6f6b41b24c58337af42d611705f0e6c27975785dcd7d08816",
+      "frozenFileCount": 220
+    },
+    "newTests": {
+      "classifier": 17,
+      "recoveryPolicy": 19,
+      "schedulerAndDeliveryIntegration": 9,
+      "total": 45
+    },
+    "integration": {
+      "actualBrowserScenarios": 6,
+      "negativeBoundaryScenarios": 3,
+      "modelDecisions": "scripted_offline",
+      "positivePaths": [
+        "actual page errors -> source read -> independent rework -> fresh candidate -> real passing browser test -> current review -> matching formal ZIP",
+        "actual selector timeouts -> source read -> corrected source-supported selector -> real passing browser test -> explicit candidate ZIP"
+      ],
+      "negativePaths": [
+        "ignored diagnostics -> one truthful partial final with retained candidate",
+        "new action after final checkpoint is not executed",
+        "malformed final stops without synthetic completion",
+        "unresolved done proposal stays partial",
+        "nonexecuted tests are not product diagnoses",
+        "unknown outcomes remain unsettled without replay",
+        "original global final-only boundary still wins"
+      ]
+    },
+    "r11Replay": [
+      {
+        "case": "software-1",
+        "exportSha256": "e3a97becf8570446e2e1004da892de069850988a2ccffd6733c823fd396c12c7",
+        "fullRecordedCalls": 64,
+        "diagnosticKind": "page_errors",
+        "actualMatchingFailures": 2,
+        "latestActualFailureCallId": "call-bcb5635996534806",
+        "counterfactualHistoricalReplay": true
+      },
+      {
+        "case": "software-2",
+        "exportSha256": "9668658d533f9e8358f97b5b38948a1845719d3fb3facdcce2bfe142c43475f5",
+        "fullRecordedCalls": 78,
+        "diagnosticKind": "step_execution_error",
+        "actualMatchingFailures": 2,
+        "latestActualFailureCallId": "call-ee2ecc12a6bf448d",
+        "counterfactualHistoricalReplay": true
+      }
+    ],
+    "replayFileSha256": "30cdc85d3604f21aa9d3751e3d32836ce0f475cdc0c82f8216b4b15d380c63c3",
+    "postTestNonsemanticCleanup": {
+      "path": "backend/browser_execution_diagnostics.py",
+      "change": "Remove extra blank line at EOF only",
+      "beforeSha256": "7a615e29f24026ec68f90c9483e171c133f83a73d493b0b085d721f921431b4e",
+      "afterSha256": "1ea76a9dc14ec45aeb2af6f7ede6d79d158745d45782ed90832a731f4b7834b0",
+      "syntaxTreeIdentical": true
+    }
+  },
+  "boundaries": {
+    "freshLiveModelCalls": 0,
+    "freshMidTestRuns": 0,
+    "originalR11ProductsModified": false,
+    "githubPushed": false,
+    "user8080ServiceChanged": false,
+    "budgetsOrAccessExtended": false,
+    "diagnosisCreatesAcceptance": false,
+    "stabilityClaim": false,
+    "remainingValidation": "Run the actual software tasks again with a real model to determine whether it follows diagnoses and fixes the storage handling and dashboard loading defects autonomously."
+  },
+  "reference": {
+    "project": "CrewAI",
+    "pinnedCommit": "bf6fd3a0972dd72fe1ff568c243e87e3b8408d35",
+    "borrowedPattern": "Concrete guardrail feedback with bounded correction; platform-specific browser provenance, reviewer binding and ZIP validation remain independent implementations.",
+    "runtimeDependencyAdded": false
+  },
+  "localOnlyEvidence": {
+    "regressionLog": "evidence/integration-r12/full-regression-attempt1.log",
+    "sourceFreeze": "evidence/integration-r12/full-regression-source-freeze.json",
+    "rawLogsCommitted": false
+  }
+}

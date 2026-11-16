@@ -20,6 +20,8 @@ from .generation_cooldown import new_cooldown,cooldown_binding
 from .readonly_recovery import readonly_failure_feedback
 from .necessary_source import necessary_source_admission
 from .browser_failure_recovery import browser_failure_feedback,browser_failure_trend
+from .browser_execution_diagnostics import current_browser_execution_diagnostic
+from .browser_diagnostic_recovery import browser_diagnostic_recovery,current_browser_diagnostic_checkpoint
 from .browser_stagnation import browser_stagnation_feedback
 from .handoff_priority import handoff_priority,priority_tail,PREFIX as HANDOFF_PRIORITY_PREFIX
 from .sandbox import read_text
@@ -110,6 +112,8 @@ class ActionError(ValueError):
 class Stopped(Exception): pass
 class ReviewFinalizationError(Exception):
     code='review_final_invalid'
+class BrowserDiagnosticFinalizationError(Exception):
+    code='browser_diagnostic_final_invalid'
 class BudgetExceeded(Exception): pass
 class UncertainEffect(Exception):
     code='uncertain'
@@ -1847,7 +1851,10 @@ class Platform:
         partial_review=partial_review_context(run,task,self.agents)
         if partial_review:initial['partialDependencyReview']=partial_review
         if stage:initial['stageControl']=stage
-        diagnostic=latest_test_diagnostic(run,task)
+        # A source read used to diagnose a failed browser interaction must not
+        # erase that observation. The helper revalidates ownership, revision,
+        # actual execution and intervening mutations; it does not cache a pass.
+        diagnostic=current_browser_execution_diagnostic(run,task) or latest_test_diagnostic(run,task)
         initial['lastTestDiagnostic']=diagnostic
         task['_messages'][1]['content']=json.dumps(self.config.scrub(initial),ensure_ascii=False)
         task['_messages'][:]=[message for message in task['_messages'] if not
@@ -1939,10 +1946,15 @@ class Platform:
                 # This protected constraint is binding-specific, not permanent
                 # history. A changed target or real delivery work may invalidate it.
                 task['_messages'][:]=[m for m in task['_messages'] if not
-                    (m.get('role')=='user' and m.get('content','').startswith('最后收尾约束：审核重复恢复。'))]
+                    (m.get('role')=='user' and m.get('content','').startswith(
+                        ('最后收尾约束：审核重复恢复。','最后收尾约束：浏览器诊断恢复。')))]
                 review_checkpoint=self._review_checkpoint(run,task) if not final_only else None
+                diagnostic_checkpoint=current_browser_diagnostic_checkpoint(run,task,self.agents) if not final_only else None
                 if review_checkpoint:
                     task['_messages'].append({'role':'user','content':'最后收尾约束：审核重复恢复。'+json.dumps(review_checkpoint,ensure_ascii=False,separators=(',',':'))})
+                if diagnostic_checkpoint:
+                    task['_messages'].append({'role':'user','content':'最后收尾约束：浏览器诊断恢复。'+json.dumps(
+                        self.config.scrub(diagnostic_checkpoint),ensure_ascii=False,separators=(',',':'))})
                 if final_only:
                     if self._time_only(run):
                         if task.get('_timeFinalRevision')==task.get('revision',0) and not task.get('generationCooldown'):
@@ -1961,7 +1973,7 @@ class Platform:
                     with self.lock:
                         self._apply_generation_refresh(self._gate(channel,run_id),task,task['_messages'],exc)
                     continue
-                if exc.code!='output_truncated' or review_checkpoint:raise
+                if exc.code!='output_truncated' or review_checkpoint or diagnostic_checkpoint:raise
                 with self.lock:
                     clean=getattr(exc,'response_content','')
                     repairs=task.get('_truncationRepairs',0)
@@ -1991,6 +2003,9 @@ class Platform:
             try:
                 action=parse_object(content)
             except ProtocolError as exc:
+                if diagnostic_checkpoint:
+                    task['_messages'].append({'role':'assistant','content':self.config.scrub(content)})
+                    raise ProtocolError('浏览器诊断恢复要求一次真实 final；模型仍返回无效 JSON，未合成完成。') from exc
                 if review_checkpoint:
                     task['_messages'].append({'role':'assistant','content':self.config.scrub(content)})
                     raise ProtocolError('审核重复恢复要求一次真实 final；模型仍返回无效 JSON，未合成完成。') from exc
@@ -2039,6 +2054,14 @@ class Platform:
                 repairing_contract=action.get('type')=='final' and task.get('outputContract') is not None and task.get('_outputContractRepairs',0)<=2
                 self._persist()
             self._gate(channel,run_id)
+            if (diagnostic_checkpoint and current_browser_diagnostic_checkpoint(run,task,self.agents)
+                    and action.get('type')!='final'):
+                task['finalizationFailure']={'turn':task['turns'],'action':action.get('type'),
+                                             'code':'browser_diagnostic_final_required'}
+                self._event(run,'browser_diagnostic_finalization_rejected',task['agentId'],
+                    '重复浏览器失败在诊断后仍未改变；未执行新的非收尾动作，保留实际成果和失败。',
+                    {'taskId':task['id'],**task['finalizationFailure']})
+                raise ProtocolError('浏览器诊断恢复已要求一次真实 final；模型未交接，未执行新动作或合成完成。')
             # Recheck after generation: changed target bytes/decisions invalidate
             # the old checkpoint. This boundary never replays or invents final.
             if review_checkpoint and self._review_checkpoint(run,task) and action.get('type')!='final':
@@ -2048,6 +2071,7 @@ class Platform:
                     {'taskId':task['id'],**task['finalizationFailure']})
                 raise ProtocolError('重复有效审查恢复已要求一次 final，模型仍未交棒；未执行新动作或合成完成。')
             review_closing=bool(review_checkpoint and self._review_checkpoint(run,task))
+            diagnostic_closing=bool(diagnostic_checkpoint and current_browser_diagnostic_checkpoint(run,task,self.agents))
             current_stage=stage_control(run,task,clock_ms())
             protocol_feedback=_action_not_tool_feedback(action)
             phase_feedback=stage_action_feedback(current_stage,action)
@@ -2076,7 +2100,8 @@ class Platform:
                 continue
             recovery=readonly_failure_feedback(run,task,action) if not final_only else None
             browser_recovery=(browser_stagnation_feedback(run,task,action)
-                              or browser_failure_feedback(run,task,action)) if not final_only else None
+                              or browser_failure_feedback(run,task,action)
+                              or browser_diagnostic_recovery(run,task,action,self.agents)) if not final_only else None
             current_duplicate=(action.get('type')=='review' and action.get('verdict')=='pass'
                 and self._current_review_receipt(run,task,self._task(run,action.get('taskId'))) is not None
                 and (scope:=self._review_context(run,task)) is not None
@@ -2096,10 +2121,14 @@ class Platform:
                     clean=self.config.scrub(browser_recovery)
                     task['_messages'].append({'role':'user','content':'浏览器测试失败恢复：'+json.dumps(clean,ensure_ascii=False,separators=(',',':'))})
                     self._transcript(run,'system',json.dumps(clean,ensure_ascii=False),task['agentId'],kind='browser_failure_recovery',taskId=task['id'])
-                    self._event(run,'browser_failure_recovery',task['agentId'],'同版本浏览器断言重复失败，未重跑；保留实际诊断并要求核对测试或修复真实缺陷。',
+                    self._event(run,'browser_failure_recovery',task['agentId'],'同版本浏览器测试重复失败，未重跑；保留实际诊断并要求核对测试或修复真实缺陷。',
                                 {'taskId':task['id'],'observedCallIds':clean['observedFailures']['callIds'],
                                  **({'failureSignature':clean['failureSignature'],'recovery':clean['recovery']}
                                     if clean.get('failureSignature') else {})})
+                    if ((clean.get('recovery') or {}).get('kind')=='browser_execution_diagnostic'
+                            and clean['recovery'].get('requireFinal') is True):
+                        task['_browserDiagnosticClosing']={'proposal':copy.deepcopy(action),
+                                                           'failureSignature':clean['failureSignature']}
                     self._persist()
                 if (browser_recovery.get('recovery') or {}).get('stopTask'):
                     raise ProtocolError('同一已执行的浏览器失败在两次诊断反馈后仍未修正；第三次无进展提案未执行，停止该任务并保留真实失败与验收缺口。')
@@ -2119,12 +2148,33 @@ class Platform:
                     text=action.get('text')
                     status=action.get('status','done')
                     if not isinstance(text,str) or not text.strip() or status not in ('done','partial','failed'):
+                        if diagnostic_closing:
+                            task['finalizationFailure']={'turn':task['turns'],'action':'final','code':'browser_diagnostic_final_invalid'}
+                            raise BrowserDiagnosticFinalizationError('浏览器诊断收尾的实际 final 缺少有效 text/status；未合成完成。')
                         if review_closing:
                             # The model's malformed proposal is retained, never
                             # converted to a successful synthetic completion.
                             task['finalizationFailure']={'turn':task['turns'],'action':'final','code':'review_final_invalid'}
                             raise ReviewFinalizationError('审核收尾的实际 final 缺少有效 text/status；未合成完成。')
                         raise ProtocolError('final 必须有有效 text 和 status。')
+                    if diagnostic_closing:
+                        # This unchanged, actually failed scenario remains open.
+                        # Preserve the model's real handoff, without opening a
+                        # fresh clarification/repair loop or claiming success.
+                        validation=validate_task_output(task,run,self.artifacts,text[:18000])
+                        with self.lock:
+                            task['outputValidation']=validation
+                            task['closureReason']='browser_diagnostic_unresolved'
+                            task['error']={'code':'browser_execution_unresolved',
+                                           'message':'当前版本的真实浏览器失败尚未解决；保留实际成果与未完成说明。'}
+                            self._event(run,'browser_diagnostic_closed',task['agentId'],task['error']['message'],
+                                {'taskId':task['id'],'failureSignature':diagnostic_checkpoint['failureSignature'],
+                                 'observedCallIds':diagnostic_checkpoint['observedFailures']['callIds'],
+                                 'proposedStatus':status,'status':'partial' if status=='done' else status,
+                                 'outputValidation':validation})
+                            self._persist()
+                        return {'text':text[:18000],'status':'partial' if status=='done' else status,
+                                'reflection':action.get('reflection'),'closureReason':'browser_diagnostic_unresolved'}
                     if status=='done' and review_closing and self._review_context(run,task)['remainingTargetIds']:
                         task['error']={'code':'review_incomplete','message':'尚有当前版本未完成的独立审查，不能把重复审查计为完成。'}
                         return {'text':text[:18000],'status':'partial','reflection':action.get('reflection')}
@@ -2746,6 +2796,13 @@ class Platform:
                 diagnostic={'reviewerTaskId':reviewer['id'],'targetRevision':target['revision'],
                             'artifactHashes':copy.deepcopy(snapshot['artifactHashes']),
                             'lastTest':latest_test_diagnostic(run,reviewer),'observedFailures':failure_references(run,reviewer)}
+                browser_diagnostic=current_browser_execution_diagnostic(run,reviewer)
+                if browser_diagnostic:
+                    observed=next((c for c in run['calls'] if c.get('id')==browser_diagnostic.get('callId')),None)
+                    if observed and observed.get('reviewTargets',{}).get(target['id'])==snapshot:
+                        # Only the already authorized target receives the
+                        # matching actual diagnostic, even after QA reads code.
+                        diagnostic['lastTest']=browser_diagnostic
                 target['reworkDiagnostics']=diagnostic
                 validation['diagnosticEvidence']=copy.deepcopy(diagnostic)
                 target.setdefault('validationHistory',[]).append(validation)

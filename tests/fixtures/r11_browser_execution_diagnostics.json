@@ -1,0 +1,1776 @@
+{
+  "provenance": {
+    "description": "Immutable actual R11 tool records. Outer bookkeeping/stdout/screenshot paths removed; args, executed steps/assertions/source manifests/errors preserved. Minimal run/task represents the running prefix before third rejected proposal, not a new execution.",
+    "sources": [
+      {
+        "case": "software-1",
+        "runId": "run-2848772a96c94d96",
+        "exportSha256": "e3a97becf8570446e2e1004da892de069850988a2ccffd6733c823fd396c12c7",
+        "rawCanonicalCallSha256": {
+          "call-1eed6909d28644f7": "483cb88119fcb079d596e604f487c3f9566083c46c7dd9544752a8c03e3d0d39",
+          "call-bcb5635996534806": "b8a26ee8b8b2f4d92f5879aea4bd8fd5d2b696acaab71b30ffce8e7942070f76"
+        }
+      },
+      {
+        "case": "software-2",
+        "runId": "run-029c945e92a3417e",
+        "exportSha256": "9668658d533f9e8358f97b5b38948a1845719d3fb3facdcce2bfe142c43475f5",
+        "rawCanonicalCallSha256": {
+          "call-0daf9140bcbd4209": "69bbb16949857b47f84ee6f62e1f0b51e26a1a1b84f54fbc0fd11539f23e1b27",
+          "call-ee2ecc12a6bf448d": "2466e2f99d45ab328f543107942ea22c0dfda1cf502671fa793b029749adbd82"
+        }
+      }
+    ],
+    "knownSchemaFailureCanonicalRawSha256": "7e85a6ad4e887406689cddaf1e79f1dcea32a52497e7dfd27e84c610ff94b34a",
+    "unrelatedSuccessCanonicalRawSha256": "95f8e2e09c01b970435b055f658222bb898b371f48ca0c2f547b2aa7b88a68b3"
+  },
+  "page_errors": {
+    "run": {
+      "id": "run-2848772a96c94d96",
+      "status": "running",
+      "calls": [
+        {
+          "id": "call-1eed6909d28644f7",
+          "agentId": "qa",
+          "taskId": "task-e6fed4c6076a435e",
+          "revision": 0,
+          "tool": "code.test",
+          "status": "failed",
+          "args": {
+            "checks": [
+              {
+                "action": "click",
+                "selector": "#gridBody tr:nth-child(4) .cell.free[data-slot=\"2\"]"
+              },
+              {
+                "action": "fill",
+                "selector": "#bookName",
+                "value": "Frank"
+              },
+              {
+                "action": "click",
+                "selector": "#bookConfirm"
+              },
+              {
+                "action": "assert_text",
+                "selector": "#gridBody tr:nth-child(4) .cell.booked[data-slot=\"2\"]",
+                "text": "Frank"
+              },
+              {
+                "action": "storage_write_denied",
+                "enabled": true,
+                "key": "mrb.bookings.v1"
+              },
+              {
+                "action": "click",
+                "selector": "#gridBody tr:nth-child(5) .cell.free[data-slot=\"2\"]"
+              },
+              {
+                "action": "fill",
+                "selector": "#bookName",
+                "value": "Grace"
+              },
+              {
+                "action": "click",
+                "selector": "#bookConfirm"
+              },
+              {
+                "action": "storage_write_denied",
+                "enabled": false,
+                "key": "mrb.bookings.v1"
+              },
+              {
+                "action": "reload"
+              },
+              {
+                "action": "assert_text",
+                "selector": "#gridBody tr:nth-child(4) .cell.booked[data-slot=\"2\"]",
+                "text": "Frank"
+              },
+              {
+                "action": "assert_text",
+                "selector": "#gridBody tr:nth-child(5) .cell.free[data-slot=\"2\"]",
+                "text": "Free"
+              }
+            ],
+            "language": "browser",
+            "path": "imports/artifact-f1d7685dfb9546c88f27d813e9a1bb42/index.html",
+            "resources": {
+              "app.js": "imports/artifact-a307ad0e426345fcb758ed371a103673/app.js",
+              "styles.css": "imports/artifact-2fa2b0d74f804b07be20e3d19ab7be8e/styles.css"
+            },
+            "timeout": 20
+          },
+          "result": {
+            "browser": {
+              "assertionCount": 3,
+              "assertions": [
+                {
+                  "action": "assert_text",
+                  "actual": "Frank",
+                  "expected": "Frank",
+                  "pageId": "main",
+                  "passed": true,
+                  "selector": "#gridBody tr:nth-child(4) .cell.booked[data-slot=\"2\"]"
+                },
+                {
+                  "action": "assert_text",
+                  "actual": "Frank",
+                  "expected": "Frank",
+                  "pageId": "main",
+                  "passed": true,
+                  "selector": "#gridBody tr:nth-child(4) .cell.booked[data-slot=\"2\"]"
+                },
+                {
+                  "action": "assert_text",
+                  "actual": "Free",
+                  "expected": "Free",
+                  "pageId": "main",
+                  "passed": true,
+                  "selector": "#gridBody tr:nth-child(5) .cell.free[data-slot=\"2\"]"
+                }
+              ],
+              "assertionsPassed": 3,
+              "blockedRequests": [],
+              "dialogCoverageComplete": true,
+              "dialogResponses": [],
+              "engine": "chromium",
+              "entry": {
+                "path": "imports/artifact-f1d7685dfb9546c88f27d813e9a1bb42/index.html",
+                "sha256": "1d3ae235b1a80dd20ad51a0f6485916e0102f2f5e1d5424386878f3e9221bfb6"
+              },
+              "executed": true,
+              "faultCoverageComplete": true,
+              "faults": [
+                {
+                  "blockedKeys": [
+                    "mrb.bookings.v1"
+                  ],
+                  "blockedWrites": 1,
+                  "enabledAtStep": 5,
+                  "id": "fault-1",
+                  "key": "mrb.bookings.v1",
+                  "operations": [
+                    {
+                      "key": "mrb.bookings.v1",
+                      "operation": "setItem"
+                    }
+                  ],
+                  "pageId": "main",
+                  "restoredAtStep": 9
+                }
+              ],
+              "httpErrors": [],
+              "ok": false,
+              "pageErrors": [
+                {
+                  "message": "Independent test denied this localStorage write",
+                  "pageId": "main"
+                }
+              ],
+              "pages": [
+                {
+                  "entryPath": "imports/artifact-f1d7685dfb9546c88f27d813e9a1bb42/index.html",
+                  "pageId": "main"
+                }
+              ],
+              "readFaultCoverageComplete": true,
+              "readFaults": [],
+              "sourceManifest": [
+                {
+                  "path": "imports/artifact-f1d7685dfb9546c88f27d813e9a1bb42/index.html",
+                  "sha256": "1d3ae235b1a80dd20ad51a0f6485916e0102f2f5e1d5424386878f3e9221bfb6"
+                },
+                {
+                  "path": "imports/artifact-2fa2b0d74f804b07be20e3d19ab7be8e/styles.css",
+                  "sha256": "4603f3ac51f8f1e97919a75110e4750671c5712a15b30fd62490e51d20780235"
+                },
+                {
+                  "path": "imports/artifact-a307ad0e426345fcb758ed371a103673/app.js",
+                  "sha256": "2f8706cea1db98a349d71a6fe2a2b44f8ecc464e384ff4bfac03b562a20c92c0"
+                }
+              ],
+              "steps": [
+                {
+                  "action": "click",
+                  "ok": true,
+                  "pageId": "main",
+                  "selector": "#gridBody tr:nth-child(4) .cell.free[data-slot=\"2\"]"
+                },
+                {
+                  "action": "fill",
+                  "ok": true,
+                  "pageId": "main",
+                  "selector": "#bookName"
+                },
+                {
+                  "action": "click",
+                  "ok": true,
+                  "pageId": "main",
+                  "selector": "#bookConfirm"
+                },
+                {
+                  "action": "assert_text",
+                  "actual": "Frank",
+                  "expected": "Frank",
+                  "ok": true,
+                  "pageId": "main",
+                  "passed": true,
+                  "selector": "#gridBody tr:nth-child(4) .cell.booked[data-slot=\"2\"]"
+                },
+                {
+                  "action": "storage_write_denied",
+                  "enabled": true,
+                  "key": "mrb.bookings.v1",
+                  "ok": true,
+                  "pageId": "main"
+                },
+                {
+                  "action": "click",
+                  "ok": true,
+                  "pageId": "main",
+                  "selector": "#gridBody tr:nth-child(5) .cell.free[data-slot=\"2\"]"
+                },
+                {
+                  "action": "fill",
+                  "ok": true,
+                  "pageId": "main",
+                  "selector": "#bookName"
+                },
+                {
+                  "action": "click",
+                  "ok": true,
+                  "pageId": "main",
+                  "selector": "#bookConfirm"
+                },
+                {
+                  "action": "storage_write_denied",
+                  "enabled": false,
+                  "key": "mrb.bookings.v1",
+                  "ok": true,
+                  "pageId": "main"
+                },
+                {
+                  "action": "reload",
+                  "ok": true,
+                  "pageId": "main"
+                },
+                {
+                  "action": "assert_text",
+                  "actual": "Frank",
+                  "expected": "Frank",
+                  "ok": true,
+                  "pageId": "main",
+                  "passed": true,
+                  "selector": "#gridBody tr:nth-child(4) .cell.booked[data-slot=\"2\"]"
+                },
+                {
+                  "action": "assert_text",
+                  "actual": "Free",
+                  "expected": "Free",
+                  "ok": true,
+                  "pageId": "main",
+                  "passed": true,
+                  "selector": "#gridBody tr:nth-child(5) .cell.free[data-slot=\"2\"]"
+                }
+              ],
+              "testedFiles": [
+                {
+                  "path": "imports/artifact-f1d7685dfb9546c88f27d813e9a1bb42/index.html",
+                  "sha256": "1d3ae235b1a80dd20ad51a0f6485916e0102f2f5e1d5424386878f3e9221bfb6"
+                },
+                {
+                  "path": "imports/artifact-2fa2b0d74f804b07be20e3d19ab7be8e/styles.css",
+                  "sha256": "4603f3ac51f8f1e97919a75110e4750671c5712a15b30fd62490e51d20780235"
+                },
+                {
+                  "path": "imports/artifact-a307ad0e426345fcb758ed371a103673/app.js",
+                  "sha256": "2f8706cea1db98a349d71a6fe2a2b44f8ecc464e384ff4bfac03b562a20c92c0"
+                }
+              ]
+            },
+            "error": "Browser assertions, page errors, or evidence capture failed.",
+            "exitCode": 1,
+            "isolation": {
+              "containerId": "evo-b0cc2864810b41a1b090262f35ebb3c1",
+              "hostFallback": false,
+              "imports": "explicit_read_only",
+              "namespaceId": "ns-9cb947005c50ffa453f1",
+              "network": "none",
+              "ownerAgentId": "qa",
+              "resourceScope": "per_invocation",
+              "runId": "run-2848772a96c94d96",
+              "workspace": "private_per_agent_run"
+            },
+            "ok": false,
+            "outputLimitExceeded": false,
+            "runtime": "browser",
+            "test": true,
+            "timedOut": false
+          },
+          "reviewTargets": {
+            "task-80802a06d35e4536": {
+              "artifactHashes": {
+                "artifact-2fa2b0d74f804b07be20e3d19ab7be8e": "4603f3ac51f8f1e97919a75110e4750671c5712a15b30fd62490e51d20780235",
+                "artifact-a307ad0e426345fcb758ed371a103673": "2f8706cea1db98a349d71a6fe2a2b44f8ecc464e384ff4bfac03b562a20c92c0",
+                "artifact-e74fb639c59949aa863bd5f8577cd337": "d5bbb75f6696f4540c75e6e9b1eb82d799d4df8c64cede22822fdde1dc513369",
+                "artifact-f1d7685dfb9546c88f27d813e9a1bb42": "1d3ae235b1a80dd20ad51a0f6485916e0102f2f5e1d5424386878f3e9221bfb6"
+              },
+              "targetRevision": 0
+            },
+            "task-d563126142c44fee": {
+              "artifactHashes": {},
+              "targetRevision": 0
+            },
+            "task-de8d7396423a48f1": {
+              "artifactHashes": {
+                "artifact-4e8d66f9bc6a4c228d04f4b8df77677e": "7db68cad0b05cc7865269889d14925e4ea4ea68e4887b950f25b77d03832b749"
+              },
+              "targetRevision": 0
+            }
+          }
+        },
+        {
+          "id": "call-bcb5635996534806",
+          "agentId": "qa",
+          "taskId": "task-e6fed4c6076a435e",
+          "revision": 0,
+          "tool": "code.test",
+          "status": "failed",
+          "args": {
+            "checks": [
+              {
+                "action": "click",
+                "selector": "#gridBody tr:nth-child(4) .cell.free[data-slot=\"2\"]"
+              },
+              {
+                "action": "fill",
+                "selector": "#bookName",
+                "value": "Frank"
+              },
+              {
+                "action": "click",
+                "selector": "#bookConfirm"
+              },
+              {
+                "action": "assert_text",
+                "selector": "#gridBody tr:nth-child(4) .cell.booked[data-slot=\"2\"]",
+                "text": "Frank"
+              },
+              {
+                "action": "storage_write_denied",
+                "enabled": true,
+                "key": "mrb.bookings.v1"
+              },
+              {
+                "action": "click",
+                "selector": "#gridBody tr:nth-child(5) .cell.free[data-slot=\"2\"]"
+              },
+              {
+                "action": "fill",
+                "selector": "#bookName",
+                "value": "Grace"
+              },
+              {
+                "action": "click",
+                "selector": "#bookConfirm"
+              },
+              {
+                "action": "storage_write_denied",
+                "enabled": false,
+                "key": "mrb.bookings.v1"
+              },
+              {
+                "action": "reload"
+              },
+              {
+                "action": "assert_text",
+                "selector": "#gridBody tr:nth-child(4) .cell.booked[data-slot=\"2\"]",
+                "text": "Frank"
+              },
+              {
+                "action": "assert_text",
+                "selector": "#gridBody tr:nth-child(5) .cell.free[data-slot=\"2\"]",
+                "text": "Free"
+              }
+            ],
+            "language": "browser",
+            "path": "imports/artifact-f1d7685dfb9546c88f27d813e9a1bb42/index.html",
+            "resources": {
+              "app.js": "imports/artifact-a307ad0e426345fcb758ed371a103673/app.js",
+              "styles.css": "imports/artifact-2fa2b0d74f804b07be20e3d19ab7be8e/styles.css"
+            },
+            "timeout": 20
+          },
+          "result": {
+            "browser": {
+              "assertionCount": 3,
+              "assertions": [
+                {
+                  "action": "assert_text",
+                  "actual": "Frank",
+                  "expected": "Frank",
+                  "pageId": "main",
+                  "passed": true,
+                  "selector": "#gridBody tr:nth-child(4) .cell.booked[data-slot=\"2\"]"
+                },
+                {
+                  "action": "assert_text",
+                  "actual": "Frank",
+                  "expected": "Frank",
+                  "pageId": "main",
+                  "passed": true,
+                  "selector": "#gridBody tr:nth-child(4) .cell.booked[data-slot=\"2\"]"
+                },
+                {
+                  "action": "assert_text",
+                  "actual": "Free",
+                  "expected": "Free",
+                  "pageId": "main",
+                  "passed": true,
+                  "selector": "#gridBody tr:nth-child(5) .cell.free[data-slot=\"2\"]"
+                }
+              ],
+              "assertionsPassed": 3,
+              "blockedRequests": [],
+              "dialogCoverageComplete": true,
+              "dialogResponses": [],
+              "engine": "chromium",
+              "entry": {
+                "path": "imports/artifact-f1d7685dfb9546c88f27d813e9a1bb42/index.html",
+                "sha256": "1d3ae235b1a80dd20ad51a0f6485916e0102f2f5e1d5424386878f3e9221bfb6"
+              },
+              "executed": true,
+              "faultCoverageComplete": true,
+              "faults": [
+                {
+                  "blockedKeys": [
+                    "mrb.bookings.v1"
+                  ],
+                  "blockedWrites": 1,
+                  "enabledAtStep": 5,
+                  "id": "fault-1",
+                  "key": "mrb.bookings.v1",
+                  "operations": [
+                    {
+                      "key": "mrb.bookings.v1",
+                      "operation": "setItem"
+                    }
+                  ],
+                  "pageId": "main",
+                  "restoredAtStep": 9
+                }
+              ],
+              "httpErrors": [],
+              "ok": false,
+              "pageErrors": [
+                {
+                  "message": "Independent test denied this localStorage write",
+                  "pageId": "main"
+                }
+              ],
+              "pages": [
+                {
+                  "entryPath": "imports/artifact-f1d7685dfb9546c88f27d813e9a1bb42/index.html",
+                  "pageId": "main"
+                }
+              ],
+              "readFaultCoverageComplete": true,
+              "readFaults": [],
+              "sourceManifest": [
+                {
+                  "path": "imports/artifact-f1d7685dfb9546c88f27d813e9a1bb42/index.html",
+                  "sha256": "1d3ae235b1a80dd20ad51a0f6485916e0102f2f5e1d5424386878f3e9221bfb6"
+                },
+                {
+                  "path": "imports/artifact-2fa2b0d74f804b07be20e3d19ab7be8e/styles.css",
+                  "sha256": "4603f3ac51f8f1e97919a75110e4750671c5712a15b30fd62490e51d20780235"
+                },
+                {
+                  "path": "imports/artifact-a307ad0e426345fcb758ed371a103673/app.js",
+                  "sha256": "2f8706cea1db98a349d71a6fe2a2b44f8ecc464e384ff4bfac03b562a20c92c0"
+                }
+              ],
+              "steps": [
+                {
+                  "action": "click",
+                  "ok": true,
+                  "pageId": "main",
+                  "selector": "#gridBody tr:nth-child(4) .cell.free[data-slot=\"2\"]"
+                },
+                {
+                  "action": "fill",
+                  "ok": true,
+                  "pageId": "main",
+                  "selector": "#bookName"
+                },
+                {
+                  "action": "click",
+                  "ok": true,
+                  "pageId": "main",
+                  "selector": "#bookConfirm"
+                },
+                {
+                  "action": "assert_text",
+                  "actual": "Frank",
+                  "expected": "Frank",
+                  "ok": true,
+                  "pageId": "main",
+                  "passed": true,
+                  "selector": "#gridBody tr:nth-child(4) .cell.booked[data-slot=\"2\"]"
+                },
+                {
+                  "action": "storage_write_denied",
+                  "enabled": true,
+                  "key": "mrb.bookings.v1",
+                  "ok": true,
+                  "pageId": "main"
+                },
+                {
+                  "action": "click",
+                  "ok": true,
+                  "pageId": "main",
+                  "selector": "#gridBody tr:nth-child(5) .cell.free[data-slot=\"2\"]"
+                },
+                {
+                  "action": "fill",
+                  "ok": true,
+                  "pageId": "main",
+                  "selector": "#bookName"
+                },
+                {
+                  "action": "click",
+                  "ok": true,
+                  "pageId": "main",
+                  "selector": "#bookConfirm"
+                },
+                {
+                  "action": "storage_write_denied",
+                  "enabled": false,
+                  "key": "mrb.bookings.v1",
+                  "ok": true,
+                  "pageId": "main"
+                },
+                {
+                  "action": "reload",
+                  "ok": true,
+                  "pageId": "main"
+                },
+                {
+                  "action": "assert_text",
+                  "actual": "Frank",
+                  "expected": "Frank",
+                  "ok": true,
+                  "pageId": "main",
+                  "passed": true,
+                  "selector": "#gridBody tr:nth-child(4) .cell.booked[data-slot=\"2\"]"
+                },
+                {
+                  "action": "assert_text",
+                  "actual": "Free",
+                  "expected": "Free",
+                  "ok": true,
+                  "pageId": "main",
+                  "passed": true,
+                  "selector": "#gridBody tr:nth-child(5) .cell.free[data-slot=\"2\"]"
+                }
+              ],
+              "testedFiles": [
+                {
+                  "path": "imports/artifact-f1d7685dfb9546c88f27d813e9a1bb42/index.html",
+                  "sha256": "1d3ae235b1a80dd20ad51a0f6485916e0102f2f5e1d5424386878f3e9221bfb6"
+                },
+                {
+                  "path": "imports/artifact-2fa2b0d74f804b07be20e3d19ab7be8e/styles.css",
+                  "sha256": "4603f3ac51f8f1e97919a75110e4750671c5712a15b30fd62490e51d20780235"
+                },
+                {
+                  "path": "imports/artifact-a307ad0e426345fcb758ed371a103673/app.js",
+                  "sha256": "2f8706cea1db98a349d71a6fe2a2b44f8ecc464e384ff4bfac03b562a20c92c0"
+                }
+              ]
+            },
+            "error": "Browser assertions, page errors, or evidence capture failed.",
+            "exitCode": 1,
+            "isolation": {
+              "containerId": "evo-dbf1994d4a7446cebe6272a1c1233ea3",
+              "hostFallback": false,
+              "imports": "explicit_read_only",
+              "namespaceId": "ns-9cb947005c50ffa453f1",
+              "network": "none",
+              "ownerAgentId": "qa",
+              "resourceScope": "per_invocation",
+              "runId": "run-2848772a96c94d96",
+              "workspace": "private_per_agent_run"
+            },
+            "ok": false,
+            "outputLimitExceeded": false,
+            "runtime": "browser",
+            "test": true,
+            "timedOut": false
+          },
+          "reviewTargets": {
+            "task-80802a06d35e4536": {
+              "artifactHashes": {
+                "artifact-2fa2b0d74f804b07be20e3d19ab7be8e": "4603f3ac51f8f1e97919a75110e4750671c5712a15b30fd62490e51d20780235",
+                "artifact-a307ad0e426345fcb758ed371a103673": "2f8706cea1db98a349d71a6fe2a2b44f8ecc464e384ff4bfac03b562a20c92c0",
+                "artifact-e74fb639c59949aa863bd5f8577cd337": "d5bbb75f6696f4540c75e6e9b1eb82d799d4df8c64cede22822fdde1dc513369",
+                "artifact-f1d7685dfb9546c88f27d813e9a1bb42": "1d3ae235b1a80dd20ad51a0f6485916e0102f2f5e1d5424386878f3e9221bfb6"
+              },
+              "targetRevision": 0
+            },
+            "task-d563126142c44fee": {
+              "artifactHashes": {},
+              "targetRevision": 0
+            },
+            "task-de8d7396423a48f1": {
+              "artifactHashes": {
+                "artifact-4e8d66f9bc6a4c228d04f4b8df77677e": "7db68cad0b05cc7865269889d14925e4ea4ea68e4887b950f25b77d03832b749"
+              },
+              "targetRevision": 0
+            }
+          }
+        }
+      ],
+      "steps": [
+        {
+          "id": "task-e6fed4c6076a435e",
+          "agentId": "qa",
+          "revision": 0,
+          "status": "running"
+        },
+        {
+          "id": "task-d563126142c44fee",
+          "agentId": "lead",
+          "revision": 0,
+          "outputs": []
+        },
+        {
+          "id": "task-de8d7396423a48f1",
+          "agentId": "lead",
+          "revision": 0,
+          "outputs": [
+            "artifact-4e8d66f9bc6a4c228d04f4b8df77677e"
+          ]
+        },
+        {
+          "id": "task-80802a06d35e4536",
+          "agentId": "dev",
+          "revision": 0,
+          "outputs": [
+            "artifact-f1d7685dfb9546c88f27d813e9a1bb42",
+            "artifact-a307ad0e426345fcb758ed371a103673",
+            "artifact-2fa2b0d74f804b07be20e3d19ab7be8e",
+            "artifact-e74fb639c59949aa863bd5f8577cd337"
+          ]
+        }
+      ],
+      "events": [],
+      "transcript": [],
+      "artifacts": [
+        {
+          "id": "artifact-4e8d66f9bc6a4c228d04f4b8df77677e",
+          "runId": "run-2848772a96c94d96",
+          "taskId": "task-de8d7396423a48f1",
+          "sha256": "7db68cad0b05cc7865269889d14925e4ea4ea68e4887b950f25b77d03832b749",
+          "ownerAgentId": "lead"
+        },
+        {
+          "id": "artifact-f1d7685dfb9546c88f27d813e9a1bb42",
+          "runId": "run-2848772a96c94d96",
+          "taskId": "task-80802a06d35e4536",
+          "sha256": "1d3ae235b1a80dd20ad51a0f6485916e0102f2f5e1d5424386878f3e9221bfb6",
+          "ownerAgentId": "dev"
+        },
+        {
+          "id": "artifact-a307ad0e426345fcb758ed371a103673",
+          "runId": "run-2848772a96c94d96",
+          "taskId": "task-80802a06d35e4536",
+          "sha256": "2f8706cea1db98a349d71a6fe2a2b44f8ecc464e384ff4bfac03b562a20c92c0",
+          "ownerAgentId": "dev"
+        },
+        {
+          "id": "artifact-2fa2b0d74f804b07be20e3d19ab7be8e",
+          "runId": "run-2848772a96c94d96",
+          "taskId": "task-80802a06d35e4536",
+          "sha256": "4603f3ac51f8f1e97919a75110e4750671c5712a15b30fd62490e51d20780235",
+          "ownerAgentId": "dev"
+        },
+        {
+          "id": "artifact-e74fb639c59949aa863bd5f8577cd337",
+          "runId": "run-2848772a96c94d96",
+          "taskId": "task-80802a06d35e4536",
+          "sha256": "d5bbb75f6696f4540c75e6e9b1eb82d799d4df8c64cede22822fdde1dc513369",
+          "ownerAgentId": "dev"
+        }
+      ]
+    },
+    "task": {
+      "id": "task-e6fed4c6076a435e",
+      "agentId": "qa",
+      "revision": 0,
+      "status": "running"
+    },
+    "action": {
+      "type": "tool",
+      "name": "code.test",
+      "args": {
+        "checks": [
+          {
+            "action": "click",
+            "selector": "#gridBody tr:nth-child(4) .cell.free[data-slot=\"2\"]"
+          },
+          {
+            "action": "fill",
+            "selector": "#bookName",
+            "value": "Frank"
+          },
+          {
+            "action": "click",
+            "selector": "#bookConfirm"
+          },
+          {
+            "action": "assert_text",
+            "selector": "#gridBody tr:nth-child(4) .cell.booked[data-slot=\"2\"]",
+            "text": "Frank"
+          },
+          {
+            "action": "storage_write_denied",
+            "enabled": true,
+            "key": "mrb.bookings.v1"
+          },
+          {
+            "action": "click",
+            "selector": "#gridBody tr:nth-child(5) .cell.free[data-slot=\"2\"]"
+          },
+          {
+            "action": "fill",
+            "selector": "#bookName",
+            "value": "Grace"
+          },
+          {
+            "action": "click",
+            "selector": "#bookConfirm"
+          },
+          {
+            "action": "storage_write_denied",
+            "enabled": false,
+            "key": "mrb.bookings.v1"
+          },
+          {
+            "action": "reload"
+          },
+          {
+            "action": "assert_text",
+            "selector": "#gridBody tr:nth-child(4) .cell.booked[data-slot=\"2\"]",
+            "text": "Frank"
+          },
+          {
+            "action": "assert_text",
+            "selector": "#gridBody tr:nth-child(5) .cell.free[data-slot=\"2\"]",
+            "text": "Free"
+          }
+        ],
+        "language": "browser",
+        "path": "imports/artifact-f1d7685dfb9546c88f27d813e9a1bb42/index.html",
+        "resources": {
+          "app.js": "imports/artifact-a307ad0e426345fcb758ed371a103673/app.js",
+          "styles.css": "imports/artifact-2fa2b0d74f804b07be20e3d19ab7be8e/styles.css"
+        },
+        "timeout": 20
+      }
+    }
+  },
+  "step_execution_error": {
+    "run": {
+      "id": "run-029c945e92a3417e",
+      "status": "running",
+      "calls": [
+        {
+          "id": "call-0daf9140bcbd4209",
+          "agentId": "dev",
+          "taskId": "task-b3755f72474a452a",
+          "revision": 0,
+          "tool": "code.test",
+          "status": "failed",
+          "args": {
+            "checks": [
+              {
+                "action": "assert_count",
+                "count": 120,
+                "selector": "#gridBody .cell.free"
+              },
+              {
+                "action": "click",
+                "selector": "#gridBody tr:nth-child(1) td:nth-child(1) .cell.free"
+              },
+              {
+                "action": "fill",
+                "selector": "#bookName",
+                "value": "Alice"
+              },
+              {
+                "action": "click",
+                "selector": "#bookConfirm"
+              },
+              {
+                "action": "assert_text",
+                "selector": "#gridBody tr:nth-child(1) td:nth-child(2) .cell.booked",
+                "text": "Alice"
+              },
+              {
+                "action": "click",
+                "selector": "#dashboardBtn"
+              },
+              {
+                "action": "assert_visible",
+                "selector": "#dashboardView"
+              },
+              {
+                "action": "assert_text",
+                "selector": "#dashCards .card:nth-child(1) .v",
+                "text": "1"
+              },
+              {
+                "action": "assert_text",
+                "selector": "#roomTableBody tr:nth-child(1) td:nth-child(2)",
+                "text": "1"
+              },
+              {
+                "action": "click",
+                "selector": "#backBtn"
+              },
+              {
+                "action": "assert_visible",
+                "selector": "#bookingView"
+              },
+              {
+                "action": "click",
+                "selector": "#gridBody tr:nth-child(1) td:nth-child(2) .cell.booked"
+              },
+              {
+                "action": "fill",
+                "selector": "#cancelName",
+                "value": "Alice"
+              },
+              {
+                "action": "click",
+                "selector": "#cancelConfirm"
+              },
+              {
+                "action": "click",
+                "selector": "#dashboardBtn"
+              },
+              {
+                "action": "assert_text",
+                "selector": "#dashCards .card:nth-child(3) .v",
+                "text": "1"
+              },
+              {
+                "action": "assert_text",
+                "selector": "#dashCards .card:nth-child(4) .v",
+                "text": "50.0%"
+              }
+            ],
+            "language": "browser",
+            "path": "app/index.html",
+            "resources": {
+              "app.js": "app/app.js",
+              "dashboard-metrics.js": "app/dashboard-metrics.js",
+              "dashboard-ui.js": "app/dashboard-ui.js",
+              "dashboard.js": "app/dashboard.js",
+              "styles.css": "app/styles.css"
+            },
+            "timeout": 20
+          },
+          "result": {
+            "browser": {
+              "assertionCount": 1,
+              "assertions": [
+                {
+                  "action": "assert_count",
+                  "actual": 120,
+                  "expected": 120,
+                  "pageId": "main",
+                  "passed": true,
+                  "selector": "#gridBody .cell.free"
+                }
+              ],
+              "assertionsPassed": 1,
+              "blockedRequests": [],
+              "dialogCoverageComplete": true,
+              "dialogResponses": [],
+              "engine": "chromium",
+              "entry": {
+                "path": "app/index.html",
+                "sha256": "d19a68cc8fbb51b620cb55ae1804d407a9f11045ffbf0d75ca852c249412ac06"
+              },
+              "error": "Browser step failed: locator.click: Timeout 2500ms exceeded.\nCall log:\n  - waiting for locator('#gridBody tr:nth-child(1) td:nth-child(1) .cell.free')\n",
+              "executed": true,
+              "failureObservation": {
+                "formValues": [
+                  {
+                    "id": "dateInput",
+                    "name": "",
+                    "type": "date",
+                    "value": "2026-11-16"
+                  }
+                ],
+                "formValuesOmitted": 0,
+                "interpretation": "Untrusted observed state only; does not determine whether the test or product is wrong.",
+                "matchCount": 0,
+                "messagesOmitted": 0,
+                "pageId": "main",
+                "runtimeUTC": "2026-11-16T07:37:05.673Z",
+                "source": "actual failing-page DOM in this test",
+                "stepIndex": 1,
+                "textLimitCharacters": 120,
+                "timezone": "UTC",
+                "valuesAreBoundedPreviews": true,
+                "visibleMessages": []
+              },
+              "faultCoverageComplete": true,
+              "faults": [],
+              "httpErrors": [],
+              "ok": false,
+              "pageErrors": [],
+              "pages": [
+                {
+                  "entryPath": "app/index.html",
+                  "pageId": "main"
+                }
+              ],
+              "readFaultCoverageComplete": true,
+              "readFaults": [],
+              "sourceManifest": [
+                {
+                  "path": "app/index.html",
+                  "sha256": "d19a68cc8fbb51b620cb55ae1804d407a9f11045ffbf0d75ca852c249412ac06"
+                },
+                {
+                  "path": "app/app.js",
+                  "sha256": "8ad918c139b00a28a2272a42f8b7cd7945005f1f48a518918b7523c3435298c1"
+                },
+                {
+                  "path": "app/dashboard.js",
+                  "sha256": "cdfcfaa5262775f7b86a2ed55ede6246260c4c58eb5c21e38843504cff7b4c08"
+                },
+                {
+                  "path": "app/dashboard-metrics.js",
+                  "sha256": "d7a82308c52b7602d6d821d4923130fc6d7d90465d1869f0130c381d3f384bd9"
+                },
+                {
+                  "path": "app/dashboard-ui.js",
+                  "sha256": "f10814aad5bcfe6cd1004ae6928dd1eccec5f7ca76d06468ea7bde43dc36588c"
+                },
+                {
+                  "path": "app/styles.css",
+                  "sha256": "2d179642fbbfca60968640ebf642ebc1963cc4e061f9d27d6b0116ed32e66ae7"
+                }
+              ],
+              "steps": [
+                {
+                  "action": "assert_count",
+                  "actual": 120,
+                  "expected": 120,
+                  "ok": true,
+                  "pageId": "main",
+                  "passed": true,
+                  "selector": "#gridBody .cell.free"
+                },
+                {
+                  "action": "click",
+                  "error": "locator.click: Timeout 2500ms exceeded.\nCall log:\n  - waiting for locator('#gridBody tr:nth-child(1) td:nth-child(1) .cell.free')\n",
+                  "ok": false,
+                  "pageId": "main",
+                  "selector": "#gridBody tr:nth-child(1) td:nth-child(1) .cell.free"
+                }
+              ],
+              "testedFiles": [
+                {
+                  "path": "app/index.html",
+                  "sha256": "d19a68cc8fbb51b620cb55ae1804d407a9f11045ffbf0d75ca852c249412ac06"
+                },
+                {
+                  "path": "app/styles.css",
+                  "sha256": "2d179642fbbfca60968640ebf642ebc1963cc4e061f9d27d6b0116ed32e66ae7"
+                },
+                {
+                  "path": "app/app.js",
+                  "sha256": "8ad918c139b00a28a2272a42f8b7cd7945005f1f48a518918b7523c3435298c1"
+                }
+              ]
+            },
+            "error": "Browser step failed: locator.click: Timeout 2500ms exceeded.\nCall log:\n  - waiting for locator('#gridBody tr:nth-child(1) td:nth-child(1) .cell.free')\n",
+            "exitCode": 1,
+            "isolation": {
+              "containerId": "evo-eaa0f1ae829c4f0a94cf42a213ea8b39",
+              "hostFallback": false,
+              "imports": "explicit_read_only",
+              "namespaceId": "ns-9cb947005c50ffa453f1",
+              "network": "none",
+              "ownerAgentId": "dev",
+              "resourceScope": "per_invocation",
+              "runId": "run-029c945e92a3417e",
+              "workspace": "private_per_agent_run"
+            },
+            "ok": false,
+            "outputLimitExceeded": false,
+            "runtime": "browser",
+            "test": true,
+            "timedOut": false
+          }
+        },
+        {
+          "id": "call-ee2ecc12a6bf448d",
+          "agentId": "dev",
+          "taskId": "task-b3755f72474a452a",
+          "revision": 0,
+          "tool": "code.test",
+          "status": "failed",
+          "args": {
+            "checks": [
+              {
+                "action": "assert_count",
+                "count": 120,
+                "selector": "#gridBody .cell.free"
+              },
+              {
+                "action": "click",
+                "selector": "#gridBody tr:nth-child(1) td:nth-child(1) .cell.free"
+              },
+              {
+                "action": "fill",
+                "selector": "#bookName",
+                "value": "Alice"
+              },
+              {
+                "action": "click",
+                "selector": "#bookConfirm"
+              },
+              {
+                "action": "assert_text",
+                "selector": "#gridBody tr:nth-child(1) td:nth-child(2) .cell.booked",
+                "text": "Alice"
+              },
+              {
+                "action": "click",
+                "selector": "#dashboardBtn"
+              },
+              {
+                "action": "assert_visible",
+                "selector": "#dashboardView"
+              },
+              {
+                "action": "assert_text",
+                "selector": "#dashCards .card:nth-child(1) .v",
+                "text": "1"
+              },
+              {
+                "action": "assert_text",
+                "selector": "#roomTableBody tr:nth-child(1) td:nth-child(2)",
+                "text": "1"
+              },
+              {
+                "action": "click",
+                "selector": "#backBtn"
+              },
+              {
+                "action": "assert_visible",
+                "selector": "#bookingView"
+              },
+              {
+                "action": "click",
+                "selector": "#gridBody tr:nth-child(1) td:nth-child(2) .cell.booked"
+              },
+              {
+                "action": "fill",
+                "selector": "#cancelName",
+                "value": "Alice"
+              },
+              {
+                "action": "click",
+                "selector": "#cancelConfirm"
+              },
+              {
+                "action": "click",
+                "selector": "#dashboardBtn"
+              },
+              {
+                "action": "assert_text",
+                "selector": "#dashCards .card:nth-child(3) .v",
+                "text": "1"
+              },
+              {
+                "action": "assert_text",
+                "selector": "#dashCards .card:nth-child(4) .v",
+                "text": "50.0%"
+              }
+            ],
+            "language": "browser",
+            "path": "app/index.html",
+            "resources": {
+              "app.js": "app/app.js",
+              "dashboard-metrics.js": "app/dashboard-metrics.js",
+              "dashboard-ui.js": "app/dashboard-ui.js",
+              "dashboard.js": "app/dashboard.js",
+              "styles.css": "app/styles.css"
+            },
+            "timeout": 20
+          },
+          "result": {
+            "browser": {
+              "assertionCount": 1,
+              "assertions": [
+                {
+                  "action": "assert_count",
+                  "actual": 120,
+                  "expected": 120,
+                  "pageId": "main",
+                  "passed": true,
+                  "selector": "#gridBody .cell.free"
+                }
+              ],
+              "assertionsPassed": 1,
+              "blockedRequests": [],
+              "dialogCoverageComplete": true,
+              "dialogResponses": [],
+              "engine": "chromium",
+              "entry": {
+                "path": "app/index.html",
+                "sha256": "d19a68cc8fbb51b620cb55ae1804d407a9f11045ffbf0d75ca852c249412ac06"
+              },
+              "error": "Browser step failed: locator.click: Timeout 2500ms exceeded.\nCall log:\n  - waiting for locator('#gridBody tr:nth-child(1) td:nth-child(1) .cell.free')\n",
+              "executed": true,
+              "failureObservation": {
+                "formValues": [
+                  {
+                    "id": "dateInput",
+                    "name": "",
+                    "type": "date",
+                    "value": "2026-11-16"
+                  }
+                ],
+                "formValuesOmitted": 0,
+                "interpretation": "Untrusted observed state only; does not determine whether the test or product is wrong.",
+                "matchCount": 0,
+                "messagesOmitted": 0,
+                "pageId": "main",
+                "runtimeUTC": "2026-11-16T07:37:26.680Z",
+                "source": "actual failing-page DOM in this test",
+                "stepIndex": 1,
+                "textLimitCharacters": 120,
+                "timezone": "UTC",
+                "valuesAreBoundedPreviews": true,
+                "visibleMessages": []
+              },
+              "faultCoverageComplete": true,
+              "faults": [],
+              "httpErrors": [],
+              "ok": false,
+              "pageErrors": [],
+              "pages": [
+                {
+                  "entryPath": "app/index.html",
+                  "pageId": "main"
+                }
+              ],
+              "readFaultCoverageComplete": true,
+              "readFaults": [],
+              "sourceManifest": [
+                {
+                  "path": "app/index.html",
+                  "sha256": "d19a68cc8fbb51b620cb55ae1804d407a9f11045ffbf0d75ca852c249412ac06"
+                },
+                {
+                  "path": "app/app.js",
+                  "sha256": "8ad918c139b00a28a2272a42f8b7cd7945005f1f48a518918b7523c3435298c1"
+                },
+                {
+                  "path": "app/dashboard.js",
+                  "sha256": "cdfcfaa5262775f7b86a2ed55ede6246260c4c58eb5c21e38843504cff7b4c08"
+                },
+                {
+                  "path": "app/dashboard-metrics.js",
+                  "sha256": "d7a82308c52b7602d6d821d4923130fc6d7d90465d1869f0130c381d3f384bd9"
+                },
+                {
+                  "path": "app/dashboard-ui.js",
+                  "sha256": "f10814aad5bcfe6cd1004ae6928dd1eccec5f7ca76d06468ea7bde43dc36588c"
+                },
+                {
+                  "path": "app/styles.css",
+                  "sha256": "2d179642fbbfca60968640ebf642ebc1963cc4e061f9d27d6b0116ed32e66ae7"
+                }
+              ],
+              "steps": [
+                {
+                  "action": "assert_count",
+                  "actual": 120,
+                  "expected": 120,
+                  "ok": true,
+                  "pageId": "main",
+                  "passed": true,
+                  "selector": "#gridBody .cell.free"
+                },
+                {
+                  "action": "click",
+                  "error": "locator.click: Timeout 2500ms exceeded.\nCall log:\n  - waiting for locator('#gridBody tr:nth-child(1) td:nth-child(1) .cell.free')\n",
+                  "ok": false,
+                  "pageId": "main",
+                  "selector": "#gridBody tr:nth-child(1) td:nth-child(1) .cell.free"
+                }
+              ],
+              "testedFiles": [
+                {
+                  "path": "app/index.html",
+                  "sha256": "d19a68cc8fbb51b620cb55ae1804d407a9f11045ffbf0d75ca852c249412ac06"
+                },
+                {
+                  "path": "app/styles.css",
+                  "sha256": "2d179642fbbfca60968640ebf642ebc1963cc4e061f9d27d6b0116ed32e66ae7"
+                },
+                {
+                  "path": "app/app.js",
+                  "sha256": "8ad918c139b00a28a2272a42f8b7cd7945005f1f48a518918b7523c3435298c1"
+                }
+              ]
+            },
+            "error": "Browser step failed: locator.click: Timeout 2500ms exceeded.\nCall log:\n  - waiting for locator('#gridBody tr:nth-child(1) td:nth-child(1) .cell.free')\n",
+            "exitCode": 1,
+            "isolation": {
+              "containerId": "evo-74d425b6e88c4ce680e9f42cda0c3244",
+              "hostFallback": false,
+              "imports": "explicit_read_only",
+              "namespaceId": "ns-9cb947005c50ffa453f1",
+              "network": "none",
+              "ownerAgentId": "dev",
+              "resourceScope": "per_invocation",
+              "runId": "run-029c945e92a3417e",
+              "workspace": "private_per_agent_run"
+            },
+            "ok": false,
+            "outputLimitExceeded": false,
+            "runtime": "browser",
+            "test": true,
+            "timedOut": false
+          }
+        }
+      ],
+      "steps": [
+        {
+          "id": "task-b3755f72474a452a",
+          "agentId": "dev",
+          "revision": 0,
+          "status": "running"
+        }
+      ],
+      "events": [],
+      "transcript": []
+    },
+    "task": {
+      "id": "task-b3755f72474a452a",
+      "agentId": "dev",
+      "revision": 0,
+      "status": "running"
+    },
+    "action": {
+      "type": "tool",
+      "name": "code.test",
+      "args": {
+        "checks": [
+          {
+            "action": "assert_count",
+            "count": 120,
+            "selector": "#gridBody .cell.free"
+          },
+          {
+            "action": "click",
+            "selector": "#gridBody tr:nth-child(1) td:nth-child(1) .cell.free"
+          },
+          {
+            "action": "fill",
+            "selector": "#bookName",
+            "value": "Alice"
+          },
+          {
+            "action": "click",
+            "selector": "#bookConfirm"
+          },
+          {
+            "action": "assert_text",
+            "selector": "#gridBody tr:nth-child(1) td:nth-child(2) .cell.booked",
+            "text": "Alice"
+          },
+          {
+            "action": "click",
+            "selector": "#dashboardBtn"
+          },
+          {
+            "action": "assert_visible",
+            "selector": "#dashboardView"
+          },
+          {
+            "action": "assert_text",
+            "selector": "#dashCards .card:nth-child(1) .v",
+            "text": "1"
+          },
+          {
+            "action": "assert_text",
+            "selector": "#roomTableBody tr:nth-child(1) td:nth-child(2)",
+            "text": "1"
+          },
+          {
+            "action": "click",
+            "selector": "#backBtn"
+          },
+          {
+            "action": "assert_visible",
+            "selector": "#bookingView"
+          },
+          {
+            "action": "click",
+            "selector": "#gridBody tr:nth-child(1) td:nth-child(2) .cell.booked"
+          },
+          {
+            "action": "fill",
+            "selector": "#cancelName",
+            "value": "Alice"
+          },
+          {
+            "action": "click",
+            "selector": "#cancelConfirm"
+          },
+          {
+            "action": "click",
+            "selector": "#dashboardBtn"
+          },
+          {
+            "action": "assert_text",
+            "selector": "#dashCards .card:nth-child(3) .v",
+            "text": "1"
+          },
+          {
+            "action": "assert_text",
+            "selector": "#dashCards .card:nth-child(4) .v",
+            "text": "50.0%"
+          }
+        ],
+        "language": "browser",
+        "path": "app/index.html",
+        "resources": {
+          "app.js": "app/app.js",
+          "dashboard-metrics.js": "app/dashboard-metrics.js",
+          "dashboard-ui.js": "app/dashboard-ui.js",
+          "dashboard.js": "app/dashboard.js",
+          "styles.css": "app/styles.css"
+        },
+        "timeout": 20
+      }
+    }
+  },
+  "knownSchemaFailure": {
+    "id": "call-c7749e36fdc8495c",
+    "agentId": "qa",
+    "taskId": "task-e6fed4c6076a435e",
+    "revision": 0,
+    "tool": "code.test",
+    "status": "failed",
+    "args": {
+      "checks": [
+        {
+          "action": "assert_count",
+          "count": 10,
+          "selector": "#gridBody tr"
+        },
+        {
+          "action": "assert_count",
+          "count": 120,
+          "selector": "#gridBody .cell.free"
+        },
+        {
+          "action": "click",
+          "selector": "#gridBody tr:nth-child(1) .cell.free"
+        },
+        {
+          "action": "assert_visible",
+          "selector": "#bookDialog"
+        },
+        {
+          "action": "fill",
+          "selector": "#bookName",
+          "value": "Alice"
+        },
+        {
+          "action": "click",
+          "selector": "#bookConfirm"
+        },
+        {
+          "action": "assert_text",
+          "selector": "#gridBody tr:nth-child(1) .cell.booked",
+          "text": "Alice"
+        },
+        {
+          "action": "assert_storage",
+          "exact": false,
+          "key": "mrb.bookings.v1",
+          "value": "[{\"id\":\"b-"
+        }
+      ],
+      "language": "browser",
+      "path": "imports/artifact-f1d7685dfb9546c88f27d813e9a1bb42/index.html",
+      "resources": {
+        "app.js": "imports/artifact-a307ad0e426345fcb758ed371a103673/app.js",
+        "styles.css": "imports/artifact-2fa2b0d74f804b07be20e3d19ab7be8e/styles.css"
+      },
+      "timeout": 20
+    },
+    "result": {
+      "error": {
+        "code": "parameter",
+        "message": "Invalid fields for browser action assert_storage.",
+        "retryable": false
+      },
+      "ok": false,
+      "outcomeUnknown": false
+    },
+    "reviewTargets": {
+      "task-80802a06d35e4536": {
+        "artifactHashes": {
+          "artifact-2fa2b0d74f804b07be20e3d19ab7be8e": "4603f3ac51f8f1e97919a75110e4750671c5712a15b30fd62490e51d20780235",
+          "artifact-a307ad0e426345fcb758ed371a103673": "2f8706cea1db98a349d71a6fe2a2b44f8ecc464e384ff4bfac03b562a20c92c0",
+          "artifact-e74fb639c59949aa863bd5f8577cd337": "d5bbb75f6696f4540c75e6e9b1eb82d799d4df8c64cede22822fdde1dc513369",
+          "artifact-f1d7685dfb9546c88f27d813e9a1bb42": "1d3ae235b1a80dd20ad51a0f6485916e0102f2f5e1d5424386878f3e9221bfb6"
+        },
+        "targetRevision": 0
+      },
+      "task-d563126142c44fee": {
+        "artifactHashes": {},
+        "targetRevision": 0
+      },
+      "task-de8d7396423a48f1": {
+        "artifactHashes": {
+          "artifact-4e8d66f9bc6a4c228d04f4b8df77677e": "7db68cad0b05cc7865269889d14925e4ea4ea68e4887b950f25b77d03832b749"
+        },
+        "targetRevision": 0
+      }
+    }
+  },
+  "unrelatedSuccess": {
+    "id": "call-2403f01a5e2d4cf4",
+    "agentId": "qa",
+    "taskId": "task-e6fed4c6076a435e",
+    "revision": 0,
+    "tool": "code.test",
+    "status": "success",
+    "args": {
+      "checks": [
+        {
+          "action": "click",
+          "selector": "#gridBody tr:nth-child(3) .cell.free[data-slot=\"5\"]"
+        },
+        {
+          "action": "fill",
+          "selector": "#bookName",
+          "value": "Eve"
+        },
+        {
+          "action": "click",
+          "selector": "#bookConfirm"
+        },
+        {
+          "action": "assert_text",
+          "selector": "#gridBody tr:nth-child(3) .cell.booked[data-slot=\"5\"]",
+          "text": "Eve"
+        },
+        {
+          "action": "click",
+          "selector": "#gridBody tr:nth-child(3) .cell.booked[data-slot=\"5\"]"
+        },
+        {
+          "action": "assert_visible",
+          "selector": "#cancelDialog"
+        },
+        {
+          "action": "fill",
+          "selector": "#cancelName",
+          "value": "WrongName"
+        },
+        {
+          "action": "click",
+          "selector": "#cancelConfirm"
+        },
+        {
+          "action": "assert_text",
+          "selector": "#cancelError",
+          "text": "Only the person who booked this room can cancel it."
+        },
+        {
+          "action": "fill",
+          "selector": "#cancelName",
+          "value": "eve"
+        },
+        {
+          "action": "click",
+          "selector": "#cancelConfirm"
+        },
+        {
+          "action": "assert_text",
+          "selector": "#gridBody tr:nth-child(3) .cell.free[data-slot=\"5\"]",
+          "text": "Free"
+        },
+        {
+          "action": "reload"
+        },
+        {
+          "action": "assert_text",
+          "selector": "#gridBody tr:nth-child(3) .cell.free[data-slot=\"5\"]",
+          "text": "Free"
+        }
+      ],
+      "language": "browser",
+      "path": "imports/artifact-f1d7685dfb9546c88f27d813e9a1bb42/index.html",
+      "resources": {
+        "app.js": "imports/artifact-a307ad0e426345fcb758ed371a103673/app.js",
+        "styles.css": "imports/artifact-2fa2b0d74f804b07be20e3d19ab7be8e/styles.css"
+      },
+      "timeout": 20
+    },
+    "result": {
+      "browser": {
+        "assertionCount": 5,
+        "assertions": [
+          {
+            "action": "assert_text",
+            "actual": "Eve",
+            "expected": "Eve",
+            "pageId": "main",
+            "passed": true,
+            "selector": "#gridBody tr:nth-child(3) .cell.booked[data-slot=\"5\"]"
+          },
+          {
+            "action": "assert_visible",
+            "actual": true,
+            "expected": true,
+            "pageId": "main",
+            "passed": true,
+            "selector": "#cancelDialog"
+          },
+          {
+            "action": "assert_text",
+            "actual": "Only the person who booked this room can cancel it.",
+            "expected": "Only the person who booked this room can cancel it.",
+            "pageId": "main",
+            "passed": true,
+            "selector": "#cancelError"
+          },
+          {
+            "action": "assert_text",
+            "actual": "Free",
+            "expected": "Free",
+            "pageId": "main",
+            "passed": true,
+            "selector": "#gridBody tr:nth-child(3) .cell.free[data-slot=\"5\"]"
+          },
+          {
+            "action": "assert_text",
+            "actual": "Free",
+            "expected": "Free",
+            "pageId": "main",
+            "passed": true,
+            "selector": "#gridBody tr:nth-child(3) .cell.free[data-slot=\"5\"]"
+          }
+        ],
+        "assertionsPassed": 5,
+        "blockedRequests": [],
+        "dialogCoverageComplete": true,
+        "dialogResponses": [],
+        "engine": "chromium",
+        "entry": {
+          "path": "imports/artifact-f1d7685dfb9546c88f27d813e9a1bb42/index.html",
+          "sha256": "1d3ae235b1a80dd20ad51a0f6485916e0102f2f5e1d5424386878f3e9221bfb6"
+        },
+        "executed": true,
+        "faultCoverageComplete": true,
+        "faults": [],
+        "httpErrors": [],
+        "ok": true,
+        "pageErrors": [],
+        "pages": [
+          {
+            "entryPath": "imports/artifact-f1d7685dfb9546c88f27d813e9a1bb42/index.html",
+            "pageId": "main"
+          }
+        ],
+        "readFaultCoverageComplete": true,
+        "readFaults": [],
+        "sourceManifest": [
+          {
+            "path": "imports/artifact-f1d7685dfb9546c88f27d813e9a1bb42/index.html",
+            "sha256": "1d3ae235b1a80dd20ad51a0f6485916e0102f2f5e1d5424386878f3e9221bfb6"
+          },
+          {
+            "path": "imports/artifact-2fa2b0d74f804b07be20e3d19ab7be8e/styles.css",
+            "sha256": "4603f3ac51f8f1e97919a75110e4750671c5712a15b30fd62490e51d20780235"
+          },
+          {
+            "path": "imports/artifact-a307ad0e426345fcb758ed371a103673/app.js",
+            "sha256": "2f8706cea1db98a349d71a6fe2a2b44f8ecc464e384ff4bfac03b562a20c92c0"
+          }
+        ],
+        "steps": [
+          {
+            "action": "click",
+            "ok": true,
+            "pageId": "main",
+            "selector": "#gridBody tr:nth-child(3) .cell.free[data-slot=\"5\"]"
+          },
+          {
+            "action": "fill",
+            "ok": true,
+            "pageId": "main",
+            "selector": "#bookName"
+          },
+          {
+            "action": "click",
+            "ok": true,
+            "pageId": "main",
+            "selector": "#bookConfirm"
+          },
+          {
+            "action": "assert_text",
+            "actual": "Eve",
+            "expected": "Eve",
+            "ok": true,
+            "pageId": "main",
+            "passed": true,
+            "selector": "#gridBody tr:nth-child(3) .cell.booked[data-slot=\"5\"]"
+          },
+          {
+            "action": "click",
+            "ok": true,
+            "pageId": "main",
+            "selector": "#gridBody tr:nth-child(3) .cell.booked[data-slot=\"5\"]"
+          },
+          {
+            "action": "assert_visible",
+            "actual": true,
+            "expected": true,
+            "ok": true,
+            "pageId": "main",
+            "passed": true,
+            "selector": "#cancelDialog"
+          },
+          {
+            "action": "fill",
+            "ok": true,
+            "pageId": "main",
+            "selector": "#cancelName"
+          },
+          {
+            "action": "click",
+            "ok": true,
+            "pageId": "main",
+            "selector": "#cancelConfirm"
+          },
+          {
+            "action": "assert_text",
+            "actual": "Only the person who booked this room can cancel it.",
+            "expected": "Only the person who booked this room can cancel it.",
+            "ok": true,
+            "pageId": "main",
+            "passed": true,
+            "selector": "#cancelError"
+          },
+          {
+            "action": "fill",
+            "ok": true,
+            "pageId": "main",
+            "selector": "#cancelName"
+          },
+          {
+            "action": "click",
+            "ok": true,
+            "pageId": "main",
+            "selector": "#cancelConfirm"
+          },
+          {
+            "action": "assert_text",
+            "actual": "Free",
+            "expected": "Free",
+            "ok": true,
+            "pageId": "main",
+            "passed": true,
+            "selector": "#gridBody tr:nth-child(3) .cell.free[data-slot=\"5\"]"
+          },
+          {
+            "action": "reload",
+            "ok": true,
+            "pageId": "main"
+          },
+          {
+            "action": "assert_text",
+            "actual": "Free",
+            "expected": "Free",
+            "ok": true,
+            "pageId": "main",
+            "passed": true,
+            "selector": "#gridBody tr:nth-child(3) .cell.free[data-slot=\"5\"]"
+          }
+        ],
+        "testedFiles": [
+          {
+            "path": "imports/artifact-f1d7685dfb9546c88f27d813e9a1bb42/index.html",
+            "sha256": "1d3ae235b1a80dd20ad51a0f6485916e0102f2f5e1d5424386878f3e9221bfb6"
+          },
+          {
+            "path": "imports/artifact-2fa2b0d74f804b07be20e3d19ab7be8e/styles.css",
+            "sha256": "4603f3ac51f8f1e97919a75110e4750671c5712a15b30fd62490e51d20780235"
+          },
+          {
+            "path": "imports/artifact-a307ad0e426345fcb758ed371a103673/app.js",
+            "sha256": "2f8706cea1db98a349d71a6fe2a2b44f8ecc464e384ff4bfac03b562a20c92c0"
+          }
+        ]
+      },
+      "exitCode": 0,
+      "isolation": {
+        "containerId": "evo-6af9714c076b4512a04b587d8583a0f4",
+        "hostFallback": false,
+        "imports": "explicit_read_only",
+        "namespaceId": "ns-9cb947005c50ffa453f1",
+        "network": "none",
+        "ownerAgentId": "qa",
+        "resourceScope": "per_invocation",
+        "runId": "run-2848772a96c94d96",
+        "workspace": "private_per_agent_run"
+      },
+      "ok": true,
+      "outputLimitExceeded": false,
+      "runtime": "browser",
+      "test": true,
+      "timedOut": false
+    },
+    "reviewTargets": {
+      "task-80802a06d35e4536": {
+        "artifactHashes": {
+          "artifact-2fa2b0d74f804b07be20e3d19ab7be8e": "4603f3ac51f8f1e97919a75110e4750671c5712a15b30fd62490e51d20780235",
+          "artifact-a307ad0e426345fcb758ed371a103673": "2f8706cea1db98a349d71a6fe2a2b44f8ecc464e384ff4bfac03b562a20c92c0",
+          "artifact-e74fb639c59949aa863bd5f8577cd337": "d5bbb75f6696f4540c75e6e9b1eb82d799d4df8c64cede22822fdde1dc513369",
+          "artifact-f1d7685dfb9546c88f27d813e9a1bb42": "1d3ae235b1a80dd20ad51a0f6485916e0102f2f5e1d5424386878f3e9221bfb6"
+        },
+        "targetRevision": 0
+      },
+      "task-d563126142c44fee": {
+        "artifactHashes": {},
+        "targetRevision": 0
+      },
+      "task-de8d7396423a48f1": {
+        "artifactHashes": {
+          "artifact-4e8d66f9bc6a4c228d04f4b8df77677e": "7db68cad0b05cc7865269889d14925e4ea4ea68e4887b950f25b77d03832b749"
+        },
+        "targetRevision": 0
+      }
+    }
+  }
+}
