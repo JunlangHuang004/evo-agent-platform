@@ -36,12 +36,12 @@ def normalize_output_contract(value):
     """
     if value is None:
         return None
-    if not isinstance(value, dict) or len(value) > 3:
+    if not isinstance(value, dict) or len(value) > 4:
         raise _protocol_error('outputContract must be a bounded JSON object.')
     kind = value.get('kind')
     if not isinstance(kind, str) or kind not in ('text', 'artifact', 'json', 'delivery'):
         raise _protocol_error('outputContract.kind must be text, artifact, json or delivery.')
-    allowed = {'text': {'kind'}, 'artifact': {'kind', 'extensions', 'minCount'},
+    allowed = {'text': {'kind'}, 'artifact': {'kind', 'extensions', 'minCount', 'candidateDelivery'},
                'json': {'kind', 'requiredKeys'}, 'delivery': {'kind'}}[kind]
     if set(value) - allowed:
         raise _protocol_error('outputContract contains unsupported fields for its kind.')
@@ -59,6 +59,10 @@ def normalize_output_contract(value):
         if isinstance(minimum, bool) or not isinstance(minimum, int) or not 1 <= minimum <= _MAX_ARTIFACTS:
             raise _protocol_error('artifact minCount must be an integer from 1 to 40.')
         normalized.update(extensions=canonical, minCount=minimum)
+        if 'candidateDelivery' in value:
+            if type(value['candidateDelivery']) is not bool:
+                raise _protocol_error('artifact candidateDelivery must be a boolean.')
+            normalized['candidateDelivery'] = value['candidateDelivery']
     elif kind == 'json':
         keys = value.get('requiredKeys', [])
         if (not isinstance(keys, list) or len(keys) > _MAX_KEYS
@@ -116,7 +120,7 @@ def validate_task_output(task, run, artifact_store, final_text):
         return _result('passed', kind)
     if kind == 'delivery':
         from .delivery import validate_delivery
-        deliveries = [d for d in run.get('deliveries', []) if d.get('taskId') == task.get('id')
+        deliveries = [d for d in run.get('deliveries', []) if d.get('status') == 'packaged' and d.get('taskId') == task.get('id')
                       and d.get('agentId') == task.get('agentId')]
         if not deliveries:
             return _result('failed', kind, ['Create a real package_delivery before final; prose is not a downloadable product.'])
@@ -212,4 +216,13 @@ def validate_task_output(task, run, artifact_store, final_text):
     matched = list(matched_by_path.values())
     if len(matched) < contract['minCount']:
         issues.append(f"Need at least {contract['minCount']} distinct verified current-task artifact file path(s) matching extensions; found {len(matched)}.")
-    return _result('failed' if issues else 'passed', kind, issues, checked, matched)
+    candidate = None
+    if contract.get('candidateDelivery') and not issues:
+        from .candidate_delivery import current_candidate
+        candidate = current_candidate(task, run, artifact_store, matched, contract['minCount'])
+        if candidate is None:
+            issues.append('Prepare a current candidate ZIP from explicit published IDs before producer handoff: use publish_artifacts.delivery or package_delivery(candidate:true). A candidate is not independent acceptance or formal delivery.')
+    result = _result('failed' if issues else 'passed', kind, issues, checked, matched)
+    if candidate is not None:
+        result['candidateDeliveryId'] = candidate['id']
+    return result

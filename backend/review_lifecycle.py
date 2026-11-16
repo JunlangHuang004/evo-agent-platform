@@ -100,6 +100,19 @@ def repeat_binding(context,progress_signature):
     return {'scopeSha256':context['bindingSha256'],'workSha256':progress_signature}
 
 
+def report_work_signature(files, artifacts):
+    """Report work is changed bytes or a first publication, not new IDs.
+
+    Artifact IDs stay intact in provenance, permissions and review validation.
+    This derived progress key only ignores repeated publication of the same
+    report bytes at the same path. A different path or content remains work.
+    """
+    publications = sorted({fingerprint({'path':a.get('path') or a.get('name'),
+                                        'sha256':a.get('sha256')})
+                           for a in artifacts})
+    return fingerprint({'files':files,'publications':publications})
+
+
 def review_model_view(context,repeat=None):
     """Derived status only; full identities remain in host scope and evidence.
 

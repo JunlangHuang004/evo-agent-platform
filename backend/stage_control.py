@@ -274,6 +274,7 @@ def failure_references(run,task,max_items=4):
 
 def latest_test_diagnostic(run,task):
     from .browser_review_diagnostics import review_source_gaps
+    from .browser_stagnation import browser_assertion_semantics
     calls=[call for call in run.get('calls',[]) if call.get('taskId')==task['id'] and call.get('tool')!='llm.chat']
     if not calls or calls[-1].get('tool')!='code.test' or calls[-1].get('status')!='failed':return None
     call=calls[-1];result=call.get('result');result=result if isinstance(result,dict) else {}
@@ -290,4 +291,6 @@ def latest_test_diagnostic(run,task):
     row['instruction']+='with this callId; do not replace granted assets or repeat the identical failed test.'
     gaps=review_source_gaps(run,task,call)
     if gaps:row['reviewSourceCoverage']=gaps
+    semantics=browser_assertion_semantics(run,task,call)
+    if semantics:row['assertionSemantics']=semantics
     return row

@@ -8,7 +8,7 @@ This never edits a test, attributes a product defect, or creates acceptance.
 import copy
 import hashlib
 
-from .browser_failure_recovery import _key, _report
+from .browser_failure_recovery import _key, _manifest, _report
 from .browser_observation import failure_observation_view
 from .browser_spec import validate_browser_args
 from .sandbox import ToolError
@@ -54,6 +54,8 @@ def _failed_check(call):
     if parsed is None or not _valid_args(args):
         return None
     manifest, report, failures = parsed
+    if report['entry'].get('path') != args['path'] or type(call['result'].get('exitCode')) is not int:
+        return None
     steps = report.get('steps')
     if (not isinstance(steps, list) or not 1 <= len(steps) <= len(args['checks'])
             or any(not isinstance(s, dict) for s in steps) or len(failures) != 1):
@@ -88,13 +90,77 @@ def _failed_check(call):
     return manifest, report, failed, index, _setup(args, index)
 
 
+def _successful_checks(call):
+    """Only a source-bound executed pass can resolve its own exact scenarios."""
+    args, result = call.get('args'), call.get('result')
+    flags = ('outcomeUnknown', 'deadlineExceeded', 'timedOut', 'cancelled',
+             'outputLimitExceeded', 'notExecuted', 'modelViewOnly', 'needsApproval')
+    if (call.get('status') != 'success' or not _valid_args(args)
+            or not isinstance(result, dict) or result.get('ok') is not True
+            or result.get('runtime') != 'browser' or result.get('test') is not True
+            or type(result.get('exitCode')) is not int
+            or result['exitCode'] != 0 or result.get('error')
+            or any(result.get(k) or call.get(k) for k in flags)
+            or result.get('actionExecuted') is False):
+        return None
+    report = result.get('browser')
+    if (not isinstance(report, dict) or report.get('engine') != 'chromium'
+            or report.get('executed') is not True or report.get('ok') is not True
+            or any(report.get(k) for k in (*flags, 'error', 'pageErrors', 'httpErrors', 'blockedRequests'))
+            or report.get('actionExecuted') is False):
+        return None
+    manifest, tested = _manifest(report.get('sourceManifest')), _manifest(report.get('testedFiles'))
+    entry = report.get('entry')
+    if (not manifest or not tested or not isinstance(entry, dict) or entry.get('path') != args['path']
+            or manifest.get(entry.get('path')) != entry.get('sha256')
+            or tested.get(entry.get('path')) != entry.get('sha256')
+            or any(manifest.get(path) != sha for path, sha in tested.items())):
+        return None
+    steps, assertions = report.get('steps'), report.get('assertions')
+    if (not isinstance(steps, list) or len(steps) != len(args['checks'])
+            or not isinstance(assertions, list) or not assertions
+            or type(report.get('assertionCount')) is not int
+            or type(report.get('assertionsPassed')) is not int
+            or report['assertionCount'] != len(assertions)
+            or report['assertionsPassed'] != len(assertions)
+            or any(not isinstance(row, dict) for row in steps + assertions)):
+        return None
+    keys, executed_assertions = set(), []
+    for index, (check, observed) in enumerate(zip(args['checks'], steps)):
+        requested = _step(check)
+        if (observed.get('ok') is not True or observed.get('action') != requested['action']
+                or observed.get('pageId', 'main') != requested['pageId']
+                or any(observed.get(k) != requested.get(k) for k in ('selector', 'key'))):
+            return None
+        if not requested['action'].startswith('assert_'):
+            continue
+        if observed.get('passed') is not True:
+            return None
+        expected = {'assert_text': 'text', 'assert_count': 'count', 'assert_value': 'value',
+                    'assert_attribute': 'value', 'assert_storage': 'value'}.get(requested['action'])
+        if (expected and observed.get('expected') != requested[expected]
+                or requested['action'] == 'assert_visible' and observed.get('expected') is not True
+                or requested['action'] == 'assert_storage_missing' and observed.get('expected') is not None
+                or requested['action'] == 'assert_attribute' and observed.get('name') != requested['name']):
+            return None
+        executed_assertions.append(observed)
+        keys.add(_key(_setup(args, index)))
+    fields = ('action', 'pageId', 'selector', 'key', 'name', 'expected', 'actual', 'passed', 'expectedDifferentFrom')
+    if (len(assertions) != len(executed_assertions)
+            or any(any(a.get(k) != observed.get(k) for k in fields)
+                   for a, observed in zip(assertions, executed_assertions))):
+        return None
+    return manifest, keys
+
+
 def browser_stagnation_feedback(run, task, action):
     """Reject a still-unchanged failing check despite surrounding check changes.
 
     Two actual matching failures are required. Every possible owner workspace
     mutation or untrustworthy browser result invalidates the history; every
     corrected check/setup remains eligible for normal tool execution. A real
-    successful browser execution clears the failure history. Rejections are
+    successful browser execution resolves only its exact passing scenarios; an
+    unrelated pass cannot erase a failure. Rejections are
     not fake tool calls and never inflate the observed failure count.
     """
     if not all(isinstance(v, dict) for v in (run, task, action)):
@@ -144,9 +210,20 @@ def browser_stagnation_feedback(run, task, action):
             continue
         parsed = _failed_check(call)
         if parsed is None:
-            # Success, preflight/infra errors and malformed/unexecuted evidence
-            # cannot prove an unchanged failing browser attempt.
-            groups = {}; source_version = None
+            successful = _successful_checks(call)
+            if successful is not None:
+                manifest, resolved = successful
+                if source_version != manifest:
+                    groups = {}
+                source_version = manifest
+                # A passing unrelated check is useful evidence, not a repair
+                # of every other failed check on the same unchanged source.
+                for key in resolved:
+                    groups.pop(key, None)
+            else:
+                # Preserve conservative boundaries for incomplete/unknown
+                # effects; only trustworthy actual passes get scoped handling.
+                groups = {}; source_version = None
             continue
         manifest, report, failed, index, setup = parsed
         if source_version != manifest:
@@ -161,7 +238,8 @@ def browser_stagnation_feedback(run, task, action):
     key, rows = max(matches, key=lambda item: len(item[1]))
     latest_id, report, failed, actual_index = rows[-1]
     identity = {'runId': run['id'], 'taskId': task['id'], 'agentId': task['agentId'],
-                'revision': task['revision'], 'sourceManifest': source_version, 'failureSetup': key}
+                'revision': task['revision'], 'sourceManifest': source_version, 'failureSetup': key,
+                'firstUnresolvedFailureCallId': rows[0][0]}
     signature = hashlib.sha256(_key(identity).encode()).hexdigest()
     # Persisted host events are the rejection ledger. They count proposals, not
     # executions. A restart does not grant another endless set of warnings.
@@ -185,7 +263,8 @@ def browser_stagnation_feedback(run, task, action):
         'rejectionScope': {'kind': 'same_failing_check_and_stateful_setup_on_unchanged_sources',
             'allBrowserTestingBlocked': False, 'correctedProposalRequiresNormalChecks': True,
             'newPermissionGranted': False, 'proposalFailedCheckIndex': proposed[key],
-            'ignoredDifferences': 'Other read-only assertions and steps after the failed check only.'},
+            'ignoredDifferences': 'Other read-only assertions and steps after the failed check only.',
+            'unrelatedPassingChecksResolveThisFailure': False},
         'observedFailures': {'count': len(rows), 'callIds': [row[0] for row in rows[-4:]],
             'callIdsTruncated': len(rows) > 4, 'latestCallId': latest_id,
             'failedAssertions': [diagnostic], 'failedAssertionsOmitted': 0,
@@ -202,3 +281,85 @@ def browser_stagnation_feedback(run, task, action):
             'Alternatively submit a bounded review rework with a demonstrated defect, or an honest final partial with missing coverage. '
             'After two rejected proposals for this failure, a third still-unchanged proposal stops this task without accepting it. '
             'Observed failure count excludes these rejected proposals. No test, product edit, review, publication or extra time is created.'}
+
+
+def browser_assertion_semantics(run, task, call):
+    """Explain exact storage comparisons without diagnosing or fixing a product.
+
+    A previous execution's literal is not by itself a requirement. Its reuse as expected
+    is recorded only when actual source hashes and stateful preparation match.
+    This observation never blocks a changed assertion, changes its expected
+    result, erases its failure, or declares an implementation defect.
+    """
+    if (not all(isinstance(v, dict) for v in (run, task, call))
+            or any(not isinstance(v, str) or not v for v in (run.get('id'), task.get('id'), task.get('agentId')))
+            or call.get('tool') != 'code.test' or not isinstance(call.get('id'), str)
+            or call.get('runId', run.get('id')) != run.get('id')
+            or call.get('agentId') != task.get('agentId') or call.get('taskId') != task.get('id')
+            or type(task.get('revision')) is not int or task['revision'] < 0
+            or type(call.get('revision')) is not int or call['revision'] != task['revision']):
+        return None
+    calls = run.get('calls')
+    if not isinstance(calls, list) or any(not isinstance(c, dict) for c in calls):
+        return None
+    from .stage_control import _unresolved_owner_effects
+    if _unresolved_owner_effects(run, task):
+        return None
+    parsed = _failed_check(call)
+    if parsed is None:
+        return None
+    manifest, report, failed, index, setup = parsed
+    action = failed.get('action')
+    if action not in ('assert_storage', 'assert_storage_missing'):
+        return None
+    detail = {'callId': call['id'], 'comparison': 'exact_stored_string' if action == 'assert_storage' else 'key_absence_requires_null',
+              'jsonSubsetMatching': False, 'cause': 'unassessed', 'productDefectEstablished': False,
+              'failurePreserved': True, 'expectationChanged': False}
+    if action == 'assert_storage_missing':
+        detail['instruction'] = ('An empty array/object/string is still a stored value, not key absence. '
+            'Check the actual storage contract before changing code or the expectation; this failure alone does not establish a product defect.')
+        return detail
+    detail['instruction'] = ('assert_storage compares the whole stored string exactly; it does not match a JSON subset. '
+        'Check which values the requirement makes stable. Generated IDs/times can differ across executions; '
+        'do not copy an earlier observation as a new expected answer or weaken required behavior. '
+        'Use evidence-grounded deterministic setup or observable required invariants, then execute and review normally.')
+    matches = [i for i, row in enumerate(calls) if row.get('id') == call['id']]
+    if len(matches) != 1 or calls[matches[0]] != call:
+        return detail
+    current = copy.deepcopy(setup); current['assertion'].pop('value', None)
+    seen = set()
+    for previous in reversed(calls[:matches[0]]):
+        if previous.get('runId', run.get('id')) != run.get('id'):
+            break
+        if previous.get('agentId') != task.get('agentId'):
+            continue
+        tool, args = previous.get('tool'), previous.get('args')
+        if (tool in ('file.write', 'file.patch', 'file.delete', 'code.run')
+                or tool == 'code.test' and (not isinstance(args, dict) or args.get('language') != 'browser')):
+            break
+        if tool != 'code.test':
+            continue
+        identifier = previous.get('id')
+        if (not isinstance(identifier, str) or identifier in seen
+                or previous.get('taskId') != task['id'] or type(previous.get('revision')) is not int
+                or previous['revision'] != task['revision']):
+            break
+        seen.add(identifier)
+        prior = _failed_check(previous)
+        if prior is None:
+            passing = _successful_checks(previous)
+            if passing is None or passing[0] != manifest:
+                break
+            continue
+        previous_manifest, _, observed, _, previous_setup = prior
+        if previous_manifest != manifest:
+            break
+        previous_setup = copy.deepcopy(previous_setup); previous_setup['assertion'].pop('value', None)
+        if _key(previous_setup) != _key(current):
+            continue
+        if (isinstance(failed.get('expected'), str) and failed['expected'] == observed.get('actual')
+                and failed.get('actual') != failed['expected']):
+            detail['previousActualReusedAsExpected'] = {'callId': identifier,
+                'sameSourcesAndPreparation': True, 'currentObservationDiffers': True}
+        break
+    return detail

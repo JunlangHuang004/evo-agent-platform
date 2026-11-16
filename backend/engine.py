@@ -25,13 +25,15 @@ from .handoff_priority import handoff_priority,priority_tail,PREFIX as HANDOFF_P
 from .sandbox import read_text
 from .delivery import create_delivery, _snapshot as _delivery_snapshot, _current_source as _current_delivery_source
 from .delivery_review import reviewed_sources, handoff_context, unchanged_bundle_binding, current_packaging_binding
+from .candidate_delivery import publication_candidate, create_candidate_delivery, existing_candidate
 from .memory import MemoryService
 from .learning import LearningService
 from .partial_review import budget_partial_receipt, review_dependency_exceptions
 from .partial_review_completion import make_partial_review_admission,partial_review_context,partial_review_completion_feedback
 from .review_target_feedback import review_target_feedback
-from .review_lifecycle import current_pass_receipt,review_context,current_repeat_state,record_duplicate,review_model_view
+from .review_lifecycle import current_pass_receipt,review_context,current_repeat_state,record_duplicate,review_model_view,report_work_signature
 from .completion_guardrail import completion_clarification_feedback
+from .final_summary import final_summary_feedback
 from .persistence import Repository
 from .provider import ModelClient, ProviderError
 from .runtime import ProtocolError, action_prompt, fingerprint, normalize_plan, parse_object, planning_prompt, strings, validate_dag, compress_messages, retained_file_reads, retained_written_files
@@ -87,6 +89,7 @@ def _action_not_tool_feedback(action):
         example={'type':name,'artifactIds':copy.deepcopy(ids) if valid else ['<actual-published-artifact-id>'],
                  'entrypoint':text('entrypoint','<entrypoint-in-selected-artifacts.html>'),
                  'instructions':text('instructions','Explain how to run the actual published bundle.')}
+        if args.get('candidate') is True:example['candidate']=True
         fields={'artifactIds':'actual published artifact IDs','entrypoint':'path in the selected files','instructions':'actual run instructions'}
     else:return None
     return {'ok':False,'notExecuted':True,'actionExecuted':False,'requestedTool':name,
@@ -1535,7 +1538,7 @@ class Platform:
             partial_review=partial_review_context(run,task,self.agents)
             if partial_review:context['partialDependencyReview']=partial_review
             if not task.get('_messages'):
-                task['_messages']=[{'role':'system','content':action_prompt(self.agents[actor],self.tools.definitions(actor))},
+                task['_messages']=[{'role':'system','content':action_prompt(self.agents[actor],self.tools.definitions(actor),task)},
                                    {'role':'user','content':json.dumps(self.config.scrub(context),ensure_ascii=False)}]
             else:
                 restored_context=context
@@ -1752,8 +1755,10 @@ class Platform:
                   for child in run.get('steps',[]) if child.get('parentId')==task['id'] and child.get('status')=='done']
         browser_coverage,qa_evidence=self._browser_progress_coverage(run,task)
         # A read window (especially a failed/irrelevant one) must not reset
-        # duplicate-review recovery. Changed report bytes/publication are work.
-        task['_reviewWorkSignature']=fingerprint({'files':files,'outputs':outputs})
+        # duplicate-review recovery. Re-publishing identical bytes at the same
+        # path is also not new report work, regardless of the new artifact ID.
+        task['_reviewWorkSignature']=report_work_signature(files,
+            [a for a in run.get('artifacts',[]) if a['id'] in task.get('outputs',[])])
         review_progress=self._review_context(run,task)
         review_receipts=[row['passReceipt'] for row in review_progress['targets'] if row['passReceipt']] if review_progress else []
         signature=fingerprint({'files':files,'outputs':outputs,'tests':sorted(test_progress),'browserCoverage':sorted(browser_coverage),
@@ -2107,7 +2112,10 @@ class Platform:
                     self._event(run,'finalization_rejected',task['agentId'],
                                 '最后一轮未返回final；该动作未执行，也未合成完成。',{'taskId':task['id'],**task['finalizationFailure']})
                     raise BudgetExceeded('最后收尾轮必须返回final；未执行新动作，保留原成果与预算错误。')
-                if kind=='final':
+                summary_feedback=final_summary_feedback(task,action)
+                if summary_feedback is not None:
+                    result=summary_feedback
+                elif kind=='final':
                     text=action.get('text')
                     status=action.get('status','done')
                     if not isinstance(text,str) or not text.strip() or status not in ('done','partial','failed'):
@@ -2234,25 +2242,64 @@ class Platform:
                             self._persist()
                     else:
                         result={'ok':True,**({'artifact':published[0]} if kind=='publish_artifact' else {'artifacts':published})}
+                        if 'delivery' in action:
+                            # Only an entirely successful explicit publication batch
+                            # reaches this deterministic step. Published bytes survive
+                            # a package error; no rollback or invented acceptance.
+                            with self.lock:
+                                self._gate(channel,run_id)
+                                try:
+                                    candidate=publication_candidate(run,task,self.artifacts,published,action['delivery'])
+                                    previous=existing_candidate(run,self.artifacts,candidate)
+                                    if not previous and sum(d.get('status')=='candidate' for d in run.get('deliveries',[]))>=8:
+                                        raise ValueError('本次运行最多创建8个候选包；不占用正式交付名额。')
+                                except (ValueError,KeyError,TypeError) as error:
+                                    result.update(ok=False,error={'code':'candidate_delivery','message':str(error)},
+                                                  note='Published artifacts remain available; repair the explicit package declaration without replaying completed writes.')
+                                else:
+                                    if self._time_only(run) and self._remaining_ms(run)<=0:
+                                        run.setdefault('lateDeliveries',[]).append(candidate)
+                                        self._expire_time_budget(channel,run)
+                                        raise Stopped()
+                                    if previous:
+                                        candidate=previous
+                                    else:
+                                        run.setdefault('deliveries',[]).append(candidate)
+                                        self._event(run,'candidate_delivery_packaged',task['agentId'],
+                                                    '按已发布文件清单生成待审核候选包；未产生独立验收或正式交付。',
+                                                    {'deliveryId':candidate['id'],'taskId':task['id'],'entrypoint':candidate['entrypoint']})
+                                    result.update(candidateDelivery=candidate,candidateReused=bool(previous))
+                                    self._persist()
                 elif kind=='package_delivery':
                     with self.lock:
-                        if len(run.get('deliveries',[]))>=8:
-                            raise ProtocolError('本次运行最多创建8个可追踪交付包。')
-                        delivery=create_delivery(run,task,self.artifacts,action.get('artifactIds'),
-                                                 action.get('entrypoint'),action.get('instructions'))
+                        if 'candidate' in action and type(action['candidate']) is not bool:
+                            raise ProtocolError('package_delivery candidate must be a boolean.')
+                        candidate=action.get('candidate') is True
+                        package=create_candidate_delivery if candidate else create_delivery
+                        delivery=package(run,task,self.artifacts,action.get('artifactIds'),
+                                         action.get('entrypoint'),action.get('instructions'))
+                        previous=existing_candidate(run,self.artifacts,delivery) if candidate else None
+                        count=sum((d.get('status')=='candidate')==candidate for d in run.get('deliveries',[]))
+                        if not previous and count>=8:
+                            raise ProtocolError('本次运行最多创建8个'+('候选包。' if candidate else '正式交付包。'))
                         if self._time_only(run) and self._remaining_ms(run)<=0:
                             run.setdefault('lateDeliveries',[]).append(delivery)
                             self._expire_time_budget(channel,run)
                             raise Stopped()
-                        binding=unchanged_bundle_binding(run,task,delivery,self.artifacts,
+                        binding=None if candidate else unchanged_bundle_binding(run,task,delivery,self.artifacts,
                             self._reviewed_delivery_sources(run,task))
                         if binding:delivery['reviewedSourceBinding']=binding
-                        run.setdefault('deliveries',[]).append(delivery)
-                        self._event(run,'delivery_packaged',task['agentId'],'已从显式选择的快照创建可下载产品包；打包不等于验收通过。',
-                                    {'deliveryId':delivery['id'],'taskId':task['id'],'entrypoint':delivery['entrypoint'],
-                                     'artifactIds':[f['artifactId'] for f in delivery['files']]})
+                        if previous:
+                            delivery=previous
+                        else:
+                            run.setdefault('deliveries',[]).append(delivery)
+                            self._event(run,'candidate_delivery_packaged' if candidate else 'delivery_packaged',task['agentId'],
+                                        '已从显式快照创建待审核候选包。' if candidate else '已从显式选择的快照创建可下载产品包；打包不等于验收通过。',
+                                        {'deliveryId':delivery['id'],'taskId':task['id'],'entrypoint':delivery['entrypoint'],
+                                         'artifactIds':[f['artifactId'] for f in delivery['files']]})
                         self._persist()
                     result={'ok':True,'delivery':delivery}
+                    if candidate:result['candidateReused']=bool(previous)
                 elif kind=='grant_artifact':
                     artifact=self.artifacts.get(action.get('artifactId'))
                     if artifact.get('ownerAgentId',artifact.get('owner'))!=task['agentId']: raise ProtocolError('只能授权自己注册的产物。')

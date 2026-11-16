@@ -1,0 +1,431 @@
+{
+  "reportVersion": 1,
+  "recordedAtUTC": "2026-11-16T05:59:35.988343+00:00",
+  "evaluation": "R10 six real Mid-Test tasks followed by R11 local engineering changes",
+  "officialRubric": false,
+  "liveRound": {
+    "round": "R10",
+    "sourceCommit": "d7b754b538cc61c1cc6870273e90c632efb0a799",
+    "sourceFileCount": 212,
+    "sourceManifestSha256": "412dc4a9c73481c834452d146a3eb4f9f2832f18928dd7c0d11f9659023ee934",
+    "preflightRegression": {
+      "passed": 832,
+      "skipped": 0,
+      "failures": 0,
+      "errors": 0,
+      "durationSeconds": 249.901,
+      "log": "local evidence/full-regression-attempt3.log",
+      "logSha256": "277211ef63d8839232b2d8db1efe15ea8d040a5040afa9a91ae7004062c32f6a",
+      "command": "RUN_BROWSER_DOCKER_TESTS=1 RUN_AGENT_SANDBOX_DOCKER_TESTS=1 python3 -m unittest discover -s tests -v"
+    },
+    "cases": [
+      {
+        "case": "software-1",
+        "runId": "run-7109efc11ad4428f",
+        "previousRunId": null,
+        "workflowStatus": "partial",
+        "terminalExportSha256": "cd34bd3498a1316267cb256d0f3e2cb00f5b2a90530c0adf59a187b3cbfccf77",
+        "modelCalls": 97,
+        "reportedTokens": 1407104,
+        "unknownUsageCalls": 9,
+        "wallElapsedMs": 1800376,
+        "reviewPassEvents": 0,
+        "duplicateSameVersionReviewPassEvents": 0,
+        "idempotentReviewReturnReceipts": 0,
+        "publishedArtifacts": 5,
+        "deliveryRecords": 0,
+        "deliveryIds": [],
+        "productAssessment": {
+          "title": "会议室预约",
+          "requestedFormProduced": true,
+          "core": "16项正常预约检查、直接打开及刷新保存通过；没有交付ZIP。",
+          "issues": [
+            "存储读取异常后预约可覆盖原有记录。",
+            "预约格子无法通过Tab键访问。",
+            "QA72轮仍未正式交接，后续打包未执行。"
+          ],
+          "source": "evidence/software-supervision/software-final-analysis.json"
+        },
+        "newPublishedArtifacts": 5,
+        "inheritedArtifacts": 0,
+        "rawSettlementVerified": true
+      },
+      {
+        "case": "software-2",
+        "runId": "run-61871c2256744f2f",
+        "previousRunId": "run-7109efc11ad4428f",
+        "workflowStatus": "partial",
+        "terminalExportSha256": "c3c8583d3cb4347233b866c3d4be2150bc98389668b0896601e1195f09d67b74",
+        "modelCalls": 71,
+        "reportedTokens": 1607751,
+        "unknownUsageCalls": 14,
+        "wallElapsedMs": 1800006,
+        "reviewPassEvents": 0,
+        "duplicateSameVersionReviewPassEvents": 0,
+        "idempotentReviewReturnReceipts": 0,
+        "publishedArtifacts": 11,
+        "deliveryRecords": 0,
+        "deliveryIds": [],
+        "productAssessment": {
+          "title": "预约用量看板",
+          "requestedFormProduced": true,
+          "core": "预约回归和真实同浏览器S1到S2升级通过；看板10个常规观察9通过1失败。",
+          "issues": [
+            "最少使用房间判断忽略零使用房间。",
+            "只有取消记录的区间隐藏取消指标。",
+            "存储读取失败覆盖记录、取消日志写失败静默丢失及键盘可用性问题仍在。",
+            "开发者50轮后partial，独立QA和打包未执行；私有未发布补丁不计交付。"
+          ],
+          "source": "evidence/software-supervision/software-final-analysis.json"
+        },
+        "newPublishedArtifacts": 6,
+        "inheritedArtifacts": 5,
+        "rawSettlementVerified": true
+      },
+      {
+        "case": "newsroom-1",
+        "runId": "run-bc7073cd9aab4fc8",
+        "previousRunId": null,
+        "workflowStatus": "partial",
+        "terminalExportSha256": "ca3f0dd20d7174b697fbacf877450049f80ca3029f96e81deba283cf9341227b",
+        "modelCalls": 86,
+        "reportedTokens": 1357143,
+        "unknownUsageCalls": 14,
+        "wallElapsedMs": 1800004,
+        "reviewPassEvents": 1,
+        "duplicateSameVersionReviewPassEvents": 0,
+        "idempotentReviewReturnReceipts": 3,
+        "publishedArtifacts": 13,
+        "deliveryRecords": 1,
+        "deliveryIds": [
+          "delivery-b9746739e2754a22824e39835766b418"
+        ],
+        "productAssessment": {
+          "title": "校园AI新闻",
+          "requestedFormProduced": true,
+          "core": "正文942词，新闻稿/社交稿/说明组成真实ZIP；正文和社交稿与审核版本字节一致。",
+          "issues": [
+            "5月活动在11月作为近期报道，新闻时效匹配不足。",
+            "社交稿遗漏活动日期、把近80个国家和地区简化为80个国家。",
+            "正文声称来源均已读，与未读奖单的核查记录矛盾。",
+            "最终汇总重复写入及接口失败后到期；正式审核的重复pass已幂等，但同内容重发曾重置收尾计数。"
+          ],
+          "source": "evidence/newsroom-supervision/newsroom-round10-summary.json"
+        },
+        "newPublishedArtifacts": 13,
+        "inheritedArtifacts": 0,
+        "rawSettlementVerified": true
+      },
+      {
+        "case": "newsroom-2",
+        "runId": "run-0fad2ff0ae804837",
+        "previousRunId": "run-bc7073cd9aab4fc8",
+        "workflowStatus": "partial",
+        "terminalExportSha256": "2ea4fb5250c5dd3c7a4a9ee640136f4bbc43bd227fc74fe6c91b0b6da7102a38",
+        "modelCalls": 84,
+        "reportedTokens": 1423049,
+        "unknownUsageCalls": 15,
+        "wallElapsedMs": 1771977,
+        "reviewPassEvents": 2,
+        "duplicateSameVersionReviewPassEvents": 0,
+        "idempotentReviewReturnReceipts": 0,
+        "publishedArtifacts": 24,
+        "deliveryRecords": 1,
+        "deliveryIds": [
+          "delivery-a1ec2471ea9745cfbbe1c63859200621"
+        ],
+        "productAssessment": {
+          "title": "AI检测器事实核查",
+          "requestedFormProduced": true,
+          "core": "正文约1186词及社交稿/说明组成真实ZIP；稿件与审核版本字节一致，本题无800词限制。",
+          "issues": [
+            "把预测报告的20%阈值误作真实AI写作比例条件，错误解释假阳性率。",
+            "以主要来自2023年的证据概括所有现有工具，结论范围过大。",
+            "事实核查者未独立抓取原文；最终汇总有md产物契约却只私有写入未发布。"
+          ],
+          "source": "evidence/newsroom-supervision/newsroom-round10-summary.json"
+        },
+        "newPublishedArtifacts": 11,
+        "inheritedArtifacts": 13,
+        "rawSettlementVerified": true
+      },
+      {
+        "case": "fund-1",
+        "runId": "run-d4b461cd4d0c4424",
+        "previousRunId": null,
+        "workflowStatus": "partial",
+        "terminalExportSha256": "c00ac7f7e7bbdfa00d83e030662d081b30e6b988a25fe4ff918da0df7374cdca",
+        "modelCalls": 73,
+        "reportedTokens": 1099101,
+        "unknownUsageCalls": 15,
+        "wallElapsedMs": 1800001,
+        "reviewPassEvents": 0,
+        "duplicateSameVersionReviewPassEvents": 0,
+        "idempotentReviewReturnReceipts": 0,
+        "publishedArtifacts": 7,
+        "deliveryRecords": 0,
+        "deliveryIds": [],
+        "productAssessment": {
+          "title": "模拟投资方案",
+          "requestedFormProduced": true,
+          "core": "配置、风险与客户介绍均已发布；两份表格实际解析均为100%/HKD1000000且一致。",
+          "issues": [
+            "部分风险、恢复期及来源支持不足，尚需编辑与金融事实复核。",
+            "15次模型请求失败累计986.034秒，最终审核没有完成，未生成ZIP。"
+          ],
+          "source": "evidence/fund-supervision-summary.json"
+        },
+        "newPublishedArtifacts": 7,
+        "inheritedArtifacts": 0,
+        "rawSettlementVerified": true
+      },
+      {
+        "case": "fund-2",
+        "runId": "run-966736e0584d441b",
+        "previousRunId": "run-d4b461cd4d0c4424",
+        "workflowStatus": "partial",
+        "terminalExportSha256": "b8229c0518012733a58e45aea2596485239a79df8a6bd1c456478f7e8798e4b5",
+        "modelCalls": 43,
+        "reportedTokens": 661517,
+        "unknownUsageCalls": 3,
+        "wallElapsedMs": 695325,
+        "reviewPassEvents": 1,
+        "duplicateSameVersionReviewPassEvents": 0,
+        "idempotentReviewReturnReceipts": 0,
+        "publishedArtifacts": 10,
+        "deliveryRecords": 0,
+        "deliveryIds": [],
+        "productAssessment": {
+          "title": "半导体行业HTML演示文稿",
+          "requestedFormProduced": false,
+          "core": "仅3份新的范围/研究/风险Markdown，无HTML和ZIP；7份继承文件不算新产品。",
+          "issues": [
+            "研究在取证阶段关闭后如实partial，普通后续任务依赖被阻断。",
+            "全run在695.325秒结束，还余1104.675秒；不能归为30分钟全局超时。",
+            "行业收入增长不能直接推出估值偏高；部分回撤区间缺推导模型。"
+          ],
+          "source": "evidence/fund-supervision-summary.json"
+        },
+        "newPublishedArtifacts": 3,
+        "inheritedArtifacts": 7,
+        "rawSettlementVerified": true
+      }
+    ],
+    "totals": {
+      "modelCalls": 454,
+      "reportedTokens": 7555665,
+      "unknownUsageCalls": 70,
+      "deliveryRecords": 2,
+      "duplicateSameVersionReviewPassEvents": 0
+    },
+    "workflowStatuses": {
+      "partial": 6
+    },
+    "requestedProductForms": {
+      "produced": 5,
+      "expected": 6
+    },
+    "actualProductZipCount": 2,
+    "allSixTerminalSettled": true,
+    "stableDeliveryEstablished": false,
+    "manualGeneratedProductEdits": false,
+    "settings": {
+      "timeOnly": true,
+      "secondsPerCase": 1800,
+      "modelCallsLimit": null,
+      "turnsLimit": null,
+      "totalTokenLimit": null,
+      "actionMaxTokens": 6000,
+      "planningMaxTokens": 3000,
+      "requestTimeoutSeconds": 60,
+      "maxRetries": 1,
+      "generationRetries": 2,
+      "contextCharacterLevels": [
+        40000,
+        60000,
+        80000,
+        120000
+      ],
+      "requestedModel": "t2_hkgai-v3_fp8_1m_e7",
+      "reportedModelsObserved": {
+        "t2_hkgai-v3_fp8_1m_e10": 384
+      },
+      "thinking": "disabled",
+      "responseFormat": "json_object",
+      "transport": "compatible",
+      "humanWaitCountsAgainstTime": true,
+      "sameTeamTask2ContinuesTask1": true,
+      "originalTaskAndRolePromptsChanged": false
+    }
+  },
+  "R9Comparison": {
+    "oneRoundPerVersion": true,
+    "totals": {
+      "R9": {
+        "modelCalls": 406,
+        "reportedTokens": 8354112,
+        "unknownUsageCalls": 11,
+        "deliveryRecords": 1,
+        "duplicateSameVersionReviewPassEvents": 23
+      },
+      "R10": {
+        "modelCalls": 454,
+        "reportedTokens": 7555665,
+        "unknownUsageCalls": 70,
+        "deliveryRecords": 2,
+        "duplicateSameVersionReviewPassEvents": 0
+      }
+    },
+    "workflowStatuses": {
+      "R9": {
+        "partial": 4,
+        "done": 1,
+        "failed": 1
+      },
+      "R10": {
+        "partial": 6
+      }
+    },
+    "stableImprovementProven": false,
+    "causalCostReductionProven": false
+  },
+  "localUpgrade": {
+    "name": "R11",
+    "branch": "local/stable-delivery-round11",
+    "baseCommit": "d7b754b538cc61c1cc6870273e90c632efb0a799",
+    "fullRegression": {
+      "passed": 880,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "durationSeconds": 244.024,
+      "logSha256": "eb8a2365aef1f958d7033d1c0cb664d8768f5168ae2577221685eb9c901fd029",
+      "sourceFileCount": 218,
+      "sourceManifestSha256": "e15bbaabc2826a85d6c77d9bf460a2e0bfe32e89b8cb6025214670cdd9f51c44",
+      "sourceUnchangedDuringRun": true,
+      "codeAndTestsManifestSha256": "2bee14ec2dc9d4d9550f6189a0c1c0a2298a31fc63d32cd23b74965a3a82b5c8",
+      "codeAndTestsFileCount": 216,
+      "command": "RUN_BROWSER_DOCKER_TESTS=1 RUN_AGENT_SANDBOX_DOCKER_TESTS=1 python3 -m unittest discover -s tests -v",
+      "liveModelCalls": 0
+    },
+    "newRegressionTestsRelativeToR10": 48,
+    "frontendSyntaxCheck": {
+      "command": "node --check js/workbench.js",
+      "exitCode": 0,
+      "sourceSha256": "ec78428ddd4cac9ef33176547949289c3c02075b4db0efeb560c060410c4a370"
+    },
+    "priorAttempt": {
+      "tests": 880,
+      "failures": 1,
+      "durationSeconds": 233.925,
+      "cause": "Existing prompt test required literal delivery.id; restored the phrase and reran the entire unchanged suite.",
+      "logSha256": "0ec622c8549503365a772f607eea0200a402d2cbb5469c7874b9fbd92d68126d"
+    },
+    "changes": [
+      {
+        "area": "candidate_delivery",
+        "implemented": true,
+        "scope": "Explicit artifact candidateDelivery contract; fully successful publication batch plus declared entrypoint/assets/instructions creates a downloadable candidate. Download produces ZIP from immutable snapshots. No workspace scanning or automatic acceptance.",
+        "limits": [
+          "Candidate cannot satisfy formal delivery or independent acceptance.",
+          "Candidate and formal quotas separated (8 each). Model/time/call/token settings unchanged.",
+          "Fresh current-task producer entrypoint required; existing SHA/ACL/path constraints remain.",
+          "Exact current declarations reuse existing candidate; source changes need new candidate."
+        ]
+      },
+      {
+        "area": "final_summary",
+        "implemented": true,
+        "scope": "Explicit text finalSummary tasks reject new writes/tests/publications/packages/delegation/reviews with actionable feedback; leader must still return a real final.",
+        "limits": [
+          "Artifact/delivery/legacy summaries retain original contracts.",
+          "No automatic final answer, approval, review or task completion."
+        ]
+      },
+      {
+        "area": "review_progress",
+        "implemented": true,
+        "scope": "Private file and published report path/content signatures ignore same-byte republishing with a fresh artifact ID or metadata. Actual source IDs retained for provenance."
+      },
+      {
+        "area": "browser_failure_recovery",
+        "implemented": true,
+        "scope": "A trustworthy successful browser check clears only the matching assertion/setup/source-version failure episode. Unrelated successes cannot reset unresolved failures.",
+        "counterfactualHistoricalReplay": {
+          "software-1": {
+            "wouldBlockCalls": 5
+          },
+          "software-2": {
+            "browserCalls": 11,
+            "wouldBlockCalls": 0
+          },
+          "isNewLiveRun": false
+        },
+        "limits": [
+          "Distinct test expansion, actual product bugs and all loop varieties are not solved.",
+          "Changed source or corrected test setup remains eligible; failed assertions never converted to passes."
+        ]
+      },
+      {
+        "area": "research_partial_handoff",
+        "implemented": "planning_guidance_only",
+        "scope": "Planner guidance for bounded evidence, explicit gaps and a reviewer-produced usable-evidence brief.",
+        "limits": [
+          "No new structured evidence-brief contract or ordinary partial dependency bypass implemented.",
+          "F2 must still be tested after a concrete verified handoff improvement."
+        ]
+      }
+    ],
+    "newLiveSixTaskValidation": false,
+    "generatedR10ProductsModified": false,
+    "platformInternalModelOrTimeBudgetsReduced": false,
+    "user8080ServiceChanged": false,
+    "githubPushed": false
+  },
+  "nextPriorities": [
+    "Structured independently reviewed partial-research handoff without relaxing original completion gates.",
+    "Generated-product storage and dashboard fault handling; news timing/metric/source checks; evidence for forecast ranges.",
+    "Provider request failure handling and evidence-based stage allocation, evaluated separately.",
+    "Fresh six-case run and held-out tasks across repeated runs before claiming stable delivery."
+  ],
+  "crewaiReference": {
+    "commit": "bf6fd3a0972dd72fe1ff568c243e87e3b8408d35",
+    "license": "MIT",
+    "runtimeDependencyAdded": false,
+    "automaticZipProvidedByCrewAI": false,
+    "scope": "Adapted explicit TaskOutput and deterministic Flow-step design; own candidate ZIP implementation. CrewOutput aggregation does not require an open-ended extra model summary.",
+    "sources": [
+      "https://github.com/crewAIInc/crewAI/blob/bf6fd3a0972dd72fe1ff568c243e87e3b8408d35/lib/crewai/src/crewai/crew.py#L1949",
+      "https://github.com/crewAIInc/crewAI/blob/bf6fd3a0972dd72fe1ff568c243e87e3b8408d35/lib/crewai/src/crewai/task.py#L1425",
+      "https://github.com/crewAIInc/crewAI/blob/bf6fd3a0972dd72fe1ff568c243e87e3b8408d35/lib/crewai/src/crewai/tools/tool_usage.py#L779",
+      "https://github.com/crewAIInc/crewAI/blob/bf6fd3a0972dd72fe1ff568c243e87e3b8408d35/lib/crewai/src/crewai/utilities/agent_utils.py#L1999",
+      "https://docs.crewai.com/en/concepts/tasks",
+      "https://docs.crewai.com/en/concepts/flows"
+    ]
+  },
+  "localEvidence": {
+    "rawEvidenceIncludedInRepository": false,
+    "pathsRelativeToLocalRoundEvidenceDirectory": true,
+    "sha256": {
+      "unified-assessment.json": "055912527774e7fe434ff48ac0f1d257e956b6b406196e4e3b9f780c5f13713a",
+      "final-freeze-and-export-check.json": "21f1d9b5e65255cf874d6ddd8742ff02350c899ab81701201a384db80ccadef0",
+      "software-supervision/software-final-analysis.json": "ec687b719cc40de17d4aed5068cf7bdf79134ab84c8e95fba73fcd0d245d327d",
+      "newsroom-supervision/newsroom-round10-summary.json": "9412950ed1389695e8ebf73123205542a84e8bf48002b3d167650be536fd8395",
+      "fund-supervision-summary.json": "cb3cace2d07b36d17a6d2e8d4dc0b954470e02fd1b13cc19681780bfabb46114",
+      "r9-r10-workflow-comparison.json": "2196fdf693d199f2161db97a0af06c656d187d52a620e974fff25efe05b32e55",
+      "r9-r10-wait-comparison.json": "c5726403c401eb661177e80d6f4db3ccf541b380dfc466e5fca36d5400997f7f",
+      "crewai-reference.json": "b7304c83501b54d3944602fb67dc5ec34a6f675bc9aef68e2966e4e4816a353e",
+      "crewai-tool-reuse-reference.json": "92466167dcba543415f19982c943dfaa62f6c1eecd7d731cc5cfe4cb4c6fe52e"
+    }
+  },
+  "limits": [
+    "检查数描述覆盖范围，不是产品质量百分比；S1界面改变导致16项检查与R9的17项并非同一个分母。",
+    "一轮结果不能证明稳定性；服务失败频率和人工等待不同，不能把差异全归于代码。",
+    "70个失败请求用量未知；已知Token较低不能证明总成本下降。",
+    "平台生成产品保持原样；后续代码优化不是人工修复这些产品。",
+    "Partial is a workflow state, not a universal product-quality verdict. A valid ZIP does not imply business or factual correctness.",
+    "Zero duplicate pass events does not mean no redundant review actions or successful handoff.",
+    "R11 regression tests are offline and do not establish six-task live success.",
+    "Unpublished patches and inherited files are not counted as newly delivered fixes/products."
+  ]
+}

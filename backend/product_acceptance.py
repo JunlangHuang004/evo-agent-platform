@@ -200,6 +200,8 @@ class ProductVerifier:
             def get(self, artifact_id): return evidence.load_artifact(artifact_id)
         errors = []
         for delivery in reversed(raw.get('deliveries', [])):
+            if delivery.get('status') == 'candidate':
+                continue
             try:
                 validate_delivery(delivery, raw, Store(), current=True)
                 archive = delivery_zip(delivery, raw, Store())

@@ -6,15 +6,16 @@ import tempfile
 import unittest
 
 from backend.config import Config
+from backend.delivery import create_delivery,DeliveryError
 from backend.engine import Platform,clock_ms
-from backend.review_lifecycle import current_pass_receipt,review_context,record_duplicate,current_repeat_state
+from backend.review_lifecycle import current_pass_receipt,review_context,record_duplicate,current_repeat_state,report_work_signature
 from backend.teams import get_team_agents
 from tests.test_engine import ScriptedProvider,task,final
 from tests.test_execution_closure import LocalFiles,tool
 
 
 class ReviewLifecycleRuntimeTests(unittest.TestCase):
-    def run_case(self,qa,*,qa_contract=None,limit=None,source=False):
+    def run_case(self,qa,*,qa_contract=None,limit=None,source=False,package_names=None):
         folder=tempfile.TemporaryDirectory();self.addCleanup(folder.cleanup)
         config=Config(Path(folder.name),{'LLM_API_KEY':'offline-review-lifecycle','MAX_RETRIES':'0'})
         config.apply_time_only_profile()
@@ -34,6 +35,7 @@ class ReviewLifecycleRuntimeTests(unittest.TestCase):
         def release(i,c,m):
             if i==0:
                 artifacts=c['authorizedArtifacts']
+                if package_names is not None:artifacts=[a for a in artifacts if a['name'] in package_names]
                 return {'type':'package_delivery','artifactIds':[a['id'] for a in artifacts],
                         'entrypoint':artifacts[0]['name'],'instructions':'Open the published Markdown documents.'}
             return final('Actual package created after explicit QA final.')
@@ -148,6 +150,55 @@ class ReviewLifecycleRuntimeTests(unittest.TestCase):
         self.assertFalse(app.artifacts.can_access(source['id'],'reviewer',run['id']))
         self.assertFalse(any(e['type']=='artifact_granted' and e['payload'].get('artifactId')==source['id']
                              and e['payload'].get('toAgent')=='reviewer' for e in run['events']))
+
+    def test_identical_report_republication_does_not_reset_final_handoff(self):
+        def qa(i,c,m,app):
+            if i==0:return tool('file.write',path='review.md',content='Actual assessment of the two current products.')
+            if i==1:return {'type':'publish_artifact','path':'review.md'}
+            if i<4:return self.decision(c,i-2)
+            if i==4:return self.decision(c,0)
+            if i==5:return tool('file.read',path='review.md')
+            if i==6:return {'type':'publish_artifact','path':'review.md'}
+            if i==7:
+                self.assertEqual(c['reviewProgress']['duplicateRecovery']['duplicatesWithoutProgress'],1)
+                return self.decision(c,1)
+            self.assertTrue(c['reviewProgress']['duplicateRecovery']['finalRequired'])
+            return final('Explicit handoff of the already published assessment.')
+        # The release explicitly packages the two requested products. Including
+        # both distinct review IDs at one archive path is a real package conflict,
+        # unrelated to whether republishing is new reviewer work.
+        app,run,model=self.run_case(qa,qa_contract={'kind':'artifact','extensions':['.md']},
+                                  package_names={'Proposal.md','Intro.md'})
+        q=self.qa_task(run)
+        self.assertEqual(run['status'],'done')
+        self.assertEqual(q['status'],'done');self.assertEqual(model.counts['QA'],9)
+        reports=[a for a in run['artifacts'] if a.get('taskId')==q['id']]
+        self.assertEqual(len(reports),2)
+        self.assertNotEqual(reports[0]['id'],reports[1]['id'])
+        self.assertEqual(reports[0]['sha256'],reports[1]['sha256'])
+        self.assertEqual(len([e for e in run['events'] if e['type']=='review_pass']),2)
+        self.assertEqual(len(run['deliveries']),1)
+        self.assertEqual({f['path'] for f in run['deliveries'][0]['files']},{'Proposal.md','Intro.md'})
+        release=next(t for t in run['steps'] if t['title']=='Release')
+        with self.assertRaisesRegex(DeliveryError,'same product path'):
+            create_delivery(run,release,app.artifacts,[reports[1]['id'],reports[0]['id']],
+                            'review.md','Open the selected reports.')
+
+    def test_report_progress_uses_bytes_and_path_but_preserves_new_publication_and_edits(self):
+        files={'review.md':'a'*64}
+        first={'id':'first','path':'review.md','name':'review.md','sha256':'a'*64}
+        republished={**first,'id':'second','createdAt':12345}
+        before=report_work_signature(files,[])
+        published=report_work_signature(files,[first])
+        self.assertNotEqual(before,published)
+        self.assertEqual(published,report_work_signature(files,[first,republished]))
+        self.assertEqual(published,report_work_signature(files,[first,{**republished,'name':'display-only-title'}]))
+        self.assertEqual(published,report_work_signature(files,[republished,first]))
+        moved={**first,'id':'moved','path':'archive/review.md'}
+        self.assertNotEqual(published,report_work_signature(files,[first,moved]))
+        changed={**first,'id':'changed','sha256':'b'*64}
+        self.assertNotEqual(published,report_work_signature(files,[first,changed]))
+        self.assertNotEqual(published,report_work_signature({'review.md':'b'*64},[first]))
 
     def test_original_deadline_final_gate_takes_precedence_and_adds_no_repair(self):
         def qa(i,c,m,app):

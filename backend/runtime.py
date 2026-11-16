@@ -178,16 +178,17 @@ def planning_prompt(agents, limit):
             'Return a compact plan, not implementation, code, long analysis or full task answers. Use short titles/goals and at most two concise acceptance criteria per task. '
             'Optional task outputContract: {"kind":"text"}, {"kind":"artifact","extensions":[".html"],"minCount":1}, '
             '{"kind":"json","requiredKeys":["result"]}, or {"kind":"delivery"} for a final runnable/downloadable product package. '
+            'For the actual product producer, artifact may additionally set candidateDelivery:true: publish its explicit entrypoint/assets/use instructions as a downloadable pending-review candidate before QA. Do not mark research notes or briefs as product candidates. '
             'Use a json output contract only for requested machine-readable data or an actual downstream parser. Ordinary review conclusions use a text contract for final.text; the required review action carries the structured verdict/evidence, and all actions remain JSON. '
             'For requested files/HTML/software deliverables declare a matching artifact contract; choose the formats from the actual request. '
             'For a product request, prefer a compact requirements/design, implementation, independent validation, and packaging/delivery loop owned by the actual roles. '
             'For an ordinary small runnable product with four roles, combine clarification and design in one lead-owned task; '
-            'usually use five real tasks: lead requirements/design, developer implementation, independent QA, release packaging, and final lead synthesis. '
+            'usually use five real tasks: lead requirements/design, developer implementation with candidate package, independent QA, release packaging, and final lead synthesis. '
             'Adapt this guide to the actual task and selected capabilities; do not add a separate clarification task before the design task. '
             'The task maximum is a ceiling, not a target. Combine closely related implementation work and publish any design files needed by another role. '
             'Do not preallocate repeated fix/retest tasks; let an actual reviewer request bounded rework when evidence shows a defect. '
             'A usable product needs a real entrypoint, required assets and usage instructions; design notes alone are not a finished product. '
-            'Implementation tasks publish actual source artifacts for independent QA. For runnable software or website products, '
+            'Implementation tasks publish actual source artifacts and a declared candidate bundle before independent QA; candidate is not acceptance or formal release. For runnable software or website products, '
             'give the final packaging task a delivery contract even if the user did not explicitly ask for a ZIP download; pure analysis needs no forced package. '
             'The packaging role must have authorized access to all required source snapshots; final synthesis receives ancestor outputs. '
             'For written reports and presentations, independently review all substantive draft artifacts before packaging, not just their introductions. '
@@ -197,7 +198,9 @@ def planning_prompt(agents, limit):
             'reviewOf binds planned targets and ordering only: it does not prove completeness, grant extra access or record a verdict. '
             'Checking research notes alone does not validate claims added later by the writer; plan a final-draft review and let the reviewer request author rework when needed. '
             'Give that review explicit dependencies on the draft and relevant research/source-producing tasks so their published evidence can be granted through the existing handoff rules. A task title or unseen ancestor does not authorize access. '
-            'Choose only the tasks actually needed within the maximum; dependencies use task ids, no cycles. Determine the breakdown and technical approach yourself from the actual request and prior group context. '
+            'Final lead synthesis uses a text contract and reports existing products, reviews and gaps; put substantive product writing before its independent review, not in final synthesis. '
+            'Research handoffs need bounded evidence and explicit gaps. Where appropriate, let an independent reviewer publish a scoped usable-evidence brief for downstream writing; do not silently narrow mandatory user requirements or treat the original partial research as done. '
+            'Choose only necessary tasks; dependencies use task ids, no cycles. Determine the approach from the actual request and prior context. '
             'Handle consequential clarification inside the responsible task before affected work; do not make a separate DAG task for every question. '
             'Reuse saved humanClarifications and ask only for unresolved consequential requirements or contradictions. '
             'Start concise evidence notes early, before the server stageControl acquisition cutoff. Plan explicit synthesis and handoff time; '
@@ -229,7 +232,7 @@ def _tool_schema_bundle(definitions):
     return {'tools':specs,'parameterSchemas':shared}
 
 
-def action_prompt(agent, definitions):
+def action_prompt(agent, definitions, task=None):
     specs=_tool_schema_bundle(definitions)
     allowed={item['name'] for item in definitions}
     code_enabled=bool(allowed.intersection(('code.run','code.test')))
@@ -260,6 +263,10 @@ def action_prompt(agent, definitions):
             'task.reviewOf, when present, lists the actual planned producer task IDs to inspect and review, not your own task ID. Use their current delivered artifacts and an explicit review action; the declaration is not a verdict. '
             'When your task is independent validation, submit an explicit review of the actual producer task and current draft artifacts; a prose verification note alone is not that action. '
             'text/source review is an editorial assessment, not a fabricated code test. ') if 'review' in agent.get('capabilities',[]) else ''
+    candidate_guidance=('For artifact candidateDelivery:true, attach delivery:{entrypoint,instructions,artifactIds?:[existing asset IDs]} to publish_artifacts; only a fully successful batch creates the pending-review ZIP. Or use package_delivery with candidate:true and explicit IDs. Candidate is not formal delivery or acceptance. '
+        if isinstance(task,dict) and (task.get('outputContract') or {}).get('candidateDelivery') is True else '')
+    summary_guidance=('This final summary has an explicit text contract: readonly inspection and final.text only; do not rewrite, publish, repackage or execute products. '
+        if isinstance(task,dict) and task.get('finalSummary') is True and (task.get('outputContract') or {}).get('kind')=='text' else '')
     return (agent.get('rolePrompt','You are '+agent['name']+'. '+agent.get('description',''))+'\n\n'
         'Reply one complete JSON action per turn, no prose. Use small modular files and exact file.patch edits; one file/change per turn. '
         'Tool action: {"type":"tool","name":"file.write","args":{"path":"x.py","content":"source"}}. '
@@ -288,6 +295,7 @@ def action_prompt(agent, definitions):
         'Package reviewed artifact IDs without rewriting claims; substantive edits need review again. Include readable source URLs/as-of dates in research-based deliveries. '
         'Read authorized prior artifacts; report missing inputs and unsupported checks. '
         'If task.finalSummary is true, synthesize the existing artifacts, actual verification and missing work. '
+        +summary_guidance+
         'Prioritize the current deliverable, latest review, delivery/taskOutput IDs, satisfied criteria and exact gaps. '
         'Reread unchanged ancestors only for a specific required missing body/window; do not repackage another role\'s delivery for certainty. '
         'Use dependency taskOutput executionError and observedWork: distinguish private writes/tests from published artifacts, and actual successful source access from failures. URL/SHA audit indexes contain no source body or acceptance. '
@@ -302,9 +310,10 @@ def action_prompt(agent, definitions):
         'file.write is private. Share with {"type":"publish_artifact","path":"relative/file.md"} or '
         '{"type":"publish_artifacts","paths":["app/index.html","app/app.js"]} (1–12 paths); check every result for partial failure. '
         'Actual returned artifact.id values enter task.outputs for handoff. '
+        +candidate_guidance+
         'For final delivery use {"type":"package_delivery","artifactIds":["artifact-real-id"],"entrypoint":"app/index.html","instructions":"Actual use steps"} '
         'Use all current required owned/granted snapshots; duplicate paths, stale or only inherited content are rejected. '
-        'Publish required outputs before final; cite actual artifact IDs; cite delivery.id only for a real package. Packaged does not mean independently accepted. '
+        'Publish required outputs before final; cite actual artifact IDs and real delivery.id only. Candidate bundles survive later QA failure but never satisfy formal delivery or independent acceptance. '
         'final.text: real IDs, entrypoint/use steps, verification evidence and limits; omit whole files/conversation. '
         'personalLearning is owner-only: factualEpisodes are past observations, experimentalCandidates are UNVERIFIED suggestions, '
         'verifiedStrategies have limited evidence, not guarantees. Check applicability and permissions. '
