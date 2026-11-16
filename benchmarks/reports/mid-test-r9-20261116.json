@@ -228,7 +228,7 @@
   },
   "snakeLimit": "First attempt on fresh state with frozen R9 source; no product edits. Byte-identical release copies received new artifact task IDs, leaving an internal acceptance gap. One common game does not rule out tuning/overfitting or prove general reliability.",
   "publishedVersion": {
-    "branch": "fix/mid-test-delivery-20261116",
+    "branch": "backend-core-upgrade",
     "baseCommit": "5fb8632565606273143692a611a6086f8b9c7119",
     "codeManifestSha256": "bc8f5ed572cf2855e05157e67c35d1f6286e5215180371b2cf4af5228666bab9",
     "codeManifestDefinition": "SHA256 of UTF-8 sorted compact JSON mapping relative source paths to SHA256, excluding root README and report metrics",
@@ -243,7 +243,9 @@
     },
     "additionalChange": "Precise submitted task/owner IDs in existing invalid reviewOf diagnostics, plus four tests. Validation, permissions and explicit replanning requirements unchanged.",
     "additionalChangeTestedInR9LiveRun": false,
-    "newFullLiveRoundStarted": false
+    "newFullLiveRoundStarted": false,
+    "remotePreviousCommit": "089847328b45703095907a8b9b50292f45cf33ab",
+    "updateMode": "fast-forward; no force push"
   },
   "evidenceAvailability": "This repository contains source/tests and this sanitized summary. Raw run exports, private state, generated products, screenshots and Word copy are retained locally. Hashes bind those records; their contents are not included here."
 }
