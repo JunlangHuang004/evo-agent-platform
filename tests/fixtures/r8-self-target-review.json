@@ -1,0 +1,224 @@
+{
+  "case": "R8 fund-1",
+  "exportSha256": "25e808372a7bb7d092a2da2195c02ce6c4eb799a67c6d5037d07639573211eaa",
+  "sourceMeaning": "Actual compact task/artifact metadata and rejected self-target proposal. Unit test is a prospective new feedback view, never a replay or modification of the old run. DAG uses the actual saved pre-synthesis working observation; artifact metadata is limited to actual snapshots registered by the self-target proposal timestamp. Later final-product artifacts are not resurrected into the historical candidate list.",
+  "run": {
+    "id": "run-29e61e970ba848d8",
+    "mode": "task",
+    "status": "running",
+    "participants": [
+      "fund_manager",
+      "research",
+      "risk",
+      "marketing"
+    ],
+    "steps": [
+      {
+        "id": "task-56932fe513bb48ac",
+        "title": "任务拆解与依赖规划",
+        "agentId": "fund_manager",
+        "status": "done",
+        "turns": 0,
+        "revision": 0,
+        "dependsOn": [],
+        "acceptanceCriteria": [
+          "交付可核对的结果并说明限制。"
+        ],
+        "outputContract": null,
+        "outputs": [],
+        "finalSummary": null
+      },
+      {
+        "id": "task-cd38c1fd88e048ef",
+        "title": "Clarify objectives and draft proposal design",
+        "agentId": "fund_manager",
+        "status": "done",
+        "turns": 5,
+        "revision": 0,
+        "dependsOn": [],
+        "acceptanceCriteria": [
+          "Client objectives, horizon, and risk tolerance confirmed or reasonable assumptions documented",
+          "Draft allocation framework and proposal outline produced"
+        ],
+        "outputContract": {
+          "kind": "text"
+        },
+        "outputs": [],
+        "finalSummary": null
+      },
+      {
+        "id": "task-30d8e962a43e4fc1",
+        "title": "Research US market and asset evidence",
+        "agentId": "research",
+        "status": "done",
+        "turns": 20,
+        "revision": 0,
+        "dependsOn": [
+          "task-cd38c1fd88e048ef"
+        ],
+        "acceptanceCriteria": [
+          "Current US equity/asset evidence with public sources and gaps documented",
+          "Concise research brief published as artifact"
+        ],
+        "outputContract": {
+          "kind": "artifact",
+          "extensions": [
+            ".md"
+          ],
+          "minCount": 1
+        },
+        "outputs": [
+          "artifact-234b668bbc6c44f99be52ed6b45b7f3f"
+        ],
+        "finalSummary": null
+      },
+      {
+        "id": "task-89375604fa7a48e7",
+        "title": "Assess risks and suitability",
+        "agentId": "risk",
+        "status": "done",
+        "turns": 5,
+        "revision": 0,
+        "dependsOn": [
+          "task-30d8e962a43e4fc1"
+        ],
+        "acceptanceCriteria": [
+          "Key risks and suitability against client profile assessed",
+          "Structured verdict with evidence and any bounded rework requests"
+        ],
+        "outputContract": {
+          "kind": "text"
+        },
+        "outputs": [
+          "artifact-4ded7dd927cd482db49d5307d35cf8df"
+        ],
+        "finalSummary": null
+      },
+      {
+        "id": "task-627c01e42f2b4cd1",
+        "title": "Draft client-friendly introduction",
+        "agentId": "marketing",
+        "status": "done",
+        "turns": 7,
+        "revision": 0,
+        "dependsOn": [
+          "task-cd38c1fd88e048ef",
+          "task-30d8e962a43e4fc1"
+        ],
+        "acceptanceCriteria": [
+          "Allocation rationale and risks explained in plain language",
+          "Draft introduction artifact published for review"
+        ],
+        "outputContract": {
+          "kind": "artifact",
+          "extensions": [
+            ".md"
+          ],
+          "minCount": 1
+        },
+        "outputs": [
+          "artifact-88db95b663d347dda7dd99dd8302b24c"
+        ],
+        "finalSummary": null
+      },
+      {
+        "id": "task-b9c70915f5014cbe",
+        "title": "Review final proposal and introduction",
+        "agentId": "risk",
+        "status": "waiting_human",
+        "turns": 6,
+        "revision": 0,
+        "dependsOn": [
+          "task-89375604fa7a48e7",
+          "task-627c01e42f2b4cd1"
+        ],
+        "acceptanceCriteria": [
+          "Draft introduction and allocation claims independently checked against research and risk findings",
+          "Structured review verdict with evidence and rework requests if needed"
+        ],
+        "outputContract": {
+          "kind": "text"
+        },
+        "outputs": [],
+        "finalSummary": null
+      },
+      {
+        "id": "task-49f7edf1bf1d4b6c",
+        "title": "Synthesize final simulated investment proposal",
+        "agentId": "fund_manager",
+        "status": "pending",
+        "turns": 0,
+        "revision": 0,
+        "dependsOn": [
+          "task-cd38c1fd88e048ef",
+          "task-30d8e962a43e4fc1",
+          "task-89375604fa7a48e7",
+          "task-627c01e42f2b4cd1",
+          "task-b9c70915f5014cbe"
+        ],
+        "acceptanceCriteria": [
+          "Final proposal includes allocation, reasons, risks, and client introduction",
+          "All prior role outputs and review verdicts incorporated",
+          "Synthesize actual research sources, execution evidence, reviewer verdicts and limitations; do not replace missing verification with prose."
+        ],
+        "outputContract": {
+          "kind": "delivery"
+        },
+        "outputs": [],
+        "finalSummary": true
+      }
+    ],
+    "artifacts": [
+      {
+        "id": "artifact-234b668bbc6c44f99be52ed6b45b7f3f",
+        "name": "us_market_evidence_brief.md",
+        "taskId": "task-30d8e962a43e4fc1",
+        "ownerAgentId": "research",
+        "runId": "run-29e61e970ba848d8",
+        "sha256": "c9a2a96f7a1f4776dec89acded35b63c5baee77c0655b29fadd55399adcddc96",
+        "size": 7429
+      },
+      {
+        "id": "artifact-4ded7dd927cd482db49d5307d35cf8df",
+        "name": "risk_suitability_assessment.md",
+        "taskId": "task-89375604fa7a48e7",
+        "ownerAgentId": "risk",
+        "runId": "run-29e61e970ba848d8",
+        "sha256": "56cb3050189a4ed11ca3e9ac39ed4e558a72db23c20e133e1b7fe36edd8847ae",
+        "size": 10912
+      },
+      {
+        "id": "artifact-88db95b663d347dda7dd99dd8302b24c",
+        "name": "client_introduction.md",
+        "taskId": "task-627c01e42f2b4cd1",
+        "ownerAgentId": "marketing",
+        "runId": "run-29e61e970ba848d8",
+        "sha256": "8319d5c2fe3b4506ee48d1a453918e52d14b3ccf63774622a179e71f386215bf",
+        "size": 7815
+      },
+      {
+        "id": "artifact-5b74a9d9d5cb4a779cda9977b10b6619",
+        "name": "review_final_proposal.md",
+        "taskId": "task-b9c70915f5014cbe",
+        "ownerAgentId": "risk",
+        "runId": "run-29e61e970ba848d8",
+        "sha256": "5317c88ce068056296df6b6f5033a0367c6327265f47514701e7177dca853f20",
+        "size": 6511
+      }
+    ]
+  },
+  "reviewerTaskId": "task-b9c70915f5014cbe",
+  "actualRejectedProposal": {
+    "type": "review",
+    "taskId": "task-b9c70915f5014cbe",
+    "verdict": "rework",
+    "feedback": "Independent editorial/evidence review of the current drafts (research brief artifact-234b668bbc6c44f99be52ed6b45b7f3f, risk assessment artifact-4ded7dd927cd482db49d5307d35cf8df, client introduction artifact-88db95b663d347dda7dd99dd8302b24c). All sourced numbers in the introduction reconcile with the brief (CAPE 39.95, P/B 6.00, P/S 3.73, div yield 1.07%, 10y 5.15%, fwd P/E 18.09x/19th pct, fwd ERP +0.38%, trailing ERP -1.28%); no fabricated or contradicted claims found. Bounded rework required before pass: D-1 (marketing) add plain-language US dividend withholding-tax note for a HK resident, labelled unverified — F-3 only partially met; D-2 (marketing) relabel the 70万-80万 drawdown and 10% FX figures as illustrative scenarios, not measured statistics (no drawdown series was retrieved); D-3 (fund_manager) the final synthesized proposal task-49f7edf1bf1d4b6c is still pending with no artifact — it must state the assumed profile as an assumption, carry all material risks in plain language, include the withholding-tax disclosure, flag ETF expense/tracking as unassessed, and not present the forward-P/E 'cheap' read without the trailing/CAPE counterpoint; D-4 (research, optional) no primary source fetched, aggregator-only data must remain disclosed. Verdict: REWORK (bounded). Confidence moderate. Full review published as artifact-5b74a9d9d5cb4a779cda9977b10b6619.",
+    "evidenceCallIds": [
+      "call-6989ee975d3d48f2",
+      "call-e5eab72ce8064826",
+      "call-42181d820489468c"
+    ]
+  },
+  "actualProposalTime": "2026-11-16T00:59:51Z",
+  "dagObservation": "/Users/jadenhuang/Documents/Codex/2026-10-27/du/work/full-mid-test-2026-11-16-round8/evidence/fund-1/plan-product-ordering-observation.json"
+}

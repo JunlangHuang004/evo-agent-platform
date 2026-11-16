@@ -1,0 +1,54 @@
+{
+  "sourceFixtureSha256": "0dae05de7d176efaa72ea222e7f4c255212ec4f01853c686e67a669923813166",
+  "runId": "run-015ea2683bed44f7",
+  "failedPreflight": {
+    "callId": "call-9aaa793190664696",
+    "taskId": "task-281b6d67abc44e37",
+    "agentId": "dev",
+    "revision": 0,
+    "path": "dashboard.html",
+    "resources": {
+      "analytics.js": "analytics.js",
+      "app.js": "app.js",
+      "dashboard.js": "dashboard.js",
+      "styles.css": "styles.css"
+    },
+    "error": {
+      "code": "permanent",
+      "message": "Cannot read the requested regular file.",
+      "retryable": false
+    },
+    "browserExecuted": false
+  },
+  "successfulWorkspaceWrites": [
+    {
+      "callId": "call-f55cc27d3c8444dd",
+      "path": "dashboard-brief.md"
+    },
+    {
+      "callId": "call-d418891215784ae7",
+      "path": "analytics.js"
+    },
+    {
+      "callId": "call-a8654b2c07de468e",
+      "path": "dashboard.js"
+    },
+    {
+      "callId": "call-0f93283a1ed04cd6",
+      "path": "dashboard.html"
+    },
+    {
+      "callId": "call-1cd2ad6834644af5",
+      "path": "styles.css"
+    }
+  ],
+  "inheritedAppArtifact": [
+    {
+      "id": "artifact-62338358341f481a817805848dfed6a1",
+      "path": "app.js",
+      "sha256": "df5a225099782ff7a40096a080954ed039cff1fb5c214e16433596b6646ba2f4",
+      "inheritedReadOnly": true
+    }
+  ],
+  "meaning": "Actual historical failure metadata only; reproduced files are small fixtures, not the generated product."
+}

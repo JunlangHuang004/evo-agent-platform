@@ -1,0 +1,249 @@
+{
+  "reportDate": "2026-11-16",
+  "round": 9,
+  "interpretation": "Artifact existence, original content satisfaction, independent product checks, platform workflow status and repeatability are separate dimensions. Counts are not course rubric scores.",
+  "liveVersion": {
+    "sourceFiles": 200,
+    "manifestSha256": "659576286944128b8d5040cad34f5bc9895ce30d7c2e18f20cc012873742e35f",
+    "sourceUnmodifiedThroughoutRuns": true,
+    "regressionPassedBeforeLive": 780
+  },
+  "settings": {
+    "wallSecondsPerCase": 1800,
+    "totalModelCallsCap": null,
+    "totalAgentTurnsCap": null,
+    "totalTokensCap": null,
+    "responseTokens": 6000,
+    "planningTokens": 3000,
+    "modelTimeoutSeconds": 60,
+    "maxRetries": 1,
+    "generationRetries": 2,
+    "contextCharacterSteps": [
+      40000,
+      60000,
+      80000,
+      120000
+    ],
+    "transport": "compatible",
+    "thinking": "disabled",
+    "jsonMode": "json_object",
+    "browserImage": "evo-agent-browser:1.64.1",
+    "requestedModel": "t2_hkgai-v3_fp8_1m_e7",
+    "reportedModelsObserved": {
+      "t2_hkgai-v3_fp8_1m_e10": 395
+    },
+    "callsWithoutReportedModel": 11
+  },
+  "method": {
+    "sameOriginalSixTasksAndFourRoles": true,
+    "freshThreeTeams": true,
+    "task2ContinuesExactTeamTask1": true,
+    "manualProductEdits": false,
+    "independentQAAnswersInjectedIntoAgents": false,
+    "operatorStoppedCases": false,
+    "operatorRole": "Relayed existing actual requester answers only after matching questions, approved exact reversible private-file edits, and ran independent product QA. For N2, relayed the original claim plus an explicitly disclosed operator interpretation, without new preferences, a preset verdict or independent-QA answers.",
+    "confounds": [
+      "S1 requester-answer relay took 343305 ms within the original wall clock.",
+      "Approval/clarification waits count toward each deadline.",
+      "Snake ran concurrently for part of the round; no isolated throughput claim.",
+      "Single full live run per frozen version does not establish repeatability."
+    ]
+  },
+  "cases": [
+    {
+      "caseId": "software-1",
+      "name": "S1 会议室预约",
+      "runId": "run-3fb89838d0ef4b2f",
+      "previousRunId": null,
+      "workflowStatus": "partial",
+      "requestedProductAuthored": true,
+      "independentAssessment": "Core booking behaviors passed independent checks; storage-read and cancellation-log failure defects remain; no final platform QA/package.",
+      "modelCalls": 48,
+      "reportedTokens": 682973,
+      "unknownUsageCalls": 2,
+      "wallElapsedMs": 990613,
+      "deliveryPackages": 0,
+      "exportSha256": "fb00147ae0a507577aa62a1562e7332790d8dd8df5d700a06652932c2ac8390a",
+      "rawRunSha256": "48fcec199d705458a2da00d3132ad1b4c58563cee7b6e3ea63c87a5cec9aa5da",
+      "independentQASummarySha256": "ae1818992878b96676069dc89c7a0cf131a4ee6143635e7b1f101f7bdce8fb69",
+      "taskTextSha256": "307277103af3cc957a0706b5fef420407e833375be56a1a1857e7f1d0e5687e3",
+      "rawSettled": true,
+      "reportedModelsObserved": {
+        "t2_hkgai-v3_fp8_1m_e10": 46
+      }
+    },
+    {
+      "caseId": "software-2",
+      "name": "S2 用量看板",
+      "runId": "run-50e7499b88e24c07",
+      "previousRunId": "run-3fb89838d0ef4b2f",
+      "workflowStatus": "partial",
+      "requestedProductAuthored": true,
+      "independentAssessment": "Core booking, nonempty analytics and actual S1-to-S2 persistence checks passed; same two storage defects; QA stuck on wrong room selector; no package.",
+      "modelCalls": 84,
+      "reportedTokens": 2486329,
+      "unknownUsageCalls": 4,
+      "wallElapsedMs": 1783764,
+      "deliveryPackages": 0,
+      "exportSha256": "3e687b7fe8e82be3a029871d21ed835d1d283c5137eec24088b240cfcfb5f67c",
+      "rawRunSha256": "d9240f057c9160b166be0489f2c175d7b970af462758edd6cf54fc26c304b11d",
+      "independentQASummarySha256": "47378d6a868f0e747016d7d2a86c0c19ee1d564d8cf37762274da38bd8be6f1c",
+      "taskTextSha256": "a66b9d105c6d546c9f0e2a9d6a1c0051b3e3fdfb12c906c7468cda05d5f2fe4e",
+      "rawSettled": true,
+      "reportedModelsObserved": {
+        "t2_hkgai-v3_fp8_1m_e10": 80
+      }
+    },
+    {
+      "caseId": "newsroom-1",
+      "name": "N1 校园 AI 报道",
+      "runId": "run-db5d6b506d0c4912",
+      "previousRunId": null,
+      "workflowStatus": "partial",
+      "requestedProductAuthored": true,
+      "independentAssessment": "Article/social exist but advance event announcements are overstated as confirmed occurrence; requires source qualification and final review.",
+      "modelCalls": 66,
+      "reportedTokens": 1007732,
+      "unknownUsageCalls": 2,
+      "wallElapsedMs": 1270288,
+      "deliveryPackages": 0,
+      "exportSha256": "40979183210f08675614762afd63647c104170126deea5d445b9d2f504e6eaf1",
+      "rawRunSha256": "2e1a4896a903baa9879b169664066149a8224205956919b65e6aaf2c9e1fdc69",
+      "independentQASummarySha256": "4d7e6bb8595615e9d446acc60be2672e570cbe37cc61c1e6cbdc7f4797c6c040",
+      "taskTextSha256": "63697e85e5d3575c406000f5081286634ab0198f66dc05005a0f004359bb666b",
+      "rawSettled": true,
+      "reportedModelsObserved": {
+        "t2_hkgai-v3_fp8_1m_e10": 64
+      }
+    },
+    {
+      "caseId": "newsroom-2",
+      "name": "N2 AI 检测器核查",
+      "runId": "run-017fe22ee4024796",
+      "previousRunId": "run-db5d6b506d0c4912",
+      "workflowStatus": "done",
+      "requestedProductAuthored": true,
+      "independentAssessment": "Substantive fact-check and real package produced; legal-case scope needs minor revision; final edited SHA lacks a new platform-internal independent review; external QA does not backfill that record.",
+      "modelCalls": 78,
+      "reportedTokens": 1659458,
+      "unknownUsageCalls": 1,
+      "wallElapsedMs": 1198045,
+      "deliveryPackages": 1,
+      "exportSha256": "d846528dfa2e5d1a01fbb7a8ecc6d093a44351c1c2338b9ee8ee6b5d95f69f96",
+      "rawRunSha256": "b933dd925a8b855cf0ee9b68648ace853ea3266f0f205990be8a677ba6161c71",
+      "independentQASummarySha256": "de05644622b094da6a3dcad1e05427d860a3241416cde8b909e3450c1c8b347a",
+      "taskTextSha256": "314643bb5af6cc444be30e6e61fe58a995fb7f660a9d24f1cda45840d678a130",
+      "rawSettled": true,
+      "reportedModelsObserved": {
+        "t2_hkgai-v3_fp8_1m_e10": 77
+      }
+    },
+    {
+      "caseId": "fund-1",
+      "name": "F1 模拟投资方案",
+      "runId": "run-9bfe0ba38d1f4562",
+      "previousRunId": null,
+      "workflowStatus": "partial",
+      "requestedProductAuthored": true,
+      "independentAssessment": "Simulated proposal, risks and introduction substantially satisfy original content; minor unsupported cheapest wording; review/access loops prevented package.",
+      "modelCalls": 127,
+      "reportedTokens": 2504546,
+      "unknownUsageCalls": 2,
+      "wallElapsedMs": 1777230,
+      "deliveryPackages": 0,
+      "exportSha256": "6cd5208885f57ee8e52d22856605d1b9aafa3aea9939ecfca9a4f2a4713e3211",
+      "rawRunSha256": "c477a825dcec18f263e0fbceca07632b265818c1c9db247e0a7ed923cce5ff15",
+      "independentQASummarySha256": "5a52e3b1fec742029df0c6ddaa1b9063058688f3625f035bf89da90b58ab76b5",
+      "taskTextSha256": "0323803664b9379f35db886dff96cca5f88885e641f08b87025206a09f4946ef",
+      "rawSettled": true,
+      "reportedModelsObserved": {
+        "t2_hkgai-v3_fp8_1m_e10": 125
+      }
+    },
+    {
+      "caseId": "fund-2",
+      "name": "F2 HTML 简报",
+      "runId": "run-121bee1e10fa4284",
+      "previousRunId": "run-9bfe0ba38d1f4562",
+      "workflowStatus": "failed",
+      "requestedProductAuthored": false,
+      "independentAssessment": "No new HTML product; three plans rejected the same reviewer-owned reviewOf target.",
+      "modelCalls": 3,
+      "reportedTokens": 13074,
+      "unknownUsageCalls": 0,
+      "wallElapsedMs": 22414,
+      "deliveryPackages": 0,
+      "exportSha256": "9d549bf72bd224b1f1c3d7a025342698b035ab27982017e839d70dd9b4d72b97",
+      "rawRunSha256": "76fce8bfd8748cd4890df0c82b2164f2b850149b5e363475f2cd774268636720",
+      "independentQASummarySha256": "e15b65d8260738c6de3a9627fad9a32f7f65755bfafa6d91695f11d302ca9155",
+      "taskTextSha256": "58375f1168d00e8023f3f3144ee7aced7ac88ad3b14b6e34f504ce806bc2f883",
+      "rawSettled": true,
+      "reportedModelsObserved": {
+        "t2_hkgai-v3_fp8_1m_e10": 3
+      }
+    }
+  ],
+  "totals": {
+    "modelCalls": 406,
+    "reportedTokens": 8354112,
+    "unknownUsageCalls": 11,
+    "deliveryPackages": 1,
+    "requestedProductsAuthored": 5,
+    "cases": 6,
+    "workflowDone": 1,
+    "workflowPartial": 4,
+    "workflowFailed": 1,
+    "stableSixTaskDeliveryEstablished": false
+  },
+  "snakeFirstAttempt": {
+    "runId": "run-c49a226db4504838",
+    "workflowStatus": "partial",
+    "actualRequestedProductProduced": true,
+    "actualRunnablePackageDelivered": true,
+    "independentChecks": {
+      "gameplayCore": {
+        "passed": 29,
+        "total": 29
+      },
+      "directFileOpening": {
+        "passed": 1,
+        "total": 1
+      },
+      "extraRobustness": {
+        "passed": 4,
+        "total": 4
+      },
+      "meaning": "Coverage counts, not a quality score."
+    },
+    "modelCalls": 82,
+    "reportedTokens": 1344049,
+    "unknownModelUsageCalls": 0,
+    "wallElapsedMs": 1275605,
+    "zipSha256": "ec949789a40dd1dd8a785e6bc42dfcb5561cb633d03fc58635a00f4072796355",
+    "terminalExportSha256": "c15dba083835cc1645781998baaad42ccda23d5c186ca29bfef4efa31d3da3b3",
+    "requestedModel": "t2_hkgai-v3_fp8_1m_e7",
+    "reportedModelsObserved": {
+      "t2_hkgai-v3_fp8_1m_e10": 82
+    }
+  },
+  "snakeLimit": "First attempt on fresh state with frozen R9 source; no product edits. Byte-identical release copies received new artifact task IDs, leaving an internal acceptance gap. One common game does not rule out tuning/overfitting or prove general reliability.",
+  "publishedVersion": {
+    "branch": "fix/mid-test-delivery-20261116",
+    "baseCommit": "5fb8632565606273143692a611a6086f8b9c7119",
+    "codeManifestSha256": "bc8f5ed572cf2855e05157e67c35d1f6286e5215180371b2cf4af5228666bab9",
+    "codeManifestDefinition": "SHA256 of UTF-8 sorted compact JSON mapping relative source paths to SHA256, excluding root README and report metrics",
+    "codeFileCountExcludingReadmeAndThisReport": 201,
+    "regression": {
+      "command": "RUN_BROWSER_DOCKER_TESTS=1 RUN_AGENT_SANDBOX_DOCKER_TESTS=1 python3 -m unittest discover -s tests -v",
+      "passed": 784,
+      "skipped": 0,
+      "elapsedSeconds": 321.923,
+      "logSha256": "2c1ef49a649da5e532b5d03cfdea2ddb2aa0e2e646e742ae03e3dd4a0c6e6ad0",
+      "realModelRequests": false
+    },
+    "additionalChange": "Precise submitted task/owner IDs in existing invalid reviewOf diagnostics, plus four tests. Validation, permissions and explicit replanning requirements unchanged.",
+    "additionalChangeTestedInR9LiveRun": false,
+    "newFullLiveRoundStarted": false
+  },
+  "evidenceAvailability": "This repository contains source/tests and this sanitized summary. Raw run exports, private state, generated products, screenshots and Word copy are retained locally. Hashes bind those records; their contents are not included here."
+}

@@ -1,0 +1,952 @@
+{
+  "sourceExport": "full-mid-test-2026-11-16-round2/results/newsroom-2.json",
+  "sourceExportSHA256": "53b91a5fe6db66b7d27b2941b0f1a5daf40d94aa5f36fdebb8aa2c2944c39896",
+  "note": "Immutable subset of saved real N2 calls: three successful arxiv reads, two actual Nature404 failures, and the third real model proposal rejected by the old repeat guard. Offline replay only, never a new successful run.",
+  "run": {
+    "id": "run-55914be200564843",
+    "calls": [
+      {
+        "agentId": "reporter",
+        "args": {
+          "url": "https://arxiv.org/abs/2304.02819"
+        },
+        "attempt": 1,
+        "durationMs": 993,
+        "id": "call-6ed0d2215b8e4f5d",
+        "result": {
+          "content": "[2304.02819] GPT detectors are biased against non-native English writers\n\n Skip to main content\n\n Search\n\n Submit\n Donate\n\nLog in \n\n Search arXiv\n\n Press Enter to search · Advanced search\n\nComputer Science > Computation and Language\n\n arXiv:2304.02819 (cs)\n\n [Submitted on 6 Apr 2023 (v1), last revised 10 Jul 2023 (this version, v3)]\n\nTitle:GPT detectors are biased against non-native English writers\n\nAuthors:Weixin Liang, Mert Yuksekgonul, Yining Mao, Eric Wu, James Zou \nView a PDF of the paper titled GPT detectors are biased against non-native English writers, by Weixin Liang and 4 other authors\n View PDF\n HTML (experimental)\n\n Abstract:The rapid adoption of generative language models has brought about substantial advancements in digital communication, while simultaneously raising concerns regarding the potential misuse of AI-generated content. Although numerous detection methods have been proposed to differentiate between AI and human-generated content, the fairness and robustness of these detectors remain underexplored. In this study, we evaluate the performance of several widely-used GPT detectors using writing samples from native and non-native English writers. Our findings reveal that these detectors consistently misclassify non-native English writing samples as AI-generated, whereas native writing samples are accurately identified. Furthermore, we demonstrate that simple prompting strategies can not only mitigate this bias but also effectively bypass GPT detectors, suggesting that GPT detectors may unintentionally penalize writers with constrained linguistic expressions. Our results call for a broader conversation about the ethical implications of deploying ChatGPT content detectors and caution against their use in evaluative or educational settings, particularly when they may inadvertently penalize or exclude non-native English speakers from the global discourse. The published version of this study can be accessed at: this http URL\n\n Subjects:\n\n Computation and Language (cs.CL); Artificial Intelligence (cs.AI); Human-Computer Interaction (cs.HC); Machine Learning (cs.LG)\n\n Cite as:\n arXiv:2304.02819 [cs.CL]\n\n (or \n arXiv:2304.02819v3 [cs.CL] for this version)\n\n https://doi.org/10.48550/arXiv.2304.02819\n\n Focus to learn more\n\n arXiv-issued DOI via DataCite\n\nSubmission history From: Weixin Liang [view email] \n [v1]\n Thu, 6 Apr 2023 01:51:15 UTC (1,273 KB)\n\n [v2]\n Tue, 18 Apr 2023 22:59:26 UTC (1,564 KB)\n\n [v3]\n Mon, 10 Jul 2023 18:48:45 UTC (1,565 KB)\n\n Full-text links:\n\nAccess Paper:\n\nView a PDF of the paper titled GPT detectors are biased against non-native English writers, by Weixin Liang and 4 other authors\nView PDF\nHTML (experimental)\nTeX Source\n\nview license\n\nAdditional Features\n\nAudio Summary\n\nCurrent browse context:\n\ncs.CL\n\n < prev\n\n   |   \n next >\n\n new\n | \n recent\n | 2023-04\n\n Change to browse by:\n\n cs\n\n cs.AI\n\n cs.HC\n\n cs.LG\n\nReferences & Citations\n\nSciX\nGoogle Scholar\n\nSemantic Scholar\n\n export BibTeX citation\n Loading...\n\nBibTeX formatted citation\n ×\n\n loading...\n\n Data provided by: \n\nBookmark\n\n Bibliographic Tools\n\nBibliographic and Citation Tools\n\n Bibliographic Explorer Toggle\n\n Bibliographic Explorer (What is the Explorer?)\n\n Connected Papers Toggle\n\n Connected Papers (What is Connected Papers?)\n\n Litmaps Toggle\n\n Litmaps (What is Litmaps?)\n\n scite.ai Toggle\n\n scite Smart Citations (What are Smart Citations?)\n\n Code, Data, Media\n\nCode, Data and Media Associated with this Article\n\n alphaXiv Toggle\n\n alphaXiv (What is alphaXiv?)\n\n Links to Code Toggle\n\n CatalyzeX Code Finder for Papers (What is CatalyzeX?)\n\n DagsHub Toggle\n\n DagsHub (What is DagsHub?)\n\n GotitPub Toggle\n\n Gotit.pub (What is GotitPub?)\n\n Huggingface Toggle\n\n Hugging Face (What is Huggingface?)\n\n ScienceCast Toggle\n\n ScienceCast (What is ScienceCast?)\n\n Demos\n\nDemos\n\n Replicate Toggle\n\n Replicate (What is Replicate?)\n\n Spaces Toggle\n\n Hugging Face Spaces (What is Spaces?)\n\n Spaces Toggle\n\n TXYZ.AI (What is TXYZ.AI?)\n\n Related Papers\n\nRecommenders and Search Tools\n\n Link to Influence Flower\n\n Influence Flower (What are Influence Flowers?)\n\n Core recommender toggle\n\n CORE Recommender (What is CORE?)\n\nAuthor\n\nVenue\n\nInstitution\n\nTopic\n\n About arXivLabs\n\narXivLabs: experimental projects with community collaborators\n\narXivLabs is a framework that allows collaborators to develop and share new arXiv features directly on our website.\n\nBoth individuals and organizations that work with arXivLabs have embraced and accepted our values of openness, community, excellence, and user data privacy. arXiv is committed to these values and only works with partners that adhere to them.\n\nHave an idea for a project that will add value for arXiv's community? Learn more about arXivLabs.\n\n Which authors of this paper are endorsers? |\n Disable MathJax (What is MathJax?)\n\n We gratefully acknowledge support from our major funders,\n member institutions, ,\n and all contributors.\n\n About ·\n Help ·\n Contact ·\n Subscribe ·\n Copyright ·\n Privacy ·\n Accessibility ·\n Operational Status (opens in new tab)\n\nMajor funding support from\n\n (opens in new tab)\n\n (opens in new tab)\n\n (opens in new tab)",
+          "linkCount": 66,
+          "linkEvidenceNote": "Anchors observed on this page only. Target contents were not fetched; these links are not sources supporting target claims.",
+          "links": [
+            {
+              "title": "archive home",
+              "url": "https://arxiv.org/"
+            },
+            {
+              "title": "Search",
+              "url": "https://arxiv.org/search"
+            },
+            {
+              "title": "Submit",
+              "url": "https://arxiv.org/submit"
+            },
+            {
+              "title": "Donate",
+              "url": "https://info.arxiv.org/about/donate.html"
+            },
+            {
+              "title": "Log in",
+              "url": "https://arxiv.org/login"
+            },
+            {
+              "title": "Advanced search",
+              "url": "https://arxiv.org/search/advanced"
+            },
+            {
+              "title": "[v1]",
+              "url": "https://arxiv.org/abs/2304.02819v1"
+            },
+            {
+              "title": "Weixin Liang",
+              "url": "https://arxiv.org/search/cs?searchtype=author&query=Liang,+W"
+            },
+            {
+              "title": "Mert Yuksekgonul",
+              "url": "https://arxiv.org/search/cs?searchtype=author&query=Yuksekgonul,+M"
+            },
+            {
+              "title": "Yining Mao",
+              "url": "https://arxiv.org/search/cs?searchtype=author&query=Mao,+Y"
+            },
+            {
+              "title": "Eric Wu",
+              "url": "https://arxiv.org/search/cs?searchtype=author&query=Wu,+E"
+            },
+            {
+              "title": "James Zou",
+              "url": "https://arxiv.org/search/cs?searchtype=author&query=Zou,+J"
+            },
+            {
+              "title": "View PDF",
+              "url": "https://arxiv.org/pdf/2304.02819"
+            },
+            {
+              "title": "HTML (experimental)",
+              "url": "https://arxiv.org/html/2304.02819v3"
+            },
+            {
+              "title": "this http URL",
+              "url": "http://www.cell.com/patterns/fulltext/S2666-3899(23)00130-7"
+            },
+            {
+              "title": "arXiv:2304.02819v3",
+              "url": "https://arxiv.org/abs/2304.02819v3"
+            },
+            {
+              "title": "https://doi.org/10.48550/arXiv.2304.02819",
+              "url": "https://doi.org/10.48550/arXiv.2304.02819"
+            },
+            {
+              "title": "view email",
+              "url": "https://arxiv.org/show-email/a1e47975/2304.02819"
+            },
+            {
+              "title": "[v2]",
+              "url": "https://arxiv.org/abs/2304.02819v2"
+            },
+            {
+              "title": "TeX Source",
+              "url": "https://arxiv.org/src/2304.02819"
+            },
+            {
+              "title": "view license",
+              "url": "http://arxiv.org/licenses/nonexclusive-distrib/1.0/"
+            },
+            {
+              "title": "Audio Summary",
+              "url": "https://arxiv.org/audio/2304.02819"
+            },
+            {
+              "title": "< prev",
+              "url": "https://arxiv.org/prevnext?id=2304.02819&function=prev&context=cs.CL"
+            },
+            {
+              "title": "next >",
+              "url": "https://arxiv.org/prevnext?id=2304.02819&function=next&context=cs.CL"
+            },
+            {
+              "title": "new",
+              "url": "https://arxiv.org/list/cs.CL/new"
+            },
+            {
+              "title": "recent",
+              "url": "https://arxiv.org/list/cs.CL/recent"
+            },
+            {
+              "title": "2023-04",
+              "url": "https://arxiv.org/list/cs.CL/2023-04"
+            },
+            {
+              "title": "cs",
+              "url": "https://arxiv.org/abs/2304.02819?context=cs"
+            },
+            {
+              "title": "cs.AI",
+              "url": "https://arxiv.org/abs/2304.02819?context=cs.AI"
+            },
+            {
+              "title": "cs.HC",
+              "url": "https://arxiv.org/abs/2304.02819?context=cs.HC"
+            },
+            {
+              "title": "cs.LG",
+              "url": "https://arxiv.org/abs/2304.02819?context=cs.LG"
+            },
+            {
+              "title": "SciX",
+              "url": "https://scixplorer.org/abs/arXiv:2304.02819"
+            },
+            {
+              "title": "Google Scholar",
+              "url": "https://scholar.google.com/scholar_lookup?arxiv_id=2304.02819"
+            },
+            {
+              "title": "Semantic Scholar",
+              "url": "https://api.semanticscholar.org/arXiv:2304.02819"
+            },
+            {
+              "title": "Bookmark on BibSonomy",
+              "url": "http://www.bibsonomy.org/BibtexHandler?requTask=upload&url=https://arxiv.org/abs/2304.02819&description=GPT detectors are biased against non-native English writers"
+            },
+            {
+              "title": "Bookmark on Reddit",
+              "url": "https://reddit.com/submit?url=https://arxiv.org/abs/2304.02819&title=GPT detectors are biased against non-native English writers"
+            },
+            {
+              "title": "What is the Explorer?",
+              "url": "https://info.arxiv.org/labs/showcase.html"
+            },
+            {
+              "title": "What is Connected Papers?",
+              "url": "https://www.connectedpapers.com/about"
+            },
+            {
+              "title": "What is Litmaps?",
+              "url": "https://www.litmaps.co/"
+            },
+            {
+              "title": "What are Smart Citations?",
+              "url": "https://www.scite.ai/"
+            },
+            {
+              "title": "What is alphaXiv?",
+              "url": "https://alphaxiv.org/"
+            },
+            {
+              "title": "What is CatalyzeX?",
+              "url": "https://www.catalyzex.com/"
+            },
+            {
+              "title": "What is DagsHub?",
+              "url": "https://dagshub.com/"
+            },
+            {
+              "title": "What is GotitPub?",
+              "url": "http://gotit.pub/faq"
+            },
+            {
+              "title": "What is Huggingface?",
+              "url": "https://huggingface.co/huggingface"
+            },
+            {
+              "title": "What is ScienceCast?",
+              "url": "https://sciencecast.org/welcome"
+            },
+            {
+              "title": "What is Replicate?",
+              "url": "https://replicate.com/docs/arxiv/about"
+            },
+            {
+              "title": "What is Spaces?",
+              "url": "https://huggingface.co/docs/hub/spaces"
+            },
+            {
+              "title": "What is TXYZ.AI?",
+              "url": "https://txyz.ai/"
+            },
+            {
+              "title": "What are Influence Flowers?",
+              "url": "https://influencemap.cmlab.dev/"
+            },
+            {
+              "title": "What is CORE?",
+              "url": "https://core.ac.uk/services/recommender"
+            },
+            {
+              "title": "Learn more about arXivLabs",
+              "url": "https://info.arxiv.org/labs/index.html"
+            },
+            {
+              "title": "Which authors of this paper are endorsers?",
+              "url": "https://arxiv.org/auth/show-endorsers/2304.02819"
+            },
+            {
+              "title": "What is MathJax?",
+              "url": "https://info.arxiv.org/help/mathjax.html"
+            },
+            {
+              "title": "member institutions",
+              "url": "https://info.arxiv.org/about/ourmembers.html"
+            },
+            {
+              "title": "About",
+              "url": "https://info.arxiv.org/about"
+            },
+            {
+              "title": "Help",
+              "url": "https://info.arxiv.org/help"
+            },
+            {
+              "title": "Contact",
+              "url": "https://info.arxiv.org/help/contact.html"
+            },
+            {
+              "title": "Subscribe",
+              "url": "https://info.arxiv.org/help/subscribe.html"
+            },
+            {
+              "title": "Copyright",
+              "url": "https://info.arxiv.org/help/license/index.html"
+            },
+            {
+              "title": "Privacy",
+              "url": "https://info.arxiv.org/help/policies/privacy_policy.html"
+            },
+            {
+              "title": "Accessibility",
+              "url": "https://info.arxiv.org/help/web_accessibility.html"
+            },
+            {
+              "title": "Operational Status (opens in new tab)",
+              "url": "https://status.arxiv.org/"
+            },
+            {
+              "title": "(opens in new tab)",
+              "url": "https://www.simonsfoundation.org/"
+            },
+            {
+              "title": "(opens in new tab)",
+              "url": "https://www.sfi.org.bm/"
+            },
+            {
+              "title": "(opens in new tab)",
+              "url": "https://www.schmidtsciences.org/"
+            }
+          ],
+          "linksAreUnfetched": true,
+          "linksTruncated": false,
+          "ok": true,
+          "sources": [
+            {
+              "title": "[2304.02819] GPT detectors are biased against non-native English writers",
+              "url": "https://arxiv.org/abs/2304.02819"
+            }
+          ],
+          "title": "[2304.02819] GPT detectors are biased against non-native English writers",
+          "truncated": false,
+          "url": "https://arxiv.org/abs/2304.02819"
+        },
+        "revision": 0,
+        "sandboxId": "reporter/run-55914be200564843",
+        "status": "success",
+        "taskId": "task-5895649e1928436c",
+        "tool": "web.fetch"
+      },
+      {
+        "agentId": "reporter",
+        "args": {
+          "url": "https://arxiv.org/abs/2306.15666"
+        },
+        "attempt": 1,
+        "durationMs": 819,
+        "id": "call-7eb02049d71d497b",
+        "result": {
+          "content": "[2306.15666] Testing of Detection Tools for AI-Generated Text\n\n Skip to main content\n\n Search\n\n Submit\n Donate\n\nLog in \n\n Search arXiv\n\n Press Enter to search · Advanced search\n\nComputer Science > Computation and Language\n\n arXiv:2306.15666 (cs)\n\n [Submitted on 21 Jun 2023 (v1), last revised 10 Jul 2023 (this version, v2)]\n\nTitle:Testing of Detection Tools for AI-Generated Text\n\nAuthors:Debora Weber-Wulff (University of Applied Sciences HTW Berlin, Germany), Alla Anohina-Naumeca (Riga Technical University, Latvia), Sonja Bjelobaba (Uppsala University, Sweden), Tomáš Foltýnek (Masaryk University, Czechia), Jean Guerrero-Dib (Universidad de Monterrey, Mexico), Olumide Popoola (Queen Mary University of London, UK), Petr Šigut (Masaryk University, Czechia), Lorna Waddington (University of Leeds, UK) \nView a PDF of the paper titled Testing of Detection Tools for AI-Generated Text, by Debora Weber-Wulff (University of Applied Sciences HTW Berlin and 15 other authors\n View PDF\n\n Abstract:Recent advances in generative pre-trained transformer large language models have emphasised the potential risks of unfair use of artificial intelligence (AI) generated content in an academic environment and intensified efforts in searching for solutions to detect such content. The paper examines the general functionality of detection tools for artificial intelligence generated text and evaluates them based on accuracy and error type analysis. Specifically, the study seeks to answer research questions about whether existing detection tools can reliably differentiate between human-written text and ChatGPT-generated text, and whether machine translation and content obfuscation techniques affect the detection of AI-generated text. The research covers 12 publicly available tools and two commercial systems (Turnitin and PlagiarismCheck) that are widely used in the academic setting. The researchers conclude that the available detection tools are neither accurate nor reliable and have a main bias towards classifying the output as human-written rather than detecting AI-generated text. Furthermore, content obfuscation techniques significantly worsen the performance of tools. The study makes several significant contributions. First, it summarises up-to-date similar scientific and non-scientific efforts in the field. Second, it presents the result of one of the most comprehensive tests conducted so far, based on a rigorous research methodology, an original document set, and a broad coverage of tools. Third, it discusses the implications and drawbacks of using detection tools for AI-generated text in academic settings.\n\n Comments:\n 38 pages, 13 figures and 10 tables, and an appendix with 18 figures. Submitted to the International Journal for Educational Integrity\n\n Subjects:\n\n Computation and Language (cs.CL); Artificial Intelligence (cs.AI); Computers and Society (cs.CY)\n\n ACM classes:\n I.2.7; I.2.m\n\n Cite as:\n arXiv:2306.15666 [cs.CL]\n\n (or \n arXiv:2306.15666v2 [cs.CL] for this version)\n\n https://doi.org/10.48550/arXiv.2306.15666\n\n Focus to learn more\n\n arXiv-issued DOI via DataCite\n\n Journal reference:\n Int J Educ Integr 19, 26 (2023)\n\n Related DOI:\n\n https://doi.org/10.1007/s40979-023-00146-z\n\n Focus to learn more\n\n DOI(s) linking to related resources\n\nSubmission history From: Debora Weber-Wulff [view email] \n [v1]\n Wed, 21 Jun 2023 16:29:44 UTC (12,049 KB)\n\n [v2]\n Mon, 10 Jul 2023 16:14:33 UTC (12,137 KB)\n\n Full-text links:\n\nAccess Paper:\n\nView a PDF of the paper titled Testing of Detection Tools for AI-Generated Text, by Debora Weber-Wulff (University of Applied Sciences HTW Berlin and 15 other authors\nView PDF\n\nview license\n\nAdditional Features\n\nAudio Summary\n\nCurrent browse context:\n\ncs.CL\n\n < prev\n\n   |   \n next >\n\n new\n | \n recent\n | 2023-06\n\n Change to browse by:\n\n cs\n\n cs.AI\n\n cs.CY\n\nReferences & Citations\n\nSciX\nGoogle Scholar\n\nSemantic Scholar\n\n export BibTeX citation\n Loading...\n\nBibTeX formatted citation\n ×\n\n loading...\n\n Data provided by: \n\nBookmark\n\n Bibliographic Tools\n\nBibliographic and Citation Tools\n\n Bibliographic Explorer Toggle\n\n Bibliographic Explorer (What is the Explorer?)\n\n Connected Papers Toggle\n\n Connected Papers (What is Connected Papers?)\n\n Litmaps Toggle\n\n Litmaps (What is Litmaps?)\n\n scite.ai Toggle\n\n scite Smart Citations (What are Smart Citations?)\n\n Code, Data, Media\n\nCode, Data and Media Associated with this Article\n\n alphaXiv Toggle\n\n alphaXiv (What is alphaXiv?)\n\n Links to Code Toggle\n\n CatalyzeX Code Finder for Papers (What is CatalyzeX?)\n\n DagsHub Toggle\n\n DagsHub (What is DagsHub?)\n\n GotitPub Toggle\n\n Gotit.pub (What is GotitPub?)\n\n Huggingface Toggle\n\n Hugging Face (What is Huggingface?)\n\n ScienceCast Toggle\n\n ScienceCast (What is ScienceCast?)\n\n Demos\n\nDemos\n\n Replicate Toggle\n\n Replicate (What is Replicate?)\n\n Spaces Toggle\n\n Hugging Face Spaces (What is Spaces?)\n\n Spaces Toggle\n\n TXYZ.AI (What is TXYZ.AI?)\n\n Related Papers\n\nRecommenders and Search Tools\n\n Link to Influence Flower\n\n Influence Flower (What are Influence Flowers?)\n\n Core recommender toggle\n\n CORE Recommender (What is CORE?)\n\nAuthor\n\nVenue\n\nInstitution\n\nTopic\n\n About arXivLabs\n\narXivLabs: experimental projects with community collaborators\n\narXivLabs is a framework that allows collaborators to develop and share new arXiv features directly on our website.\n\nBoth individuals and organizations that work with arXivLabs have embraced and accepted our values of openness, community, excellence, and user data privacy. arXiv is committed to these values and only works with partners that adhere to them.\n\nHave an idea for a project that will add value for arXiv's community? Learn more about arXivLabs.\n\n Which authors of this paper are endorsers? |\n Disable MathJax (What is MathJax?)\n\n We gratefully acknowledge support from our major funders,\n member institutions, ,\n and all contributors.\n\n About ·\n Help ·\n Contact ·\n Subscribe ·\n Copyright ·\n Privacy ·\n Accessibility ·\n Operational Status (opens in new tab)",
+          "linkCount": 63,
+          "linkEvidenceNote": "Anchors observed on this page only. Target contents were not fetched; these links are not sources supporting target claims.",
+          "links": [
+            {
+              "title": "archive home",
+              "url": "https://arxiv.org/"
+            },
+            {
+              "title": "Search",
+              "url": "https://arxiv.org/search"
+            },
+            {
+              "title": "Submit",
+              "url": "https://arxiv.org/submit"
+            },
+            {
+              "title": "Donate",
+              "url": "https://info.arxiv.org/about/donate.html"
+            },
+            {
+              "title": "Log in",
+              "url": "https://arxiv.org/login"
+            },
+            {
+              "title": "Advanced search",
+              "url": "https://arxiv.org/search/advanced"
+            },
+            {
+              "title": "[v1]",
+              "url": "https://arxiv.org/abs/2306.15666v1"
+            },
+            {
+              "title": "Debora Weber-Wulff",
+              "url": "https://arxiv.org/search/cs?searchtype=author&query=Weber-Wulff,+D"
+            },
+            {
+              "title": "Alla Anohina-Naumeca",
+              "url": "https://arxiv.org/search/cs?searchtype=author&query=Anohina-Naumeca,+A"
+            },
+            {
+              "title": "Sonja Bjelobaba",
+              "url": "https://arxiv.org/search/cs?searchtype=author&query=Bjelobaba,+S"
+            },
+            {
+              "title": "Tomáš Foltýnek",
+              "url": "https://arxiv.org/search/cs?searchtype=author&query=Folt%C3%BDnek,+T"
+            },
+            {
+              "title": "Jean Guerrero-Dib",
+              "url": "https://arxiv.org/search/cs?searchtype=author&query=Guerrero-Dib,+J"
+            },
+            {
+              "title": "Olumide Popoola",
+              "url": "https://arxiv.org/search/cs?searchtype=author&query=Popoola,+O"
+            },
+            {
+              "title": "Petr Šigut",
+              "url": "https://arxiv.org/search/cs?searchtype=author&query=%C5%A0igut,+P"
+            },
+            {
+              "title": "Lorna Waddington",
+              "url": "https://arxiv.org/search/cs?searchtype=author&query=Waddington,+L"
+            },
+            {
+              "title": "View PDF",
+              "url": "https://arxiv.org/pdf/2306.15666"
+            },
+            {
+              "title": "arXiv:2306.15666v2",
+              "url": "https://arxiv.org/abs/2306.15666v2"
+            },
+            {
+              "title": "https://doi.org/10.48550/arXiv.2306.15666",
+              "url": "https://doi.org/10.48550/arXiv.2306.15666"
+            },
+            {
+              "title": "https://doi.org/10.1007/s40979-023-00146-z",
+              "url": "https://doi.org/10.1007/s40979-023-00146-z"
+            },
+            {
+              "title": "view email",
+              "url": "https://arxiv.org/show-email/a425a697/2306.15666"
+            },
+            {
+              "title": "view license",
+              "url": "http://arxiv.org/licenses/nonexclusive-distrib/1.0/"
+            },
+            {
+              "title": "Audio Summary",
+              "url": "https://arxiv.org/audio/2306.15666"
+            },
+            {
+              "title": "< prev",
+              "url": "https://arxiv.org/prevnext?id=2306.15666&function=prev&context=cs.CL"
+            },
+            {
+              "title": "next >",
+              "url": "https://arxiv.org/prevnext?id=2306.15666&function=next&context=cs.CL"
+            },
+            {
+              "title": "new",
+              "url": "https://arxiv.org/list/cs.CL/new"
+            },
+            {
+              "title": "recent",
+              "url": "https://arxiv.org/list/cs.CL/recent"
+            },
+            {
+              "title": "2023-06",
+              "url": "https://arxiv.org/list/cs.CL/2023-06"
+            },
+            {
+              "title": "cs",
+              "url": "https://arxiv.org/abs/2306.15666?context=cs"
+            },
+            {
+              "title": "cs.AI",
+              "url": "https://arxiv.org/abs/2306.15666?context=cs.AI"
+            },
+            {
+              "title": "cs.CY",
+              "url": "https://arxiv.org/abs/2306.15666?context=cs.CY"
+            },
+            {
+              "title": "SciX",
+              "url": "https://scixplorer.org/abs/arXiv:2306.15666"
+            },
+            {
+              "title": "Google Scholar",
+              "url": "https://scholar.google.com/scholar_lookup?arxiv_id=2306.15666"
+            },
+            {
+              "title": "Semantic Scholar",
+              "url": "https://api.semanticscholar.org/arXiv:2306.15666"
+            },
+            {
+              "title": "Bookmark on BibSonomy",
+              "url": "http://www.bibsonomy.org/BibtexHandler?requTask=upload&url=https://arxiv.org/abs/2306.15666&description=Testing of Detection Tools for AI-Generated Text"
+            },
+            {
+              "title": "Bookmark on Reddit",
+              "url": "https://reddit.com/submit?url=https://arxiv.org/abs/2306.15666&title=Testing of Detection Tools for AI-Generated Text"
+            },
+            {
+              "title": "What is the Explorer?",
+              "url": "https://info.arxiv.org/labs/showcase.html"
+            },
+            {
+              "title": "What is Connected Papers?",
+              "url": "https://www.connectedpapers.com/about"
+            },
+            {
+              "title": "What is Litmaps?",
+              "url": "https://www.litmaps.co/"
+            },
+            {
+              "title": "What are Smart Citations?",
+              "url": "https://www.scite.ai/"
+            },
+            {
+              "title": "What is alphaXiv?",
+              "url": "https://alphaxiv.org/"
+            },
+            {
+              "title": "What is CatalyzeX?",
+              "url": "https://www.catalyzex.com/"
+            },
+            {
+              "title": "What is DagsHub?",
+              "url": "https://dagshub.com/"
+            },
+            {
+              "title": "What is GotitPub?",
+              "url": "http://gotit.pub/faq"
+            },
+            {
+              "title": "What is Huggingface?",
+              "url": "https://huggingface.co/huggingface"
+            },
+            {
+              "title": "What is ScienceCast?",
+              "url": "https://sciencecast.org/welcome"
+            },
+            {
+              "title": "What is Replicate?",
+              "url": "https://replicate.com/docs/arxiv/about"
+            },
+            {
+              "title": "What is Spaces?",
+              "url": "https://huggingface.co/docs/hub/spaces"
+            },
+            {
+              "title": "What is TXYZ.AI?",
+              "url": "https://txyz.ai/"
+            },
+            {
+              "title": "What are Influence Flowers?",
+              "url": "https://influencemap.cmlab.dev/"
+            },
+            {
+              "title": "What is CORE?",
+              "url": "https://core.ac.uk/services/recommender"
+            },
+            {
+              "title": "Learn more about arXivLabs",
+              "url": "https://info.arxiv.org/labs/index.html"
+            },
+            {
+              "title": "Which authors of this paper are endorsers?",
+              "url": "https://arxiv.org/auth/show-endorsers/2306.15666"
+            },
+            {
+              "title": "What is MathJax?",
+              "url": "https://info.arxiv.org/help/mathjax.html"
+            },
+            {
+              "title": "major funders",
+              "url": "https://info.arxiv.org/about/major_funders.html"
+            },
+            {
+              "title": "member institutions",
+              "url": "https://info.arxiv.org/about/ourmembers.html"
+            },
+            {
+              "title": "About",
+              "url": "https://info.arxiv.org/about"
+            },
+            {
+              "title": "Help",
+              "url": "https://info.arxiv.org/help"
+            },
+            {
+              "title": "Contact",
+              "url": "https://info.arxiv.org/help/contact.html"
+            },
+            {
+              "title": "Subscribe",
+              "url": "https://info.arxiv.org/help/subscribe.html"
+            },
+            {
+              "title": "Copyright",
+              "url": "https://info.arxiv.org/help/license/index.html"
+            },
+            {
+              "title": "Privacy",
+              "url": "https://info.arxiv.org/help/policies/privacy_policy.html"
+            },
+            {
+              "title": "Accessibility",
+              "url": "https://info.arxiv.org/help/web_accessibility.html"
+            },
+            {
+              "title": "Operational Status (opens in new tab)",
+              "url": "https://status.arxiv.org/"
+            }
+          ],
+          "linksAreUnfetched": true,
+          "linksTruncated": false,
+          "ok": true,
+          "sources": [
+            {
+              "title": "[2306.15666] Testing of Detection Tools for AI-Generated Text",
+              "url": "https://arxiv.org/abs/2306.15666"
+            }
+          ],
+          "title": "[2306.15666] Testing of Detection Tools for AI-Generated Text",
+          "truncated": false,
+          "url": "https://arxiv.org/abs/2306.15666"
+        },
+        "revision": 0,
+        "sandboxId": "reporter/run-55914be200564843",
+        "status": "success",
+        "taskId": "task-5895649e1928436c",
+        "tool": "web.fetch"
+      },
+      {
+        "agentId": "reporter",
+        "args": {
+          "url": "https://arxiv.org/abs/2303.11156"
+        },
+        "attempt": 1,
+        "durationMs": 888,
+        "id": "call-0b3ef6e1671a44c3",
+        "result": {
+          "content": "[2303.11156] Can AI-Generated Text be Reliably Detected?\n\n Skip to main content\n\n Search\n\n Submit\n Donate\n\nLog in \n\n Search arXiv\n\n Press Enter to search · Advanced search\n\nComputer Science > Computation and Language\n\n arXiv:2303.11156 (cs)\n\n [Submitted on 17 Mar 2023 (v1), last revised 17 Jan 2025 (this version, v4)]\n\nTitle:Can AI-Generated Text be Reliably Detected?\n\nAuthors:Vinu Sankar Sadasivan, Aounon Kumar, Sriram Balasubramanian, Wenxiao Wang, Soheil Feizi \nView a PDF of the paper titled Can AI-Generated Text be Reliably Detected?, by Vinu Sankar Sadasivan and 3 other authors\n View PDF\n HTML (experimental)\n\n Abstract:Large Language Models (LLMs) perform impressively well in various applications. However, the potential for misuse of these models in activities such as plagiarism, generating fake news, and spamming has raised concern about their responsible use. Consequently, the reliable detection of AI-generated text has become a critical area of research. AI text detectors have shown to be effective under their specific settings. In this paper, we stress-test the robustness of these AI text detectors in the presence of an attacker. We introduce recursive paraphrasing attack to stress test a wide range of detection schemes, including the ones using the watermarking as well as neural network-based detectors, zero shot classifiers, and retrieval-based detectors. Our experiments conducted on passages, each approximately 300 tokens long, reveal the varying sensitivities of these detectors to our attacks. Our findings indicate that while our recursive paraphrasing method can significantly reduce detection rates, it only slightly degrades text quality in many cases, highlighting potential vulnerabilities in current detection systems in the presence of an attacker. Additionally, we investigate the susceptibility of watermarked LLMs to spoofing attacks aimed at misclassifying human-written text as AI-generated. We demonstrate that an attacker can infer hidden AI text signatures without white-box access to the detection method, potentially leading to reputational risks for LLM developers. Finally, we provide a theoretical framework connecting the AUROC of the best possible detector to the Total Variation distance between human and AI text distributions. This analysis offers insights into the fundamental challenges of reliable detection as language models continue to advance. Our code is publicly available at this https URL.\n\n Comments:\n Published in Transactions on Machine Learning Research (TMLR)\n\n Subjects:\n\n Computation and Language (cs.CL); Artificial Intelligence (cs.AI); Machine Learning (cs.LG)\n\n Cite as:\n arXiv:2303.11156 [cs.CL]\n\n (or \n arXiv:2303.11156v4 [cs.CL] for this version)\n\n https://doi.org/10.48550/arXiv.2303.11156\n\n Focus to learn more\n\n arXiv-issued DOI via DataCite\n\nSubmission history From: Aounon Kumar [view email] \n [v1]\n Fri, 17 Mar 2023 17:53:19 UTC (926 KB)\n\n [v2]\n Wed, 28 Jun 2023 20:29:16 UTC (2,051 KB)\n\n [v3]\n Mon, 19 Feb 2024 16:34:24 UTC (11,738 KB)\n\n [v4]\n Fri, 17 Jan 2025 04:21:47 UTC (14,651 KB)\n\n Full-text links:\n\nAccess Paper:\n\nView a PDF of the paper titled Can AI-Generated Text be Reliably Detected?, by Vinu Sankar Sadasivan and 3 other authors\nView PDF\nHTML (experimental)\nTeX Source\n\n view license\n\nAdditional Features\n\nAudio Summary\n\nCurrent browse context:\n\ncs.CL\n\n < prev\n\n   |   \n next >\n\n new\n | \n recent\n | 2023-03\n\n Change to browse by:\n\n cs\n\n cs.AI\n\n cs.LG\n\nReferences & Citations\n\nSciX\nGoogle Scholar\n\nSemantic Scholar\n\n export BibTeX citation\n Loading...\n\nBibTeX formatted citation\n ×\n\n loading...\n\n Data provided by: \n\nBookmark\n\n Bibliographic Tools\n\nBibliographic and Citation Tools\n\n Bibliographic Explorer Toggle\n\n Bibliographic Explorer (What is the Explorer?)\n\n Connected Papers Toggle\n\n Connected Papers (What is Connected Papers?)\n\n Litmaps Toggle\n\n Litmaps (What is Litmaps?)\n\n scite.ai Toggle\n\n scite Smart Citations (What are Smart Citations?)\n\n Code, Data, Media\n\nCode, Data and Media Associated with this Article\n\n alphaXiv Toggle\n\n alphaXiv (What is alphaXiv?)\n\n Links to Code Toggle\n\n CatalyzeX Code Finder for Papers (What is CatalyzeX?)\n\n DagsHub Toggle\n\n DagsHub (What is DagsHub?)\n\n GotitPub Toggle\n\n Gotit.pub (What is GotitPub?)\n\n Huggingface Toggle\n\n Hugging Face (What is Huggingface?)\n\n ScienceCast Toggle\n\n ScienceCast (What is ScienceCast?)\n\n Demos\n\nDemos\n\n Replicate Toggle\n\n Replicate (What is Replicate?)\n\n Spaces Toggle\n\n Hugging Face Spaces (What is Spaces?)\n\n Spaces Toggle\n\n TXYZ.AI (What is TXYZ.AI?)\n\n Related Papers\n\nRecommenders and Search Tools\n\n Link to Influence Flower\n\n Influence Flower (What are Influence Flowers?)\n\n Core recommender toggle\n\n CORE Recommender (What is CORE?)\n\nAuthor\n\nVenue\n\nInstitution\n\nTopic\n\n About arXivLabs\n\narXivLabs: experimental projects with community collaborators\n\narXivLabs is a framework that allows collaborators to develop and share new arXiv features directly on our website.\n\nBoth individuals and organizations that work with arXivLabs have embraced and accepted our values of openness, community, excellence, and user data privacy. arXiv is committed to these values and only works with partners that adhere to them.\n\nHave an idea for a project that will add value for arXiv's community? Learn more about arXivLabs.\n\n Which authors of this paper are endorsers? |\n Disable MathJax (What is MathJax?)\n\n We gratefully acknowledge support from our major funders,\n member institutions, ,\n and all contributors.\n\n About ·\n Help ·\n Contact ·\n Subscribe ·\n Copyright ·\n Privacy ·\n Accessibility ·\n Operational Status (opens in new tab)\n\nMajor funding support from\n\n (opens in new tab)\n\n (opens in new tab)\n\n (opens in new tab)",
+          "linkCount": 66,
+          "linkEvidenceNote": "Anchors observed on this page only. Target contents were not fetched; these links are not sources supporting target claims.",
+          "links": [
+            {
+              "title": "archive home",
+              "url": "https://arxiv.org/"
+            },
+            {
+              "title": "Search",
+              "url": "https://arxiv.org/search"
+            },
+            {
+              "title": "Submit",
+              "url": "https://arxiv.org/submit"
+            },
+            {
+              "title": "Donate",
+              "url": "https://info.arxiv.org/about/donate.html"
+            },
+            {
+              "title": "Log in",
+              "url": "https://arxiv.org/login"
+            },
+            {
+              "title": "Advanced search",
+              "url": "https://arxiv.org/search/advanced"
+            },
+            {
+              "title": "[v1]",
+              "url": "https://arxiv.org/abs/2303.11156v1"
+            },
+            {
+              "title": "Vinu Sankar Sadasivan",
+              "url": "https://arxiv.org/search/cs?searchtype=author&query=Sadasivan,+V+S"
+            },
+            {
+              "title": "Aounon Kumar",
+              "url": "https://arxiv.org/search/cs?searchtype=author&query=Kumar,+A"
+            },
+            {
+              "title": "Sriram Balasubramanian",
+              "url": "https://arxiv.org/search/cs?searchtype=author&query=Balasubramanian,+S"
+            },
+            {
+              "title": "Wenxiao Wang",
+              "url": "https://arxiv.org/search/cs?searchtype=author&query=Wang,+W"
+            },
+            {
+              "title": "Soheil Feizi",
+              "url": "https://arxiv.org/search/cs?searchtype=author&query=Feizi,+S"
+            },
+            {
+              "title": "View PDF",
+              "url": "https://arxiv.org/pdf/2303.11156"
+            },
+            {
+              "title": "HTML (experimental)",
+              "url": "https://arxiv.org/html/2303.11156v4"
+            },
+            {
+              "title": "this https URL",
+              "url": "https://github.com/vinusankars/Reliability-of-AI-text-detectors"
+            },
+            {
+              "title": "arXiv:2303.11156v4",
+              "url": "https://arxiv.org/abs/2303.11156v4"
+            },
+            {
+              "title": "https://doi.org/10.48550/arXiv.2303.11156",
+              "url": "https://doi.org/10.48550/arXiv.2303.11156"
+            },
+            {
+              "title": "view email",
+              "url": "https://arxiv.org/show-email/f72655cd/2303.11156"
+            },
+            {
+              "title": "[v2]",
+              "url": "https://arxiv.org/abs/2303.11156v2"
+            },
+            {
+              "title": "[v3]",
+              "url": "https://arxiv.org/abs/2303.11156v3"
+            },
+            {
+              "title": "TeX Source",
+              "url": "https://arxiv.org/src/2303.11156"
+            },
+            {
+              "title": "view license",
+              "url": "http://creativecommons.org/licenses/by/4.0/"
+            },
+            {
+              "title": "Audio Summary",
+              "url": "https://arxiv.org/audio/2303.11156"
+            },
+            {
+              "title": "< prev",
+              "url": "https://arxiv.org/prevnext?id=2303.11156&function=prev&context=cs.CL"
+            },
+            {
+              "title": "next >",
+              "url": "https://arxiv.org/prevnext?id=2303.11156&function=next&context=cs.CL"
+            },
+            {
+              "title": "new",
+              "url": "https://arxiv.org/list/cs.CL/new"
+            },
+            {
+              "title": "recent",
+              "url": "https://arxiv.org/list/cs.CL/recent"
+            },
+            {
+              "title": "2023-03",
+              "url": "https://arxiv.org/list/cs.CL/2023-03"
+            },
+            {
+              "title": "cs",
+              "url": "https://arxiv.org/abs/2303.11156?context=cs"
+            },
+            {
+              "title": "cs.AI",
+              "url": "https://arxiv.org/abs/2303.11156?context=cs.AI"
+            },
+            {
+              "title": "cs.LG",
+              "url": "https://arxiv.org/abs/2303.11156?context=cs.LG"
+            },
+            {
+              "title": "SciX",
+              "url": "https://scixplorer.org/abs/arXiv:2303.11156"
+            },
+            {
+              "title": "Google Scholar",
+              "url": "https://scholar.google.com/scholar_lookup?arxiv_id=2303.11156"
+            },
+            {
+              "title": "Semantic Scholar",
+              "url": "https://api.semanticscholar.org/arXiv:2303.11156"
+            },
+            {
+              "title": "Bookmark on BibSonomy",
+              "url": "http://www.bibsonomy.org/BibtexHandler?requTask=upload&url=https://arxiv.org/abs/2303.11156&description=Can AI-Generated Text be Reliably Detected?"
+            },
+            {
+              "title": "Bookmark on Reddit",
+              "url": "https://reddit.com/submit?url=https://arxiv.org/abs/2303.11156&title=Can AI-Generated Text be Reliably Detected?"
+            },
+            {
+              "title": "What is the Explorer?",
+              "url": "https://info.arxiv.org/labs/showcase.html"
+            },
+            {
+              "title": "What is Connected Papers?",
+              "url": "https://www.connectedpapers.com/about"
+            },
+            {
+              "title": "What is Litmaps?",
+              "url": "https://www.litmaps.co/"
+            },
+            {
+              "title": "What are Smart Citations?",
+              "url": "https://www.scite.ai/"
+            },
+            {
+              "title": "What is alphaXiv?",
+              "url": "https://alphaxiv.org/"
+            },
+            {
+              "title": "What is CatalyzeX?",
+              "url": "https://www.catalyzex.com/"
+            },
+            {
+              "title": "What is DagsHub?",
+              "url": "https://dagshub.com/"
+            },
+            {
+              "title": "What is GotitPub?",
+              "url": "http://gotit.pub/faq"
+            },
+            {
+              "title": "What is Huggingface?",
+              "url": "https://huggingface.co/huggingface"
+            },
+            {
+              "title": "What is ScienceCast?",
+              "url": "https://sciencecast.org/welcome"
+            },
+            {
+              "title": "What is Replicate?",
+              "url": "https://replicate.com/docs/arxiv/about"
+            },
+            {
+              "title": "What is Spaces?",
+              "url": "https://huggingface.co/docs/hub/spaces"
+            },
+            {
+              "title": "What is TXYZ.AI?",
+              "url": "https://txyz.ai/"
+            },
+            {
+              "title": "What are Influence Flowers?",
+              "url": "https://influencemap.cmlab.dev/"
+            },
+            {
+              "title": "What is CORE?",
+              "url": "https://core.ac.uk/services/recommender"
+            },
+            {
+              "title": "Learn more about arXivLabs",
+              "url": "https://info.arxiv.org/labs/index.html"
+            },
+            {
+              "title": "Which authors of this paper are endorsers?",
+              "url": "https://arxiv.org/auth/show-endorsers/2303.11156"
+            },
+            {
+              "title": "What is MathJax?",
+              "url": "https://info.arxiv.org/help/mathjax.html"
+            },
+            {
+              "title": "member institutions",
+              "url": "https://info.arxiv.org/about/ourmembers.html"
+            },
+            {
+              "title": "About",
+              "url": "https://info.arxiv.org/about"
+            },
+            {
+              "title": "Help",
+              "url": "https://info.arxiv.org/help"
+            },
+            {
+              "title": "Contact",
+              "url": "https://info.arxiv.org/help/contact.html"
+            },
+            {
+              "title": "Subscribe",
+              "url": "https://info.arxiv.org/help/subscribe.html"
+            },
+            {
+              "title": "Copyright",
+              "url": "https://info.arxiv.org/help/license/index.html"
+            },
+            {
+              "title": "Privacy",
+              "url": "https://info.arxiv.org/help/policies/privacy_policy.html"
+            },
+            {
+              "title": "Accessibility",
+              "url": "https://info.arxiv.org/help/web_accessibility.html"
+            },
+            {
+              "title": "Operational Status (opens in new tab)",
+              "url": "https://status.arxiv.org/"
+            },
+            {
+              "title": "(opens in new tab)",
+              "url": "https://www.simonsfoundation.org/"
+            },
+            {
+              "title": "(opens in new tab)",
+              "url": "https://www.sfi.org.bm/"
+            },
+            {
+              "title": "(opens in new tab)",
+              "url": "https://www.schmidtsciences.org/"
+            }
+          ],
+          "linksAreUnfetched": true,
+          "linksTruncated": false,
+          "ok": true,
+          "sources": [
+            {
+              "title": "[2303.11156] Can AI-Generated Text be Reliably Detected?",
+              "url": "https://arxiv.org/abs/2303.11156"
+            }
+          ],
+          "title": "[2303.11156] Can AI-Generated Text be Reliably Detected?",
+          "truncated": false,
+          "url": "https://arxiv.org/abs/2303.11156"
+        },
+        "revision": 0,
+        "sandboxId": "reporter/run-55914be200564843",
+        "status": "success",
+        "taskId": "task-5895649e1928436c",
+        "tool": "web.fetch"
+      },
+      {
+        "agentId": "reporter",
+        "args": {
+          "url": "https://www.nature.com/articles/d41586-023-02361-8"
+        },
+        "attempt": 1,
+        "durationMs": 3568,
+        "id": "call-0ad343cabe0d4536",
+        "result": {
+          "error": {
+            "code": "permanent",
+            "message": "Public web server returned HTTP 404.",
+            "retryable": false
+          },
+          "ok": false,
+          "outcomeUnknown": false
+        },
+        "revision": 0,
+        "sandboxId": "reporter/run-55914be200564843",
+        "status": "failed",
+        "taskId": "task-5895649e1928436c",
+        "tool": "web.fetch"
+      },
+      {
+        "agentId": "reporter",
+        "args": {
+          "url": "https://www.nature.com/articles/d41586-023-02361-8"
+        },
+        "attempt": 1,
+        "durationMs": 3058,
+        "id": "call-394167b15aaf4e74",
+        "result": {
+          "error": {
+            "code": "permanent",
+            "message": "Public web server returned HTTP 404.",
+            "retryable": false
+          },
+          "ok": false,
+          "outcomeUnknown": false
+        },
+        "revision": 0,
+        "sandboxId": "reporter/run-55914be200564843",
+        "status": "failed",
+        "taskId": "task-5895649e1928436c",
+        "tool": "web.fetch"
+      }
+    ]
+  },
+  "task": {
+    "id": "task-5895649e1928436c",
+    "agentId": "reporter",
+    "revision": 0,
+    "status": "failed",
+    "error": {
+      "code": "protocol",
+      "message": "检测到重复动作循环，已停止。"
+    }
+  },
+  "proposedAction": {
+    "type": "tool",
+    "name": "web.fetch",
+    "args": {
+      "url": "https://www.nature.com/articles/d41586-023-02361-8"
+    }
+  }
+}

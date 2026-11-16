@@ -74,7 +74,8 @@ class MemoryTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.memory.share(item['id'], 'executor', 'tool:check')
         self.memory.share(item['id'], 'executor', {'type': 'human', 'id': 'publish-approval'})
-        shared = self.memory.recall('research', 'Python')
+        self.assertEqual(self.memory.recall('research', 'Python'), [], 'Agent recall remains owner-only even for historical shared records')
+        shared = self.memory.recall('research', 'Python', include_shared=True)
         self.assertEqual(len(shared), 1)
         self.assertEqual(shared[0]['owner'], 'executor')
         self.assertEqual(shared[0]['shareConfirmation']['id'], 'publish-approval')

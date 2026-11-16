@@ -1,0 +1,175 @@
+{
+  "classification": "Actual8flatwrongproposals; readonlyfixture, notanexecutedrepair",
+  "runId": "run-be142e5f3a894e34",
+  "taskId": "task-efbbb7cbf2fc4b9a",
+  "revision": 0,
+  "sourceManifestSha256": "2589b2f3b1b7f58412c6234462639453e5141599cd86d6c486ed3145783d7ae6",
+  "rawSnapshotSha256": "90b043274c6b683c056e9a993d984de9be7175b61607ed44f0f35e05b493aaa5",
+  "successfulPrivateWrite": {
+    "callId": "call-ab18e97b943040fc",
+    "path": "us_equity_research_brief.md",
+    "sha256": "4cc3573481360c56ecddd10bdf7d207d074584557ca959171d65fe9c575879a9",
+    "status": "success"
+  },
+  "proposals": [
+    {
+      "transcriptId": "dialogue-bdd36a55a56e4e4e",
+      "callId": "call-3097ac62688845db",
+      "time": "2026-11-15T23:33:08Z",
+      "exactProposal": {
+        "type": "tool",
+        "name": "publish_artifact",
+        "path": "us_equity_research_brief.md"
+      },
+      "stageObservations": [
+        {
+          "transcriptId": "dialogue-2038c085a35a444a",
+          "time": "2026-11-15T23:33:08Z",
+          "errorCode": "stage_local_synthesis_only",
+          "actionExecuted": false
+        }
+      ]
+    },
+    {
+      "transcriptId": "dialogue-80bd153579a94e2e",
+      "callId": "call-920855cf158c4c23",
+      "time": "2026-11-15T23:33:17Z",
+      "exactProposal": {
+        "type": "tool",
+        "name": "publish_artifact",
+        "path": "us_equity_research_brief.md"
+      },
+      "stageObservations": [
+        {
+          "transcriptId": "dialogue-07d827206fd64cb5",
+          "time": "2026-11-15T23:33:17Z",
+          "errorCode": "stage_local_synthesis_only",
+          "actionExecuted": false
+        }
+      ]
+    },
+    {
+      "transcriptId": "dialogue-7b0283b264484729",
+      "callId": "call-8b61e38f905c4b9b",
+      "time": "2026-11-15T23:33:26Z",
+      "exactProposal": {
+        "type": "tool",
+        "name": "publish_artifacts",
+        "paths": [
+          "us_equity_research_brief.md"
+        ]
+      },
+      "stageObservations": [
+        {
+          "transcriptId": "dialogue-bfffaff684f64ce7",
+          "time": "2026-11-15T23:33:26Z",
+          "errorCode": "stage_local_synthesis_only",
+          "actionExecuted": false
+        }
+      ]
+    },
+    {
+      "transcriptId": "dialogue-053fd3f27ee44442",
+      "callId": "call-2e4b6bbc67db430c",
+      "time": "2026-11-15T23:33:35Z",
+      "exactProposal": {
+        "type": "tool",
+        "name": "publish_artifact",
+        "path": "us_equity_research_brief.md"
+      },
+      "stageObservations": [
+        {
+          "transcriptId": "dialogue-1210b1a86a9b4829",
+          "time": "2026-11-15T23:33:35Z",
+          "errorCode": "stage_local_synthesis_only",
+          "actionExecuted": false
+        }
+      ]
+    },
+    {
+      "transcriptId": "dialogue-4fc103269def4389",
+      "callId": "call-140c2e2220a74126",
+      "time": "2026-11-15T23:33:44Z",
+      "exactProposal": {
+        "type": "tool",
+        "name": "publish_artifacts",
+        "paths": [
+          "us_equity_research_brief.md"
+        ]
+      },
+      "stageObservations": [
+        {
+          "transcriptId": "dialogue-edd6c6bc506f4513",
+          "time": "2026-11-15T23:33:44Z",
+          "errorCode": "stage_local_synthesis_only",
+          "actionExecuted": false
+        }
+      ]
+    },
+    {
+      "transcriptId": "dialogue-a8e6825d9c074386",
+      "callId": "call-efe695f19eff4722",
+      "time": "2026-11-15T23:33:53Z",
+      "exactProposal": {
+        "type": "tool",
+        "name": "publish_artifact",
+        "path": "us_equity_research_brief.md"
+      },
+      "stageObservations": [
+        {
+          "transcriptId": "dialogue-c0265da7c6474c64",
+          "time": "2026-11-15T23:33:53Z",
+          "errorCode": "stage_local_synthesis_only",
+          "actionExecuted": false
+        }
+      ]
+    },
+    {
+      "transcriptId": "dialogue-8e0ee463a8f44a34",
+      "callId": "call-8311cc71e1dd46df",
+      "time": "2026-11-15T23:34:02Z",
+      "exactProposal": {
+        "type": "tool",
+        "name": "publish_artifacts",
+        "paths": [
+          "us_equity_research_brief.md"
+        ]
+      },
+      "stageObservations": [
+        {
+          "transcriptId": "dialogue-f5f7c668af88481c",
+          "time": "2026-11-15T23:34:02Z",
+          "errorCode": "stage_handoff_required",
+          "actionExecuted": false
+        }
+      ]
+    },
+    {
+      "transcriptId": "dialogue-88f9318da6af42cd",
+      "callId": "call-a07a38cc990a46af",
+      "time": "2026-11-15T23:34:12Z",
+      "exactProposal": {
+        "type": "tool",
+        "name": "publish_artifact",
+        "path": "us_equity_research_brief.md"
+      },
+      "stageObservations": [
+        {
+          "transcriptId": "dialogue-833bd39b19ff494d",
+          "time": "2026-11-15T23:34:12Z",
+          "errorCode": "stage_handoff_required",
+          "actionExecuted": false
+        }
+      ]
+    }
+  ],
+  "actualWorkingSnapshot": {
+    "messages": 26,
+    "characters": 94755,
+    "hasCorrectPublishExample": true,
+    "evidenceGapMentionedMessageCount": 4,
+    "actionNotToolReceiptCount": 0
+  },
+  "diagnosis": "Knownreservedactionhelperrequiredargsdict; all8proposalsputpath/pathsattoplevelwithtype=tool, noargs; helperNone=>stagegenericreject. Noautomaticconversionorpublicationoccurred. Only1otherblockedwebfetchproposal lackedtop evidenceGap.",
+  "fixScope": "Explainvalidschemaforreservednameevenmissing/malformedargs; doNOTexecuteconvert/admitbypassingstage orpermission."
+}

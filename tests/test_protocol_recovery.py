@@ -122,6 +122,33 @@ class ProtocolRecoveryTests(unittest.TestCase):
         self.assertEqual(len(task['protocolErrors']),2)
         self.assertEqual(run['status'],'failed')
 
+    def test_tool_name_used_as_type_is_only_feedback_until_corrected_tool_action(self):
+        args={'path':'corrected.md','content':'Written only by the corrected tool action.\n'}
+        wrong={'type':'file.write','args':args}
+        corrected={'type':'tool','name':'file.write','args':args}
+        model,tools,run,task=self.run_model([wrong,corrected,{'type':'final','text':'The corrected action wrote the file.'}])
+        self.assertEqual(run['status'],'done')
+        self.assertEqual([name for name,_,_ in tools.executed],['file.write'])
+        feedback=json.loads(next(m['content'][len('动作的真实结果：'):] for m in model.action_messages[1]
+                                 if m['content'].startswith('动作的真实结果：')))
+        self.assertFalse(feedback['ok'])
+        self.assertEqual(feedback['error']['code'],'protocol')
+        self.assertIn('type="tool"',feedback['error']['message'])
+        self.assertIn('name="file.write"',feedback['error']['message'])
+        self.assertIn('此请求未执行',feedback['error']['message'])
+        self.assertEqual(sum(e['type']=='action_rejected' for e in run['events']),1)
+        self.assertEqual(len([call for call in run['calls'] if call['tool']=='file.write']),1)
+        self.assertEqual(task['turns'],3)
+
+    def test_repeated_tool_type_mistake_still_stops_at_existing_loop_limit(self):
+        wrong={'type':'file.write','args':{'path':'never.md','content':'Must not be auto-converted.'}}
+        model,tools,run,task=self.run_model([wrong])
+        self.assertEqual(run['status'],'failed')
+        self.assertEqual(task['error']['code'],'protocol')
+        self.assertIn('重复动作循环',task['error']['message'])
+        self.assertEqual(len(model.action_messages),3)
+        self.assertFalse(tools.executed)
+
     def test_bad_response_secrets_are_scrubbed_in_working_context_and_audit(self):
         bad='not-json fixture-key-must-not-leak'
         model,_,run,_=self.run_model([bad,{'type':'final','text':'Recovered.'}])

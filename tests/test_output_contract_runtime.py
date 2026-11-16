@@ -12,6 +12,7 @@ import unittest
 
 from backend.config import Config
 from backend.engine import Platform
+from backend.partial_review import budget_partial_receipt
 from backend.runtime import ProtocolError, compress_messages, normalize_plan
 from backend.tools import ToolGateway
 
@@ -127,11 +128,33 @@ class OutputContractRuntimeTests(unittest.TestCase):
         self.assertTrue(task['outputValidation']['issues'])
 
     def test_turn_budget_remains_a_hard_limit_on_contract_repairs(self):
-        _,model,run,task=self.run_model({'kind':'artifact','extensions':['.html']},[final()],MAX_AGENT_TURNS='2')
+        app,model,run,task=self.run_model({'kind':'artifact','extensions':['.html']},[final()],MAX_AGENT_TURNS='2')
         self.assertEqual(model.action_calls,2)
-        self.assertEqual(task['status'],'failed')
-        self.assertEqual(run['status'],'failed')
-        self.assertEqual(task['error']['code'],'budget')
+        self.assertEqual(model.calls,3,'one planner plus exactly two existing action turns; no extra repair request')
+        self.assertEqual(run['modelCalls'],3)
+        self.assertEqual(task['turns'],2)
+        # The last existing turn now accepts only final. Its missing-artifact
+        # contract remains an explicit failure, retained as an honest partial
+        # result rather than fabricating a budget failure or successful output.
+        self.assertEqual(task['status'],'partial')
+        self.assertEqual(run['status'],'partial')
+        self.assertEqual(task['outputValidation']['status'],'failed')
+        self.assertEqual(task['outputValidation']['semanticQuality'],'unassessed')
+        self.assertTrue(task['outputValidation']['issues'])
+        self.assertIn('交付契约未满足',task['result'])
+        self.assertEqual(task['outputs'],[])
+        self.assertEqual(run['artifacts'],[])
+        self.assertTrue(all(call['tool']=='llm.chat' for call in run['calls']))
+        self.assertEqual(len([event for event in run['events'] if event['type']=='output_validation_failed']),2)
+        self.assertFalse(any(event['type']=='output_validation_passed' for event in run['events']))
+        self.assertNotIn('partialOutput',task)
+        self.assertNotIn('closureReason',task)
+        self.assertNotEqual((task.get('error') or {}).get('code'),'budget')
+        self.assertIsNone(budget_partial_receipt(run,task),'a failed contract cannot become reviewable budget-only work')
+        self.assertEqual(run['budgetExtensions'],0)
+        persisted=next(item for item in app.repo.get_run(run['id'])['steps'] if item['id']==task['id'])
+        self.assertEqual(persisted['outputValidation']['status'],'failed')
+        self.assertEqual(persisted['outputs'],[])
 
     def test_contracts_are_normalized_for_plans_and_delegation_and_retained_in_context(self):
         count=itertools.count()

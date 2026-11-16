@@ -3,6 +3,7 @@ from html.parser import HTMLParser
 from pathlib import Path
 from urllib.parse import urlsplit, urlunsplit, urljoin, urlencode, parse_qs
 import hashlib
+import bisect
 import base64
 import copy
 import http.client
@@ -14,15 +15,21 @@ import shutil
 import socket
 import ssl
 import stat
+import sys
 import threading
 import time
 
 from .agents import AGENTS
+from .search_results import yahoo_search_results
 from .sandbox import (ToolError, SandboxManager, MAX_FILE_BYTES, SAFE_TEXT_SUFFIXES,
                       identifier, relative_parts, confined_path, secure_directory,
-                      read_text, write_text, delete_file, run_process)
+                      read_text, write_text, delete_file, run_process, check_deadline, bounded_timeout)
 
 MAX_WEB_BYTES = 512 * 1024
+MAX_READ_WINDOW_BYTES = 32 * 1024
+MAX_READ_WINDOW_LINES = 200
+MAX_FIND_MATCHES = 20
+MAX_FIND_SNIPPET_BYTES = 8 * 1024
 _SHA = re.compile(r'^[a-f0-9]{64}$')
 _COMMIT = re.compile(r'^[a-f0-9]{40,64}$')
 
@@ -34,30 +41,50 @@ def _schema(properties, required=()):
 _PATH = {'type': 'string', 'maxLength': 240, 'description': 'Relative private path, or read-only imports/<artifact-id>/<name>. Hidden and parent paths are forbidden.'}
 _TEXT = {'type': 'string', 'maxLength': MAX_FILE_BYTES}
 _EXPECTED = {'type': 'string', 'description': 'SHA256 returned by the pending approval; must match current file content.', 'pattern': '^[a-f0-9]{64}$'}
+_CODE_PARAMETERS = {
+    'language': {'type': 'string', 'enum': ['python', 'javascript', 'browser'], 'description': 'Default python. javascript executes Node in Docker. browser opens the HTML path with the fixed offline Chromium harness.'},
+    'code': {'type': 'string', 'maxLength': 65536}, 'path': _PATH,
+    'args': {'type': 'array', 'items': {'type': 'string', 'maxLength': 1024}, 'maxItems': 30},
+    'timeout': {'type': 'number', 'minimum': 1, 'maximum': 60},
+    'checks': {'type': 'array', 'maxItems': 60, 'description': 'Browser only; at least one assert_* is required. pageId defaults to main. new_page opens the same entry in the same context, max 3 pages; new pages never reseed shared localStorage. For localStorage products, key-specific storage_write_denied and two pre-opened pages can test save failures/stale-tab conflicts.',
+        'items': _schema({'action': {'type': 'string', 'enum': ['click', 'fill', 'select', 'press', 'reload', 'assert_text', 'assert_count', 'assert_value', 'assert_visible', 'assert_storage', 'assert_storage_missing', 'assert_attribute', 'capture_canvas', 'assert_canvas_changed', 'storage_write_denied', 'storage_read_denied', 'new_page', 'respond_dialog']},
+            'selector': {'type': 'string'}, 'value': {'type': 'string'}, 'key': {'type': 'string'},
+            'text': {'type': 'string'}, 'name': {'type': 'string'}, 'exact': {'type': 'boolean'}, 'count': {'type': 'integer'},
+            'pageId': {'type': 'string', 'maxLength': 32, 'description': 'main by default; create a named page first with new_page. No URLs.'},
+            'dialogType': {'type': 'string', 'enum': ['alert', 'confirm', 'prompt']},
+            'accept': {'type': 'boolean', 'description': 'respond_dialog only: arm the NEXT dialog in this page before click/press. Optional value only for accepted prompt (max2000 chars). Every armed response must actually handle the matching dialog; unused/type-mismatched responses fail coverage.'},
+            'enabled': {'type': 'boolean', 'description': 'storage_write_denied denies API writes; storage_read_denied denies only localStorage.getItem. false restores that fault in this page. Optional key targets one key; omitted targets all. Each enabled segment must block the matching application operation. Read faults persist across reload; disable before assert_storage/assert_storage_missing to inspect real persisted records. Harness assertions never count as application read-fault coverage.'}}, ['action'])},
+    'storage': {'type': 'object', 'maxProperties': 20, 'additionalProperties': {'type': 'string'}, 'description': 'Browser only; initial localStorage string values seeded once, never reset on reload. Total at most 64 KiB.'},
+    'resources': {'type': 'object', 'maxProperties': 39, 'additionalProperties': {'type': 'string'}, 'description': 'Browser only; explicit relative URL filename → private or granted imports/<artifact-id>/<name> source. Rebuilds relative JS/CSS resources without cross-agent access. The HTML entry is served at its basename.'},
+}
 _SCHEMAS = {
-    'file.read': _schema({'path': _PATH}, ['path']),
+    'file.read': _schema({'path': _PATH,
+        'startLine': {'type': 'integer', 'minimum': 1, 'maximum': 1000000, 'description': '1-based inclusive line window; default 1. Cannot combine with find.'},
+        'endLine': {'type': 'integer', 'minimum': 1, 'maximum': 1000000, 'description': '1-based inclusive end; default EOF. A window is bounded to 200 lines / 32 KiB.'},
+        'find': {'type': 'string', 'minLength': 1, 'maxLength': 1024, 'description': 'Nonempty, case-sensitive literal, not regex. Returns matches[].content with exact source locations; cannot combine with startLine/endLine.'},
+        'contextLines': {'type': 'integer', 'minimum': 0, 'maximum': 20, 'description': 'Only with find; surrounding lines before/after each match, default 3. At most 20 matches and 32 KiB total.'}}, ['path']),
     'file.list': _schema({'path': _PATH}),
     'file.write': _schema({'path': _PATH, 'content': _TEXT, 'expectedSha256': _EXPECTED}, ['path', 'content']),
     'file.patch': _schema({'path': _PATH, 'old': _TEXT, 'new': _TEXT, 'expectedSha256': _EXPECTED}, ['path', 'old', 'new']),
     'file.delete': _schema({'path': _PATH, 'expectedSha256': _EXPECTED}, ['path']),
     'web.search': _schema({'query': {'type': 'string', 'maxLength': 1000}, 'max_results': {'type': 'integer', 'minimum': 1, 'maximum': 8}}, ['query']),
     'web.fetch': _schema({'url': {'type': 'string', 'maxLength': 2048}}, ['url']),
-    'code.run': _schema({'code': {'type': 'string', 'maxLength': 65536}, 'path': _PATH, 'args': {'type': 'array', 'items': {'type': 'string', 'maxLength': 1024}, 'maxItems': 30}, 'timeout': {'type': 'number', 'minimum': 1, 'maximum': 60}}),
-    'code.test': _schema({'code': {'type': 'string', 'maxLength': 65536}, 'path': _PATH, 'args': {'type': 'array', 'items': {'type': 'string', 'maxLength': 1024}, 'maxItems': 30}, 'timeout': {'type': 'number', 'minimum': 1, 'maximum': 60}}),
+    'code.run': _schema(copy.deepcopy(_CODE_PARAMETERS)),
+    'code.test': _schema(copy.deepcopy(_CODE_PARAMETERS)),
     'git.status': _schema({}),
     'git.commit': _schema({'message': {'type': 'string', 'maxLength': 500}, 'files': {'type': 'array', 'items': _PATH, 'maxItems': 40}}, ['message']),
     'git.push': _schema({'remote': {'type': 'string', 'maxLength': 2048}, 'branch': {'type': 'string', 'maxLength': 240}, 'commit': {'type': 'string', 'pattern': '^[a-f0-9]{40,64}$'}}, ['remote', 'branch', 'commit']),
 }
 _DESCRIPTIONS = {
-    'file.read': 'Read bounded UTF-8 text in this agent/run workspace or explicitly granted imports.',
+    'file.read': 'Read UTF-8 in this private workspace or granted imports. Use find:"functionName" with contextLines, or 1-based inclusive startLine/endLine to inspect targeted code instead of repeatedly reading whole modules. Full read remains the default. sha256 always hashes the complete file. Window results preserve exact UTF-8/line endings with actual ranges and partial-line flags; find returns matches[].content. mode identifies partial reads; truncated means a safety limit omitted requested text/matches, not that the requested window is the whole file.',
     'file.list': 'List public files in this private workspace or read-only imports.',
     'file.write': 'Create UTF-8 text. Existing-file replacement requires human approval bound to its SHA256; prefer patch.',
     'file.patch': 'Apply one unique exact old→new text replacement; requires human approval and unchanged original SHA256.',
     'file.delete': 'Delete one regular private file after human approval bound to its SHA256.',
     'web.search': 'Search public web sources through DuckDuckGo Lite; returns actual links, never fabricated search results.',
-    'web.fetch': 'Fetch bounded public HTTP(S) text with DNS/IP pinning and per-redirect SSRF checks.',
-    'code.run': 'Run Python source or a relative Python script exclusively in a resource-limited Docker container.',
-    'code.test': 'Run a Python verification/test script exclusively in this agent’s isolated Docker container.',
+    'web.fetch': 'Fetch bounded public HTTP(S) text and actual page links with DNS/IP pinning and per-redirect SSRF checks. Links are discovery only: fetch a target before citing its content.',
+    'code.run': 'Run Python (default), JavaScript/Node, or declarative browser checks exclusively in an offline resource-limited Docker container. Python/JS require exactly one code/path; browser requires an HTML path plus checks.',
+    'code.test': 'Verify Python/JavaScript or actual HTML in offline Docker Chromium. Steps: click(selector); fill/select(selector,value); press(selector,key); reload(); assert_text(selector,text,exact?); assert_count(selector,count); assert_value(selector,value); assert_visible(selector); assert_storage(key,value); assert_storage_missing(key) checks real null; assert_attribute(selector,name,value); capture_canvas(selector,key) then assert_canvas_changed(selector,key). respond_dialog(dialogType=alert|confirm|prompt,accept:boolean,value?) arms one response BEFORE the click/press that opens the next native dialog; value only for accepted prompt. Unused or type-mismatched responses fail coverage. All steps optionally pageId (default main); new_page(pageId) opens the same whitelisted entry with shared storage, no reseed, max3. For localStorage apps, storage_write_denied(enabled:true,key?) intercepts setItem/removeItem/clear only in the selected page; false restores it. A targeted clear is denied only if target key exists; key omitted blocks all API writes. Every enabled segment must block a real matching write or test coverage is incomplete. Use this plus explicit UI/storage assertions to check save failures, and pre-open two pages before writes to check stale-tab conflicts. storage_read_denied(enabled:true,key?) denies only localStorage.getItem in the selected page, persists across reload, and leaves sessionStorage unchanged. false restores reads. Require actual application blockedReads; assertions do not count. Disable it before assert_storage/assert_storage_missing to verify prior records were not overwritten after a read failure. Include at least one assertion and explicit JS/CSS resource mapping. Results include per-page assertions/errors, actual fault counts/keys, screenshotPageId and tested file hashes; no arbitrary evaluate or external URL.',
     'git.status': 'Inspect this run’s isolated Git repository and return a pushTarget for the fixed configured remote.',
     'git.commit': 'Create a real local commit of specified safe text files; Git metadata and hooks are isolated from code.',
     'git.push': 'Push the exact approved commit to the fixed HTTPS remote and per-agent/per-run branch; no force or shell.',
@@ -81,7 +108,10 @@ class _TextParser(HTMLParser):
         if tag == 'title':
             self.in_title = True
         if tag == 'a':
-            self.current = {'url': attrs.get('href', ''), 'title': '', 'class': attrs.get('class', '')}
+            self.current = {'url': attrs.get('href', ''), 'title': '', 'class': attrs.get('class', ''),
+                            'label': '' if self.ignore else attrs.get('aria-label', '') or attrs.get('title', '')}
+        if tag == 'img' and self.current is not None and not self.ignore and not self.current.get('label'):
+            self.current['label'] = attrs.get('alt', '')
         if tag in ('p', 'div', 'br', 'li', 'h1', 'h2', 'h3', 'tr'):
             self.blocks.append('\n')
 
@@ -102,6 +132,54 @@ class _TextParser(HTMLParser):
             self.title.append(value)
         if self.current is not None:
             self.current['title'] += value
+
+
+def _discovered_links(links, page_url, max_count=80, max_chars=18000):
+    """Bounded anchor discovery, not fetched target evidence or permission.
+
+    No DNS or target requests occur here. Every future fetch still passes the
+    normal public-address and redirect checks. Ignore fragment-only navigation,
+    credentials and executable URLs; preserve actual relative-link resolution.
+    """
+    found = {}
+    for link in links:
+        raw = link.get('url', '').strip()
+        if not raw or raw.startswith('#') or '\\' in raw or any(ord(c) < 32 or ord(c) == 127 for c in raw):
+            continue
+        title = re.sub(r'\s+', ' ', link.get('title', '').strip() or link.get('label', '')).strip()[:300]
+        if not title:
+            continue
+        try:
+            target = urljoin(page_url, raw)
+            parts = urlsplit(target)
+            if (parts.scheme not in ('http', 'https') or not parts.hostname
+                    or parts.username is not None or parts.password is not None or len(target) > 2048):
+                continue
+            if parts.port not in (None, 80, 443) or parts.hostname.rstrip('.').lower() in ('localhost', 'localhost.localdomain'):
+                continue
+            try:
+                if not ipaddress.ip_address(parts.hostname).is_global:
+                    continue
+            except ValueError:
+                pass
+            target = urlunsplit((parts.scheme, parts.netloc, parts.path or '/', parts.query, ''))
+        except ValueError:
+            continue
+        if target == page_url:
+            continue
+        old = found.get(target)
+        if old is None or len(title) > len(old['title']):
+            found[target] = {'title': title, 'url': target}
+    selected = []
+    for link in found.values():
+        if len(selected) >= max_count:
+            break
+        if len(json.dumps(selected + [link], ensure_ascii=False)) > max_chars:
+            continue
+        selected.append(link)
+    return {'links': selected, 'linkCount': len(found), 'linksTruncated': len(selected) < len(found),
+            'linksAreUnfetched': True,
+            'linkEvidenceNote': 'Anchors observed on this page only. Target contents were not fetched; these links are not sources supporting target claims.'}
 
 
 class _PinnedHTTP(http.client.HTTPConnection):
@@ -130,8 +208,119 @@ def _public_address(address):
     return address.is_global and not (address.is_multicast or address.is_reserved or address.is_loopback or address.is_link_local)
 
 
-def _validate_url(url):
+def _source_window(content, offsets, start_line, end_line, byte_limit, *, anchor=None, match_length=0):
+    """Return a precise source slice; byte caps never split a UTF-8 code point."""
+    requested_start, requested_end = offsets[start_line - 1], offsets[end_line]
+    start = requested_start
+
+    def prefix(position):
+        return content[position:requested_end].encode('utf-8')[:byte_limit].decode('utf-8', 'ignore')
+
+    snippet = prefix(start)
+    if anchor is not None and start + len(snippet) < anchor + match_length:
+        # A minified/long line must not cause the actual match to disappear from its snippet.
+        start = max(requested_start, anchor - 128)
+        snippet = prefix(start)
+        if start + len(snippet) < anchor + match_length:
+            start = anchor
+            snippet = prefix(start)
+    stop = start + len(snippet)
+    first = bisect.bisect_right(offsets, start)
+    last = bisect.bisect_left(offsets, stop)
+    return {'content': snippet, 'startLine': first, 'endLine': last,
+            'startColumn': start - offsets[first - 1] + 1,
+            'endColumn': stop - offsets[last - 1],
+            'partialFirstLine': start != offsets[first - 1],
+            'partialLastLine': stop != offsets[last],
+            'truncated': start != requested_start or stop != requested_end}
+
+
+def _read_selection(path, content, args):
+    lines = content.splitlines(keepends=True)
+    offsets = [0]
+    for line in lines:
+        offsets.append(offsets[-1] + len(line))
+    total = len(lines)
+    result = {'ok': True, 'path': path, 'sha256': hashlib.sha256(content.encode('utf-8')).hexdigest(),
+              'totalLines': total, 'truncated': False}
+    if 'find' in args:
+        literal, context = args['find'], args.get('contextLines', 3)
+        count = content.count(literal)
+        matches, position, remaining = [], 0, MAX_READ_WINDOW_BYTES
+        literal_bytes = len(literal.encode('utf-8'))
+        while len(matches) < min(count, MAX_FIND_MATCHES) and remaining >= literal_bytes:
+            position = content.find(literal, position)
+            if position < 0:
+                break
+            match_line = bisect.bisect_right(offsets, position)
+            match_end = position + len(literal)
+            match_end_line = bisect.bisect_left(offsets, match_end)
+            start, end = max(1, match_line - context), min(total, match_end_line + context)
+            snippet = _source_window(content, offsets, start, end, min(remaining, MAX_FIND_SNIPPET_BYTES),
+                                     anchor=position, match_length=len(literal))
+            snippet.update(matchLine=match_line, matchColumn=position - offsets[match_line - 1] + 1,
+                           matchEndLine=match_end_line, matchEndColumn=match_end - offsets[match_end_line - 1])
+            matches.append(snippet)
+            remaining -= len(snippet['content'].encode('utf-8'))
+            position = match_end  # Like str.count, literal matches do not overlap.
+        result.update(mode='find', find=literal, contextLines=context, matchCount=count,
+                      returnedMatches=len(matches), matches=matches,
+                      truncated=len(matches) < count or any(match['truncated'] for match in matches))
+        return result
+    if 'startLine' in args or 'endLine' in args:
+        start, end = args.get('startLine', 1), args.get('endLine', total)
+        result.update(mode='lines', requestedStartLine=start, requestedEndLine=end)
+        if start > total:
+            result.update(content='', startLine=None, endLine=None, startColumn=None, endColumn=None,
+                          partialFirstLine=False, partialLastLine=False, outOfRange=True)
+            return result
+        selected_end = min(end, total, start + MAX_READ_WINDOW_LINES - 1)
+        result.update(_source_window(content, offsets, start, selected_end, MAX_READ_WINDOW_BYTES))
+        result['truncated'] = result['truncated'] or selected_end < min(end, total)
+        result['outOfRange'] = False
+        return result
+    result.update(mode='full', content=content)
+    return result
+
+
+_DNS_RESOLVER = 'import json,socket,sys; print(json.dumps(list(dict.fromkeys(i[4][0] for i in socket.getaddrinfo(sys.argv[1],int(sys.argv[2]),type=socket.SOCK_STREAM)))))'
+_WEB_FETCH_WORKER = '''import json,sys
+sys.path.insert(0,sys.argv[1])
+from backend.tools import ToolGateway,ToolError
+gateway=object.__new__(ToolGateway)
+gateway.timeout=float(sys.argv[3])
+try:
+    result={'response':gateway._fetch_url(sys.argv[2])}
+except ToolError as error:
+    result={'error':{'code':error.code,'message':error.message,'retryable':error.retryable}}
+print(json.dumps(result,ensure_ascii=False))
+'''
+
+
+def _resolve_addresses(host, port, deadline=None):
+    if deadline is None:
+        return list(dict.fromkeys(info[4][0] for info in socket.getaddrinfo(host, port, type=socket.SOCK_STREAM)))
+    # getaddrinfo has no reliable thread-level timeout. Only this fixed trusted resolver
+    # runs in a killable child; no model-supplied code or credentials are forwarded.
+    result = run_process([sys.executable, '-I', '-c', _DNS_RESOLVER, host, str(port)],
+                         env={'PATH': os.defpath}, timeout=bounded_timeout(60, deadline), deadline=deadline)
+    check_deadline(deadline)
+    if result['timedOut']:
+        raise ToolError('deadline', 'DNS resolution reached the run deadline; no HTTP connection was started.')
+    if result['exitCode'] or result['outputLimitExceeded']:
+        raise ToolError('transient', 'DNS lookup failed.', retryable=True)
+    try:
+        values = json.loads(result['stdout'])
+        if not isinstance(values, list) or not values or any(not isinstance(value, str) for value in values):
+            raise ValueError('invalid DNS result')
+        return values
+    except (TypeError, ValueError):
+        raise ToolError('transient', 'DNS lookup returned an invalid bounded result.', retryable=True) from None
+
+
+def _validate_url(url, deadline=None):
     """Resolve once and return validated IPs; connections pin one IP, avoiding DNS rebinding."""
+    check_deadline(deadline)
     if not isinstance(url, str) or not 1 <= len(url) <= 2048 or '\\' in url or any(ord(c) < 33 for c in url):
         raise ToolError('parameter', 'URL must be a short public HTTP(S) URL without whitespace or backslashes.')
     try:
@@ -156,7 +345,7 @@ def _validate_url(url):
         addresses = [str(direct)]
     else:
         try:
-            addresses = list(dict.fromkeys(info[4][0] for info in socket.getaddrinfo(host, port, type=socket.SOCK_STREAM)))
+            addresses = _resolve_addresses(host, port, deadline)
         except socket.gaierror as error:
             raise ToolError('transient', 'DNS lookup failed.', retryable=True) from error
     if not addresses or any(not _public_address(ipaddress.ip_address(address)) for address in addresses):
@@ -237,14 +426,32 @@ class ToolGateway:
                     raise ToolError('parameter', f'{key} must be a bounded string.')
                 if rule.get('pattern') and not re.fullmatch(rule['pattern'], value):
                     raise ToolError('parameter', f'{key} has an invalid format.')
+                if rule.get('enum') and value not in rule['enum']:
+                    raise ToolError('parameter', f'{key} has an unsupported value.')
             elif kind in ('number', 'integer'):
                 if isinstance(value, bool) or not isinstance(value, (int, float)) or kind == 'integer' and not isinstance(value, int) or not rule.get('minimum', 0) <= value <= rule.get('maximum', 60):
                     raise ToolError('parameter', f'{key} is out of range.')
             elif kind == 'array':
-                if not isinstance(value, list) or len(value) > rule.get('maxItems', 40) or any(not isinstance(item, str) or '\0' in item or len(item) > rule.get('items', {}).get('maxLength', 1024) for item in value):
+                if rule.get('items', {}).get('type') == 'object':
+                    if not isinstance(value, list) or len(value) > rule.get('maxItems', 40) or any(not isinstance(item, dict) for item in value):
+                        raise ToolError('parameter', f'{key} must be a bounded object array.')
+                elif not isinstance(value, list) or len(value) > rule.get('maxItems', 40) or any(not isinstance(item, str) or '\0' in item or len(item) > rule.get('items', {}).get('maxLength', 1024) for item in value):
                     raise ToolError('parameter', f'{key} must be a bounded string array.')
+            elif kind == 'object':
+                if not isinstance(value, dict) or len(value) > rule.get('maxProperties', 40):
+                    raise ToolError('parameter', f'{key} must be a bounded object.')
+        if name == 'file.read':
+            if 'find' in args and ('startLine' in args or 'endLine' in args):
+                raise ToolError('parameter', 'Choose either line windows or literal find, not both.')
+            if 'contextLines' in args and 'find' not in args:
+                raise ToolError('parameter', 'contextLines requires find.')
+            if args.get('find') == '':
+                raise ToolError('parameter', 'find must be a nonempty literal.')
+            if 'endLine' in args and args.get('startLine', 1) > args['endLine']:
+                raise ToolError('parameter', 'startLine cannot exceed endLine.')
 
-    def execute(self, agent_id, run_id, name, args, approved=False):
+    def execute(self, agent_id, run_id, name, args, approved=False, deadline=None):
+        check_deadline(deadline)
         if agent_id not in self.agents or name not in self.agents[agent_id]['tools'] or name not in _SCHEMAS:
             raise ToolError('permission', 'This agent is not allowed to use that tool.')
         identifier(run_id, 'run_id')
@@ -252,19 +459,98 @@ class ToolGateway:
         workspace = self.workspace(agent_id, run_id)
         with self._lock:
             lock = self._locks.setdefault((agent_id, run_id), threading.RLock())
-        with lock:
+        acquired = lock.acquire() if deadline is None else lock.acquire(timeout=bounded_timeout(60 * 60 * 24, deadline))
+        if not acquired:
+            raise ToolError('deadline', 'The run deadline expired while waiting for its workspace lock. No operation was started.')
+        try:
+            check_deadline(deadline)
             try:
                 if name.startswith('file.'):
-                    return self._redact(self._file(agent_id, run_id, name, args, bool(approved)))
-                if name.startswith('web.'):
-                    return self._redact(self._search(args) if name == 'web.search' else self._web_fetch(args['url']))
-                if name.startswith('code.'):
-                    return self._redact(self.sandbox.run(agent_id, run_id, args, test=name == 'code.test'))
-                return self._redact(self._git(agent_id, run_id, name, args, bool(approved)))
+                    result = self._file(agent_id, run_id, name, args, bool(approved), deadline=deadline)
+                elif name.startswith('web.'):
+                    options = {} if deadline is None else {'deadline': deadline}
+                    result = self._search(args, **options) if name == 'web.search' else self._web_fetch(args['url'], **options)
+                    if name == 'web.fetch' and result.get('ok') is True:
+                        check_deadline(deadline)
+                        # The snapshot contains exactly the delivered, scrubbed
+                        # text. It is not another fetch or a generated summary.
+                        result = self._redact(result)
+                        result.update(self._snapshot_web_source(agent_id, run_id, result))
+                elif name.startswith('code.'):
+                    options = {} if deadline is None else {'deadline': deadline}
+                    result = self.sandbox.run(agent_id, run_id, args, test=name == 'code.test', **options)
+                    if args.get('language')=='browser':
+                        from .browser_spec import read_fault_coverage
+                        checks=args.get('checks',[])
+                        browser=result.get('browser')
+                        if any(step.get('action')=='storage_read_denied' for step in checks) or isinstance(browser,dict) and 'readFaults' in browser:
+                            complete=isinstance(browser,dict) and read_fault_coverage(browser,checks)
+                            if isinstance(browser,dict):browser['readFaultCoverageComplete']=complete
+                            if not complete:
+                                message='A declared read fault lacks actual matching application getItem evidence; harness assertions do not count.'
+                                result.update(ok=False,error=message)
+                                if isinstance(browser,dict):browser.update(ok=False,readFaultCoverageError=message)
+                            if isinstance(browser,dict) and isinstance(browser.get('reportPath'),str) and re.fullmatch(r'browser-evidence/browser-[a-f0-9]{32}/report\.json',browser['reportPath']):
+                                write_text(workspace,browser['reportPath'],json.dumps(browser,ensure_ascii=False,indent=2),overwrite=True)
+                else:
+                    result = self._git(agent_id, run_id, name, args, bool(approved), deadline=deadline)
+                # A late result must never be promoted to success. Keep already-produced
+                # process evidence for reconciliation, rather than claiming no effect.
+                if deadline is not None and time.monotonic() >= deadline:
+                    result.update(ok=False, deadlineExceeded=True, outcomeUnknown=not result.get('needsApproval') and name not in ('file.read', 'file.list', 'web.search', 'web.fetch', 'git.status'),
+                                  error='The run deadline expired during this operation; reconcile any possible effects before retrying.')
+                return self._redact(result)
             except ToolError as error:
-                raise ToolError(error.code, self._redact(error.message), error.retryable) from None
+                raise ToolError(error.code, self._redact(error.message), error.retryable,
+                                outcome_unknown=error.outcome_unknown or error.code == 'deadline' and name in ('git.commit', 'git.push')) from None
             except (OSError, ValueError) as error:
                 raise ToolError('permanent', 'The tool could not complete its bounded operation.') from None
+        finally:
+            lock.release()
+
+    def _snapshot_web_source(self, agent_id, run_id, result):
+        """Own fetched text, readable through existing read-only imports only.
+
+        This creates no product artifact, cross-agent grant, or acceptance.
+        Failure to retain a snapshot never changes a successful network receipt
+        into a retryable fetch: the caller still has its actual returned text.
+        """
+        body, url = result.get('content'), result.get('url')
+        if not isinstance(body, str) or not isinstance(url, str):
+            return {'sourceSnapshotUnavailable': 'missing_delivered_text_or_url'}
+        try:
+            raw = body.encode('utf-8')
+            encoded_url = url.encode('utf-8')
+        except UnicodeEncodeError:
+            return {'sourceSnapshotUnavailable': 'invalid_utf8_snapshot_text_or_url'}
+        if len(raw) > MAX_FILE_BYTES or '\0' in body:
+            return {'sourceSnapshotUnavailable': 'text_exceeds_snapshot_file_limit'}
+        digest = hashlib.sha256(raw).hexdigest()
+        identity = hashlib.sha256(encoded_url + b'\0' + digest.encode('ascii')).hexdigest()
+        relative = 'web-source-' + identity + '/body.txt'
+        try:
+            base = self.sandbox.imports(agent_id, run_id)
+            target = confined_path(base, relative)
+            if target.exists():
+                if read_text(base, relative) != body:
+                    return {'sourceSnapshotUnavailable': 'existing_snapshot_mismatch'}
+            else:
+                snapshots = [item for item in base.iterdir() if item.name.startswith('web-source-')]
+                # Forty bounded files per owner/run, independent of product
+                # artifact quotas. No eviction or hidden refetch on exhaustion.
+                if len(snapshots) >= 40:
+                    return {'sourceSnapshotUnavailable': 'owner_run_snapshot_limit'}
+                write_text(base, relative, body)
+            return {'sourceSnapshot': {
+                'path': 'imports/' + relative, 'sha256': digest,
+                'url': url, 'characters': len(body), 'utf8Bytes': len(raw),
+                'truncated': result.get('truncated') is True,
+                'scope': 'same_agent_same_run_readonly',
+                'instruction': 'This is the actual fetched text snapshot, not a live update or verified claim. '
+                    'Use file.read with find/contextLines or startLine/endLine to recover missing passages; '
+                    'check sha256 and cite the original URL. A reference alone is not source evidence.'}}
+        except (ToolError, OSError, ValueError):
+            return {'sourceSnapshotUnavailable': 'snapshot_storage_unavailable'}
 
     def _location(self, agent_id, run_id, path, writable=False, allow_root=False):
         if path in ('imports', 'imports/') and allow_root:
@@ -283,13 +569,14 @@ class ToolGateway:
     def _approval(self, name, args, title, description):
         return {'ok': False, 'needsApproval': True, 'tool': name, 'args': dict(args), 'approval': {'title': title, 'description': description}}
 
-    def _file(self, agent_id, run_id, name, args, approved):
+    def _file(self, agent_id, run_id, name, args, approved, deadline=None):
+        check_deadline(deadline)
         value = args.get('path', '.')
         base, relative = self._location(agent_id, run_id, value, writable=name not in ('file.read', 'file.list'), allow_root=name == 'file.list')
         path = confined_path(base, relative, allow_root=name == 'file.list')
         if name == 'file.read':
             content = read_text(base, relative)
-            return {'ok': True, 'path': value, 'content': content, 'sha256': hashlib.sha256(content.encode()).hexdigest()}
+            return _read_selection(value, content, args)
         if name == 'file.list':
             if not path.is_dir():
                 raise ToolError('parameter', 'The requested path is not a directory.')
@@ -329,16 +616,45 @@ class ToolGateway:
         elif approved and expected is not None:
             raise ToolError('permission', 'An approved existing file disappeared; request approval again.')
         if name == 'file.delete':
+            check_deadline(deadline)
             delete_file(base, relative)
             return {'ok': True, 'path': value, 'deleted': True}
+        check_deadline(deadline)
         write_text(base, relative, replacement, overwrite=exists)
         return {'ok': True, 'path': value, 'sha256': hashlib.sha256(replacement.encode()).hexdigest(), 'bytes': len(replacement.encode()), 'created': not exists}
 
     @staticmethod
-    def _validate_url(url):
-        return _validate_url(url)
+    def _validate_url(url, deadline=None):
+        return _validate_url(url, deadline=deadline)
 
-    def _fetch_url(self, url):
+    def _fetch_url(self, url, deadline=None):
+        if deadline is not None:
+            # Socket timeouts alone do not bound DNS or slow-drip HTTP headers. This
+            # fixed worker reuses the complete pinned/redirect-checked transport;
+            # the parent kills its process group at the single absolute deadline.
+            timeout = bounded_timeout(self.timeout, deadline)
+            result = run_process([sys.executable, '-I', '-c', _WEB_FETCH_WORKER,
+                                  str(Path(__file__).resolve().parent.parent), url, str(timeout)],
+                                 env={'PATH': os.defpath}, timeout=timeout, deadline=deadline,
+                                 max_output_bytes=MAX_WEB_BYTES * 6 + 8192)
+            check_deadline(deadline)
+            if result['timedOut']:
+                raise ToolError('transient', 'Public web request exceeded its total timeout.', retryable=True)
+            if result['exitCode'] or result['outputLimitExceeded']:
+                raise ToolError('transient', 'Bounded public web transport failed.', retryable=True)
+            try:
+                payload = json.loads(result['stdout'])
+                if not isinstance(payload, dict):
+                    raise ValueError('invalid response')
+                if 'error' in payload:
+                    error = payload['error']
+                    raise ToolError(error['code'], error['message'], error.get('retryable', False))
+                response = payload['response']
+                if not isinstance(response, dict) or not isinstance(response.get('content'), str) or len(response['content'].encode('utf-8')) > MAX_WEB_BYTES * 3:
+                    raise ValueError('invalid response')
+                return response
+            except (KeyError, TypeError, ValueError):
+                raise ToolError('transient', 'Bounded public web transport returned invalid evidence.', retryable=True) from None
         deadline = time.monotonic() + self.timeout
         current = url
         for redirect in range(6):
@@ -393,24 +709,60 @@ class ToolGateway:
                 connection.close()
         raise ToolError('permanent', 'Redirect limit exceeded.')
 
-    def _web_fetch(self, url):
-        response = self._fetch_url(url)
+    def _web_fetch(self, url, deadline=None):
+        response = self._fetch_url(url) if deadline is None else self._fetch_url(url, deadline=deadline)
+        check_deadline(deadline)
         content = response['content']
         title = response['url']
+        discovery = {}
         if 'html' in response['contentType']:
             parser = _TextParser()
             parser.feed(content)
             title = ''.join(parser.title).strip()[:300] or title
             content = re.sub(r'[ \t\r\f\v]+', ' ', ''.join(parser.blocks))
             content = re.sub(r'\n\s*\n+', '\n\n', content).strip()
-        return {'ok': True, 'url': response['url'], 'title': title, 'content': content[:120000], 'truncated': response['truncated'] or len(content) > 120000, 'sources': [{'title': title, 'url': response['url']}]}
+            discovery = _discovered_links(parser.links, response['url'])
+        if not content.strip():
+            raise ToolError('no-readable-content', 'The fetched response contains no readable content after text extraction; no source content was retrieved.')
+        return {'ok': True, 'url': response['url'], 'title': title, 'content': content[:120000], 'truncated': response['truncated'] or len(content) > 120000, 'sources': [{'title': title, 'url': response['url']}], **discovery}
 
-    def _search(self, args):
+    def _search(self, args, deadline=None):
+        check_deadline(deadline)
         query = args['query'].strip()
         if not query:
             raise ToolError('parameter', 'Search query must not be empty.')
-        url = 'https://lite.duckduckgo.com/lite/?' + urlencode({'q': query})
-        response = self._fetch_url(url)
+        overall = min(time.monotonic()+self.timeout, deadline) if deadline is not None else time.monotonic()+self.timeout
+        providers = [('DuckDuckGo Lite', 'https://lite.duckduckgo.com/lite/?'+urlencode({'q': query})),
+                     ('Yahoo Search', 'https://search.yahoo.com/search?'+urlencode({'p': query}))]
+        attempts = []
+        for index, (provider, url) in enumerate(providers):
+            check_deadline(overall)
+            # Both providers share one original operation deadline. Reserve a
+            # fraction for fallback instead of allowing two full tool timeouts.
+            remaining = overall-time.monotonic()
+            attempt_deadline = time.monotonic()+remaining/(len(providers)-index)
+            try:
+                response = self._fetch_url(url, deadline=min(overall, attempt_deadline))
+                check_deadline(overall)
+                results = (self._duckduckgo_results(response, args.get('max_results', 5)) if index == 0
+                           else yahoo_search_results(response['content'], response['url'], args.get('max_results', 5)))
+                if not results:
+                    raise ToolError('transient', 'The search page contained no parseable organic results; no sources were inferred.', True)
+                attempts.append({'provider': provider, 'sourceUrl': response['url'], 'status': 'success', 'resultCount': len(results)})
+                return {'ok': True, 'query': query, 'results': results, 'sources': results, 'provider': provider,
+                        'sourceUrl': response['url'], 'providerAttempts': attempts, 'resultsAreUnfetched': True,
+                        'evidenceMeaning': 'Search returned link titles only. Each target must be fetched/read before claims can be verified.'}
+            except ToolError as error:
+                check_deadline(overall)
+                if error.outcome_unknown or error.code not in ('permanent', 'transient', 'deadline', 'no-readable-content'):
+                    raise
+                attempts.append({'provider': provider, 'sourceUrl': url, 'status': 'failed',
+                                 'error': {'code': error.code, 'message': error.message[:200], 'retryable': error.retryable}})
+        detail = '; '.join(item['provider']+': '+item['error']['message'] for item in attempts)
+        raise ToolError('search_unavailable', 'Search providers returned no results. '+detail, True)
+
+    @staticmethod
+    def _duckduckgo_results(response, limit):
         parser = _TextParser()
         parser.feed(response['content'])
         results = []
@@ -427,11 +779,9 @@ class ToolGateway:
                 continue
             seen.add(target)
             results.append({'title': re.sub(r'\s+', ' ', link['title']).strip()[:300], 'url': target})
-            if len(results) >= args.get('max_results', 5):
+            if len(results) >= limit:
                 break
-        if not results:
-            raise ToolError('transient', 'Public search returned no parseable results (it may require a CAPTCHA or rate-limit requests).', retryable=True)
-        return {'ok': True, 'query': query, 'results': results, 'sources': results, 'provider': 'DuckDuckGo Lite', 'sourceUrl': response['url']}
+        return results
 
     @staticmethod
     def _check_remote_format(remote):
@@ -450,13 +800,14 @@ class ToolGateway:
         return {'PATH': os.environ.get('PATH', os.defpath), 'HOME': str(home), 'LANG': 'C.UTF-8', 'GIT_CONFIG_NOSYSTEM': '1', 'GIT_CONFIG_GLOBAL': os.devnull,
                 'GIT_TERMINAL_PROMPT': '0', 'GIT_AUTHOR_NAME': 'Evo Agent', 'GIT_AUTHOR_EMAIL': 'agent@localhost.invalid', 'GIT_COMMITTER_NAME': 'Evo Agent', 'GIT_COMMITTER_EMAIL': 'agent@localhost.invalid'}
 
-    def _git_base(self, agent_id, run_id):
+    def _git_base(self, agent_id, run_id, deadline=None):
+        check_deadline(deadline)
         if not self.git:
             raise ToolError('permanent', 'Git is not installed.')
         metadata = secure_directory(self.data_dir, 'gitmeta', agent_id, run_id)
         workspace = self.workspace(agent_id, run_id)
         if not (metadata / 'HEAD').is_file():
-            initialized = run_process([self.git, 'init', '--bare', '--template=', str(metadata)], env=self._git_env(), timeout=self.timeout)
+            initialized = self._git_process([self.git, 'init', '--bare', '--template=', str(metadata)], deadline=deadline)
             if initialized['exitCode']:
                 raise ToolError('permanent', 'Cannot initialize isolated Git metadata.')
         options = [self.git, '--git-dir=' + str(metadata.resolve()), '--work-tree=' + str(workspace.resolve()),
@@ -464,22 +815,28 @@ class ToolGateway:
                    '-c', 'credential.helper=', '-c', 'protocol.allow=never', '-c', 'protocol.https.allow=always', '-c', 'http.followRedirects=false',
                    '-c', 'submodule.recurse=false', '-c', 'commit.gpgsign=false', '-c', 'gc.auto=0']
         branch = f'agent-runs/{agent_id}/{run_id}'
-        head = run_process([*options, 'symbolic-ref', 'HEAD', 'refs/heads/' + branch], cwd=workspace, env=self._git_env(), timeout=self.timeout)
+        head = self._git_process([*options, 'symbolic-ref', 'HEAD', 'refs/heads/' + branch], workspace=workspace, deadline=deadline)
         if head['exitCode']:
             raise ToolError('permanent', 'Cannot select the fixed per-run branch.')
         return options, workspace, branch
 
-    def _git_command(self, base, workspace, arguments, push_env=None):
+    def _git_process(self, command, workspace=None, push_env=None, deadline=None):
         environment = self._git_env()
         if push_env is not None:
             environment.update(push_env)
-        result = self._redact(run_process([*base, *arguments], cwd=workspace, env=environment, timeout=self.timeout))
+        options = {} if deadline is None else {'deadline': deadline}
+        result = self._redact(run_process(command, cwd=workspace, env=environment,
+                                         timeout=bounded_timeout(self.timeout, deadline), **options))
+        check_deadline(deadline, outcome_unknown=True)
         if result['timedOut'] or result['outputLimitExceeded']:
             raise ToolError('transient', 'Git timed out or exceeded its output limit.', retryable=True)
         return result
 
-    def _head(self, base, workspace):
-        head = self._git_command(base, workspace, ['rev-parse', '--verify', 'HEAD'])
+    def _git_command(self, base, workspace, arguments, push_env=None, deadline=None):
+        return self._git_process([*base, *arguments], workspace=workspace, push_env=push_env, deadline=deadline)
+
+    def _head(self, base, workspace, deadline=None):
+        head = self._git_command(base, workspace, ['rev-parse', '--verify', 'HEAD'], deadline=deadline)
         return head['stdout'].strip() if head['exitCode'] == 0 else None
 
     def _safe_commit_files(self, workspace, requested):
@@ -505,35 +862,35 @@ class ToolGateway:
                 safe.append(value)
         return safe
 
-    def _git(self, agent_id, run_id, name, args, approved):
-        base, workspace, branch = self._git_base(agent_id, run_id)
+    def _git(self, agent_id, run_id, name, args, approved, deadline=None):
+        base, workspace, branch = self._git_base(agent_id, run_id, deadline=deadline)
         if name == 'git.status':
-            result = self._git_command(base, workspace, ['status', '--short', '--untracked-files=normal', '--ignore-submodules=all'])
-            result.update({'ok': result['exitCode'] == 0, 'pushTarget': {'remote': self.git_remote, 'branch': branch, 'commit': self._head(base, workspace)}})
+            result = self._git_command(base, workspace, ['status', '--short', '--untracked-files=normal', '--ignore-submodules=all'], deadline=deadline)
+            result.update({'ok': result['exitCode'] == 0, 'pushTarget': {'remote': self.git_remote, 'branch': branch, 'commit': self._head(base, workspace, deadline=deadline)}})
             return result
         if name == 'git.commit':
             message = args['message'].strip()
             if not message or '\n' in message or '\r' in message:
                 raise ToolError('parameter', 'Commit message must be one nonempty line.')
             files = self._safe_commit_files(workspace, args.get('files'))
-            added = self._git_command(base, workspace, ['add', '--', *files])
+            added = self._git_command(base, workspace, ['add', '--', *files], deadline=deadline)
             if added['exitCode']:
                 raise ToolError('permanent', 'Git could not stage the selected safe files.')
-            result = self._git_command(base, workspace, ['commit', '--no-gpg-sign', '-m', message, '--only', '--', *files])
-            result.update({'ok': result['exitCode'] == 0, 'files': files, 'pushTarget': {'remote': self.git_remote, 'branch': branch, 'commit': self._head(base, workspace)}})
+            result = self._git_command(base, workspace, ['commit', '--no-gpg-sign', '-m', message, '--only', '--', *files], deadline=deadline)
+            result.update({'ok': result['exitCode'] == 0, 'files': files, 'pushTarget': {'remote': self.git_remote, 'branch': branch, 'commit': self._head(base, workspace, deadline=deadline)}})
             return result
         if not self.git_remote:
             raise ToolError('permission', 'GIT_REMOTE is not configured; no push target is authorized.')
         self._check_remote_format(self.git_remote)
-        expected = {'remote': self.git_remote, 'branch': branch, 'commit': self._head(base, workspace)}
+        expected = {'remote': self.git_remote, 'branch': branch, 'commit': self._head(base, workspace, deadline=deadline)}
         if not expected['commit'] or any(args[key] != value for key, value in expected.items()):
             raise ToolError('permission', 'Push target must exactly match the configured remote, fixed branch and current commit returned by git.status/commit.')
-        _validate_url(self.git_remote)
+        _validate_url(self.git_remote, deadline=deadline)
         if not approved:
             return self._approval(name, expected, 'Approve the exact Git push?', f"Remote: {expected['remote']}\nBranch: {branch}\nCommit: {expected['commit']}\nNo force push or other target is allowed.")
         if not self._git_token:
             raise ToolError('permission', 'GIT_TOKEN is not configured; authenticated HTTPS push is unavailable. No global credential helper is used.')
-        normalized, host, port, addresses = _validate_url(self.git_remote)
+        normalized, host, port, addresses = _validate_url(self.git_remote, deadline=deadline)
         address = addresses[0]
         pinned = f'{host}:{port}:[{address}]' if ':' in address else f'{host}:{port}:{address}'
         origin = urlsplit(normalized).scheme + '://' + urlsplit(normalized).netloc
@@ -543,6 +900,6 @@ class ToolGateway:
         push_env = {'GIT_CONFIG_COUNT': '1', 'GIT_CONFIG_KEY_0': f'http.{origin}/.extraheader',
                     'GIT_CONFIG_VALUE_0': 'AUTHORIZATION: basic ' + self._git_basic}
         result = self._git_command([*base, '-c', 'http.curloptResolve=' + pinned], workspace,
-            ['push', '--porcelain', '--no-verify', '--', self.git_remote, f"{expected['commit']}:refs/heads/{branch}"], push_env=push_env)
+            ['push', '--porcelain', '--no-verify', '--', self.git_remote, f"{expected['commit']}:refs/heads/{branch}"], push_env=push_env, deadline=deadline)
         result.update({'ok': result['exitCode'] == 0, 'pushTarget': expected})
         return result

@@ -2,7 +2,7 @@
 import copy
 import json
 import unittest
-from backend.runtime import compress_messages
+from backend.runtime import ProtocolError, compress_messages
 
 
 class ContextTests(unittest.TestCase):
@@ -43,9 +43,12 @@ class ContextTests(unittest.TestCase):
         self.assertIn('[TRUNCATED]', compressed[-1]['content'])
         self.assertIn('RESULT-BEGIN', compressed[-1]['content'])
         self.assertIn('RESULT-END', compressed[-1]['content'])
-        for limit in (0, 1, 2, 20, 200, 1000, 8000):
+        for limit in (0, 1, 2, 20, 200, 1000):
             with self.subTest(limit=limit):
-                self.assertLessEqual(sum(len(item['content']) for item in compress_messages(messages, limit)), limit)
+                with self.assertRaisesRegex(ProtocolError,'上下文容量'):
+                    compress_messages(messages,limit)
+                self.assertEqual(messages,original,'capacity failure must not mutate the source')
+        self.assertLessEqual(sum(len(item['content']) for item in compress_messages(messages,8000)),8000)
 
     def test_normal_messages_unchanged_and_old_turns_dropped_once(self):
         small = [{'role': 'system', 'content': 'protocol'}, {'role': 'user', 'content': 'goal'}]

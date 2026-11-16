@@ -131,6 +131,60 @@ class ToolTests(unittest.TestCase):
             self.gateway._fetch_url('https://example.com/')
         self.assertEqual(len(Connection.calls), 1)
 
+    def test_web_fetch_empty_response_is_not_successful_source_content(self):
+        url = 'https://example.com/empty'
+        for mime, content in (('text/plain', ''), ('text/plain', ' \n\t '),
+                              ('text/html', ''), ('text/html', '<html><body> \n </body></html>')):
+            with self.subTest(mime=mime, content=content), mock.patch.object(self.gateway, '_fetch_url',
+                    return_value={'url': url, 'contentType': mime, 'content': content, 'truncated': False}) as fetched:
+                with self.assertRaises(ToolError) as caught:
+                    self.call('web.fetch', {'url': url}, agent='research')
+                self.assertEqual(caught.exception.code, 'no-readable-content')
+                self.assertFalse(caught.exception.retryable)
+                fetched.assert_called_once_with(url)
+
+    def test_web_fetch_script_only_html_is_not_successful_even_if_truncated(self):
+        url = 'https://example.com/script-only'
+        for truncated in (False, True):
+            with self.subTest(truncated=truncated), mock.patch.object(self.gateway, '_fetch_url',
+                    return_value={'url': url, 'contentType': 'text/html',
+                                  'content': '<html><body><script>window.app={text:"not readable article text"};</script><style>body{color:red}</style></body></html>',
+                                  'truncated': truncated}):
+                with self.assertRaises(ToolError) as caught:
+                    self.call('web.fetch', {'url': url}, agent='research')
+                self.assertEqual(caught.exception.code, 'no-readable-content')
+
+    def test_web_fetch_normal_html_and_nonempty_plain_text_keep_existing_contract(self):
+        url = 'https://example.com/readable'
+        fixtures = [('text/html', '<html><head><title>Article</title></head><body><p>Actual readable body.</p><script>not evidence</script></body></html>'),
+                    ('text/plain', ' \nActual plain text.\n ')]
+        for mime, content in fixtures:
+            with self.subTest(mime=mime), mock.patch.object(self.gateway, '_fetch_url',
+                    return_value={'url': url, 'contentType': mime, 'content': content, 'truncated': False}):
+                result = self.call('web.fetch', {'url': url}, agent='research')
+                self.assertTrue(result['ok'])
+                self.assertFalse(result['truncated'])
+                self.assertEqual(result['url'], url)
+                self.assertEqual(result['sources'], [{'title': result['title'], 'url': url}])
+                if mime == 'text/plain':
+                    self.assertEqual(result['content'], content)
+                else:
+                    self.assertEqual(result['title'], 'Article')
+                    self.assertIn('Actual readable body.', result['content'])
+                    self.assertNotIn('not evidence', result['content'])
+
+    def test_web_fetch_truncated_but_nonempty_content_remains_successful_and_labeled(self):
+        url = 'https://example.com/partial'
+        for mime, content in (('text/plain', 'Available partial text.'),
+                              ('text/html', '<p>Available partial body.</p><script>incomplete app payload')):
+            with self.subTest(mime=mime), mock.patch.object(self.gateway, '_fetch_url',
+                    return_value={'url': url, 'contentType': mime, 'content': content, 'truncated': True}):
+                result = self.call('web.fetch', {'url': url}, agent='research')
+                self.assertTrue(result['ok'])
+                self.assertTrue(result['truncated'])
+                self.assertIn('Available partial', result['content'])
+                self.assertEqual(result['sources'][0]['url'], url)
+
     def test_docker_unavailable_has_no_host_fallback(self):
         with mock.patch.object(self.gateway.sandbox, 'capabilities', return_value={'dockerAvailable': False, 'dockerImageReady': False, 'reason': 'Docker unavailable'}), mock.patch('backend.sandbox.run_process') as process:
             with self.assertRaisesRegex(ToolError, 'Docker unavailable'):

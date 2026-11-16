@@ -225,8 +225,8 @@ def main():
     parser.add_argument('--model-timeout', type=int, default=60)
     parser.add_argument('--max-calls', type=int, default=48)
     parser.add_argument('--max-retries', type=int, default=1)
-    parser.add_argument('--completion-tokens', type=int, default=3000)
-    parser.add_argument('--planning-tokens', type=int, default=1200)
+    parser.add_argument('--completion-tokens', type=int, default=6000)
+    parser.add_argument('--planning-tokens', type=int, default=3000)
     args = parser.parse_args()
     if not args.live:
         parser.error('--live is required for real course API requests')
@@ -271,6 +271,8 @@ def main():
     report = {'kind': 'Mid Test real-model observation, not official grading',
               'provider': config.provider, 'configuredModel': config.model,
               'settings': {'deadlinePerTask': args.deadline, 'humanWait': args.human_wait,
+                           'transportMode': getattr(config, 'transport_mode', 'standard'),
+                           'requestedThinkingMode': getattr(config, 'thinking_mode', 'default'),
                            'modelTimeout': args.model_timeout, 'maxModelCallsPerTask': args.max_calls,
                            'maxCompletionTokens': args.completion_tokens, 'planningMaxTokens': args.planning_tokens,
                            'maxAgentTurns': 16, 'maxRetries': args.max_retries},

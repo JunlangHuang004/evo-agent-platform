@@ -494,6 +494,15 @@ class ArtifactStore:
                 raise
         return result
 
+    def can_access(self, artifact_id, agent_id, run_id):
+        """Check published ownership/grants without exposing another workspace."""
+        with self.lock:
+            item = self._artifacts.get(artifact_id)
+            return bool(item and item.get('runId') == run_id and
+                        (item.get('ownerAgentId') == agent_id or
+                         any(g.get('id') == artifact_id and g.get('toAgentId') == agent_id
+                             and g.get('runId') == run_id for g in self._grants)))
+
     def list_for_run(self, run_id):
         run_id = _identifier(run_id, "Run ID")
         with self.lock:

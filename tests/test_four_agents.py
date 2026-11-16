@@ -129,6 +129,7 @@ class FourRoleModel:
         self.counts = defaultdict(int)
         self.contexts = {}
         self.executor_test_call = None
+        self.executor_projected_test_ids = []
         self.lock = threading.Lock()
         self.plan = {'summary': 'Coordinator scope -> Research sources -> Executor implementation -> Reviewer evidence -> Coordinator summary',
                      'tasks': [step('scope', 'coordinator', capability='planning'),
@@ -187,9 +188,14 @@ class FourRoleModel:
                        {'type': 'publish_artifact', 'path': 'solution.py'},
                        {'type': 'publish_artifact', 'path': 'test_solution.py'},
                        finish('Implementation and test sources published; gateway receipts record the test-double execution.')]
-            if index >= 5:
+            if index == 5:
                 # The last code receipt, not an earlier code.run receipt.
+                # Capture the actual receipt as soon as code.test returns.
+                # Later publication turns may project old tool-result bodies;
+                # the server retains their IDs in progressReceipt and calls.
                 self.executor_test_call = [item['callId'] for item in results if item.get('exitCode') == 0 and item.get('callId')][-1]
+            elif index > 5:
+                self.executor_projected_test_ids.append(context['progressReceipt']['successfulTestCallIds'])
             action = actions[index]
         elif title == 'review':
             source = self.imported(context, 'solution.py')
@@ -284,6 +290,15 @@ class FourAgentIntegrationTests(unittest.TestCase):
             gateway.execute('executor', run['id'], 'file.write', {'path': research_path, 'content': 'tampering'}, approved=True)
         validation = tasks['implement']['validation']
         self.assertTrue(validation['verified'])
+        self.assertTrue(model.executor_projected_test_ids)
+        for shown_ids in model.executor_projected_test_ids:
+            self.assertIn(model.executor_test_call, shown_ids)
+            for shown_id in shown_ids:
+                actual = next(call for call in run['calls'] if call['id'] == shown_id)
+                self.assertEqual((actual['taskId'], actual['agentId'], actual['tool'], actual['status']),
+                                 (tasks['implement']['id'], 'executor', 'code.test', 'success'))
+                self.assertEqual(actual['revision'], tasks['implement']['revision'])
+                self.assertEqual(actual['result']['exitCode'], 0)
         self.assertEqual(validation['reviewerTaskId'], tasks['review']['id'])
         evidence = next(call for call in run['calls'] if call['id'] == validation['evidenceCallIds'][0])
         self.assertEqual((evidence['agentId'], evidence['tool'], evidence['status']), ('reviewer', 'code.test', 'success'))

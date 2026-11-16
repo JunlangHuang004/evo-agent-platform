@@ -125,7 +125,12 @@ class TeamRuntimeTests(unittest.TestCase):
                     prompt=action_prompt(agent,definitions)
                     self.assertIn(agent['rolePrompt'],prompt)
                     self.assertIn('expectedSha256',prompt)
-                    self.assertIn('Python 3.11',prompt)
+                    self.assertIn('offline Docker only',prompt)
+                    if any(item['name'].startswith('code.') for item in definitions):
+                        self.assertIn('Python 3.11',prompt)
+                    else:
+                        self.assertIn('no host fallback',prompt)
+                        self.assertNotIn('Python 3.11',prompt)
                     if 'code.test' in agent['tools']:
                         self.assertIn('"timeout"',prompt)
                         self.assertIn('"args"',prompt)

@@ -1,0 +1,1390 @@
+{
+  "sourceRunId": "run-34691d519a9f48a0",
+  "sourceManifestSha256": "2589b2f3b1b7f58412c6234462639453e5141599cd86d6c486ed3145783d7ae6",
+  "scope": "Exact selected actual call fields needed for offline progress observation; no source bodies, roles, requester replies, screenshots, or acceptance labels.",
+  "run": {
+    "id": "run-34691d519a9f48a0",
+    "calls": [
+      {
+        "id": "call-ab79f451fa054443",
+        "tool": "code.test",
+        "taskId": "task-3df969bc9a204e50",
+        "agentId": "dev",
+        "revision": 0,
+        "args": {
+          "checks": [
+            {
+              "action": "assert_text",
+              "selector": "h1",
+              "text": "Meeting Room Booking"
+            },
+            {
+              "action": "assert_count",
+              "count": 10,
+              "selector": "table.grid tbody tr"
+            },
+            {
+              "action": "assert_count",
+              "count": 120,
+              "selector": "td.free"
+            },
+            {
+              "action": "fill",
+              "selector": "#nameInput",
+              "value": "Alice Chan"
+            },
+            {
+              "action": "click",
+              "selector": "td.free[data-room='room-3'][data-hour='9']"
+            },
+            {
+              "action": "assert_text",
+              "selector": "#message",
+              "text": "Booked Room 3 at 09:00-10:00 for Alice Chan."
+            },
+            {
+              "action": "assert_count",
+              "count": 1,
+              "selector": "td.booked"
+            },
+            {
+              "action": "assert_count",
+              "count": 119,
+              "selector": "td.free"
+            },
+            {
+              "action": "assert_text",
+              "selector": "#myBookings li.booking span",
+              "text": "Room 3 · 09:00-10:00"
+            },
+            {
+              "action": "click",
+              "selector": "td.free[data-room='room-3'][data-hour='9']"
+            },
+            {
+              "action": "assert_text",
+              "selector": "#message",
+              "text": "Room 3 at 09:00-10:00 is already booked by Alice Chan."
+            },
+            {
+              "action": "assert_count",
+              "count": 1,
+              "selector": "td.booked"
+            },
+            {
+              "action": "click",
+              "selector": "td.free[data-room='room-3'][data-hour='10']"
+            },
+            {
+              "action": "assert_count",
+              "count": 2,
+              "selector": "td.booked"
+            },
+            {
+              "action": "fill",
+              "selector": "#nameInput",
+              "value": "Bob Lee"
+            },
+            {
+              "action": "assert_count",
+              "count": 0,
+              "selector": "#myBookings li.booking"
+            },
+            {
+              "action": "click",
+              "pageId": "main",
+              "selector": "#myBookings li.booking button.cancel"
+            }
+          ],
+          "language": "browser",
+          "path": "index.html",
+          "resources": {
+            "app.js": "app.js",
+            "styles.css": "styles.css",
+            "ui.js": "ui.js"
+          },
+          "timeout": 20
+        },
+        "status": "failed",
+        "result": {
+          "ok": false,
+          "runtime": "browser",
+          "exitCode": 1,
+          "timedOut": false,
+          "outputLimitExceeded": false,
+          "browser": {
+            "engine": "chromium",
+            "executed": true,
+            "ok": false,
+            "entry": {
+              "path": "index.html",
+              "sha256": "77fd22574508ea7d2ea3271d01c3bdba30dae52e800e0300ce8ab006f0eb710c"
+            },
+            "sourceManifest": [
+              {
+                "path": "index.html",
+                "sha256": "77fd22574508ea7d2ea3271d01c3bdba30dae52e800e0300ce8ab006f0eb710c"
+              },
+              {
+                "path": "app.js",
+                "sha256": "df5a225099782ff7a40096a080954ed039cff1fb5c214e16433596b6646ba2f4"
+              },
+              {
+                "path": "ui.js",
+                "sha256": "98f84e62e324a4d097a3e351e1380ce56558b66a26a0309ebb0c7cf10d007e70"
+              },
+              {
+                "path": "styles.css",
+                "sha256": "819064c13eb7d3f1ec514493e75e1d138a9aa50ff2a959368ae556ef7739907d"
+              }
+            ],
+            "testedFiles": [
+              {
+                "path": "index.html",
+                "sha256": "77fd22574508ea7d2ea3271d01c3bdba30dae52e800e0300ce8ab006f0eb710c"
+              },
+              {
+                "path": "styles.css",
+                "sha256": "819064c13eb7d3f1ec514493e75e1d138a9aa50ff2a959368ae556ef7739907d"
+              },
+              {
+                "path": "app.js",
+                "sha256": "df5a225099782ff7a40096a080954ed039cff1fb5c214e16433596b6646ba2f4"
+              },
+              {
+                "path": "ui.js",
+                "sha256": "98f84e62e324a4d097a3e351e1380ce56558b66a26a0309ebb0c7cf10d007e70"
+              }
+            ],
+            "assertions": [
+              {
+                "action": "assert_text",
+                "actual": "Meeting Room Booking",
+                "expected": "Meeting Room Booking",
+                "pageId": "main",
+                "passed": true,
+                "selector": "h1"
+              },
+              {
+                "action": "assert_count",
+                "actual": 10,
+                "expected": 10,
+                "pageId": "main",
+                "passed": true,
+                "selector": "table.grid tbody tr"
+              },
+              {
+                "action": "assert_count",
+                "actual": 0,
+                "expected": 120,
+                "pageId": "main",
+                "passed": false,
+                "selector": "td.free"
+              }
+            ],
+            "failureObservation": {
+              "formValues": [
+                {
+                  "id": "dateInput",
+                  "name": "",
+                  "type": "date",
+                  "value": "2026-11-15"
+                },
+                {
+                  "id": "nameInput",
+                  "name": "",
+                  "type": "text",
+                  "value": ""
+                }
+              ],
+              "formValuesOmitted": 0,
+              "interpretation": "Untrusted observed state only; does not determine whether the test or product is wrong.",
+              "matchCount": 0,
+              "messagesOmitted": 0,
+              "pageId": "main",
+              "runtimeUTC": "2026-11-15T23:28:22.294Z",
+              "source": "actual failing-page DOM in this test",
+              "stepIndex": 2,
+              "textLimitCharacters": 120,
+              "timezone": "UTC",
+              "valuesAreBoundedPreviews": true,
+              "visibleMessages": []
+            }
+          }
+        }
+      },
+      {
+        "id": "call-5e5967100ca4481b",
+        "tool": "code.test",
+        "taskId": "task-3df969bc9a204e50",
+        "agentId": "dev",
+        "revision": 0,
+        "args": {
+          "checks": [
+            {
+              "action": "assert_text",
+              "selector": "h1",
+              "text": "Meeting Room Booking"
+            },
+            {
+              "action": "assert_count",
+              "count": 10,
+              "selector": "table.grid tbody tr"
+            },
+            {
+              "action": "assert_count",
+              "count": 120,
+              "selector": "td.free"
+            },
+            {
+              "action": "fill",
+              "selector": "#nameInput",
+              "value": "Alice Chan"
+            },
+            {
+              "action": "click",
+              "selector": "td.free[data-room='room-3'][data-hour='9']"
+            },
+            {
+              "action": "assert_text",
+              "selector": "#message",
+              "text": "Booked Room 3 at 09:00-10:00 for Alice Chan."
+            },
+            {
+              "action": "assert_count",
+              "count": 1,
+              "selector": "td.booked"
+            },
+            {
+              "action": "assert_count",
+              "count": 119,
+              "selector": "td.free"
+            },
+            {
+              "action": "assert_text",
+              "selector": "#myBookings li.booking span",
+              "text": "Room 3 · 09:00-10:00"
+            },
+            {
+              "action": "click",
+              "selector": "td.free[data-room='room-3'][data-hour='9']"
+            },
+            {
+              "action": "assert_text",
+              "selector": "#message",
+              "text": "Room 3 at 09:00-10:00 is already booked by Alice Chan."
+            },
+            {
+              "action": "assert_count",
+              "count": 1,
+              "selector": "td.booked"
+            },
+            {
+              "action": "click",
+              "selector": "td.free[data-room='room-3'][data-hour='10']"
+            },
+            {
+              "action": "assert_count",
+              "count": 2,
+              "selector": "td.booked"
+            },
+            {
+              "action": "fill",
+              "selector": "#nameInput",
+              "value": "Bob Lee"
+            },
+            {
+              "action": "assert_count",
+              "count": 0,
+              "selector": "#myBookings li.booking"
+            },
+            {
+              "action": "fill",
+              "selector": "#nameInput",
+              "value": "Alice Chan"
+            },
+            {
+              "action": "assert_count",
+              "count": 2,
+              "selector": "#myBookings li.booking"
+            },
+            {
+              "accept": true,
+              "action": "respond_dialog",
+              "dialogType": "confirm"
+            },
+            {
+              "action": "click",
+              "selector": "#myBookings li.booking button.cancel"
+            },
+            {
+              "action": "assert_count",
+              "count": 1,
+              "selector": "td.booked"
+            },
+            {
+              "action": "assert_count",
+              "count": 119,
+              "selector": "td.free"
+            }
+          ],
+          "language": "browser",
+          "path": "index.html",
+          "resources": {
+            "app.js": "app.js",
+            "styles.css": "styles.css",
+            "ui.js": "ui.js"
+          },
+          "timeout": 20
+        },
+        "status": "failed",
+        "result": {
+          "ok": false,
+          "runtime": "browser",
+          "exitCode": 1,
+          "timedOut": false,
+          "outputLimitExceeded": false,
+          "browser": {
+            "engine": "chromium",
+            "executed": true,
+            "ok": false,
+            "entry": {
+              "path": "index.html",
+              "sha256": "77fd22574508ea7d2ea3271d01c3bdba30dae52e800e0300ce8ab006f0eb710c"
+            },
+            "sourceManifest": [
+              {
+                "path": "index.html",
+                "sha256": "77fd22574508ea7d2ea3271d01c3bdba30dae52e800e0300ce8ab006f0eb710c"
+              },
+              {
+                "path": "app.js",
+                "sha256": "df5a225099782ff7a40096a080954ed039cff1fb5c214e16433596b6646ba2f4"
+              },
+              {
+                "path": "ui.js",
+                "sha256": "6239d701f9453cc1c1e9d13b9a14eac088ac3abe3cbcfadf96deaa1546fd3f2a"
+              },
+              {
+                "path": "styles.css",
+                "sha256": "819064c13eb7d3f1ec514493e75e1d138a9aa50ff2a959368ae556ef7739907d"
+              }
+            ],
+            "testedFiles": [
+              {
+                "path": "index.html",
+                "sha256": "77fd22574508ea7d2ea3271d01c3bdba30dae52e800e0300ce8ab006f0eb710c"
+              },
+              {
+                "path": "styles.css",
+                "sha256": "819064c13eb7d3f1ec514493e75e1d138a9aa50ff2a959368ae556ef7739907d"
+              },
+              {
+                "path": "app.js",
+                "sha256": "df5a225099782ff7a40096a080954ed039cff1fb5c214e16433596b6646ba2f4"
+              },
+              {
+                "path": "ui.js",
+                "sha256": "6239d701f9453cc1c1e9d13b9a14eac088ac3abe3cbcfadf96deaa1546fd3f2a"
+              }
+            ],
+            "assertions": [
+              {
+                "action": "assert_text",
+                "actual": "Meeting Room Booking",
+                "expected": "Meeting Room Booking",
+                "pageId": "main",
+                "passed": true,
+                "selector": "h1"
+              },
+              {
+                "action": "assert_count",
+                "actual": 10,
+                "expected": 10,
+                "pageId": "main",
+                "passed": true,
+                "selector": "table.grid tbody tr"
+              },
+              {
+                "action": "assert_count",
+                "actual": 0,
+                "expected": 120,
+                "pageId": "main",
+                "passed": false,
+                "selector": "td.free"
+              }
+            ],
+            "failureObservation": {
+              "formValues": [
+                {
+                  "id": "dateInput",
+                  "name": "",
+                  "type": "date",
+                  "value": "2026-11-15"
+                },
+                {
+                  "id": "nameInput",
+                  "name": "",
+                  "type": "text",
+                  "value": ""
+                }
+              ],
+              "formValuesOmitted": 0,
+              "interpretation": "Untrusted observed state only; does not determine whether the test or product is wrong.",
+              "matchCount": 0,
+              "messagesOmitted": 0,
+              "pageId": "main",
+              "runtimeUTC": "2026-11-15T23:32:43.274Z",
+              "source": "actual failing-page DOM in this test",
+              "stepIndex": 2,
+              "textLimitCharacters": 120,
+              "timezone": "UTC",
+              "valuesAreBoundedPreviews": true,
+              "visibleMessages": []
+            }
+          }
+        }
+      },
+      {
+        "id": "call-c37f9d5f3818424a",
+        "tool": "code.test",
+        "taskId": "task-3df969bc9a204e50",
+        "agentId": "dev",
+        "revision": 0,
+        "args": {
+          "checks": [
+            {
+              "action": "assert_text",
+              "selector": "h1",
+              "text": "Meeting Room Booking"
+            },
+            {
+              "action": "assert_count",
+              "count": 10,
+              "selector": "table.grid tbody tr"
+            },
+            {
+              "action": "assert_count",
+              "count": 120,
+              "selector": "td.free"
+            },
+            {
+              "action": "fill",
+              "selector": "#nameInput",
+              "value": "Alice Chan"
+            },
+            {
+              "action": "click",
+              "selector": "td.free[data-room='room-3'][data-hour='9']"
+            },
+            {
+              "action": "assert_text",
+              "selector": "#message",
+              "text": "Booked Room 3 at 09:00-10:00 for Alice Chan."
+            },
+            {
+              "action": "assert_count",
+              "count": 1,
+              "selector": "td.booked"
+            },
+            {
+              "action": "assert_count",
+              "count": 119,
+              "selector": "td.free"
+            },
+            {
+              "action": "assert_text",
+              "selector": "#myBookings li.booking span",
+              "text": "Room 3 · 09:00-10:00"
+            },
+            {
+              "action": "click",
+              "selector": "td.free[data-room='room-3'][data-hour='9']"
+            },
+            {
+              "action": "assert_text",
+              "selector": "#message",
+              "text": "Room 3 at 09:00-10:00 is already booked by Alice Chan."
+            },
+            {
+              "action": "assert_count",
+              "count": 1,
+              "selector": "td.booked"
+            },
+            {
+              "action": "click",
+              "selector": "td.free[data-room='room-3'][data-hour='10']"
+            },
+            {
+              "action": "assert_count",
+              "count": 2,
+              "selector": "td.booked"
+            },
+            {
+              "action": "fill",
+              "selector": "#nameInput",
+              "value": "Bob Lee"
+            },
+            {
+              "action": "assert_count",
+              "count": 0,
+              "selector": "#myBookings li.booking"
+            },
+            {
+              "action": "fill",
+              "selector": "#nameInput",
+              "value": "Alice Chan"
+            },
+            {
+              "action": "assert_count",
+              "count": 2,
+              "selector": "#myBookings li.booking"
+            },
+            {
+              "accept": true,
+              "action": "respond_dialog",
+              "dialogType": "confirm"
+            },
+            {
+              "action": "click",
+              "selector": "#myBookings li.booking button.cancel"
+            },
+            {
+              "action": "assert_count",
+              "count": 1,
+              "selector": "td.booked"
+            },
+            {
+              "action": "assert_count",
+              "count": 119,
+              "selector": "td.free"
+            }
+          ],
+          "language": "browser",
+          "path": "index.html",
+          "resources": {
+            "app.js": "app.js",
+            "styles.css": "styles.css",
+            "ui.js": "ui.js"
+          },
+          "timeout": 20
+        },
+        "status": "failed",
+        "result": {
+          "ok": false,
+          "runtime": "browser",
+          "exitCode": 1,
+          "timedOut": false,
+          "outputLimitExceeded": false,
+          "browser": {
+            "engine": "chromium",
+            "executed": true,
+            "ok": false,
+            "entry": {
+              "path": "index.html",
+              "sha256": "77fd22574508ea7d2ea3271d01c3bdba30dae52e800e0300ce8ab006f0eb710c"
+            },
+            "sourceManifest": [
+              {
+                "path": "index.html",
+                "sha256": "77fd22574508ea7d2ea3271d01c3bdba30dae52e800e0300ce8ab006f0eb710c"
+              },
+              {
+                "path": "app.js",
+                "sha256": "df5a225099782ff7a40096a080954ed039cff1fb5c214e16433596b6646ba2f4"
+              },
+              {
+                "path": "ui.js",
+                "sha256": "6239d701f9453cc1c1e9d13b9a14eac088ac3abe3cbcfadf96deaa1546fd3f2a"
+              },
+              {
+                "path": "styles.css",
+                "sha256": "819064c13eb7d3f1ec514493e75e1d138a9aa50ff2a959368ae556ef7739907d"
+              }
+            ],
+            "testedFiles": [
+              {
+                "path": "index.html",
+                "sha256": "77fd22574508ea7d2ea3271d01c3bdba30dae52e800e0300ce8ab006f0eb710c"
+              },
+              {
+                "path": "styles.css",
+                "sha256": "819064c13eb7d3f1ec514493e75e1d138a9aa50ff2a959368ae556ef7739907d"
+              },
+              {
+                "path": "app.js",
+                "sha256": "df5a225099782ff7a40096a080954ed039cff1fb5c214e16433596b6646ba2f4"
+              },
+              {
+                "path": "ui.js",
+                "sha256": "6239d701f9453cc1c1e9d13b9a14eac088ac3abe3cbcfadf96deaa1546fd3f2a"
+              }
+            ],
+            "assertions": [
+              {
+                "action": "assert_text",
+                "actual": "Meeting Room Booking",
+                "expected": "Meeting Room Booking",
+                "pageId": "main",
+                "passed": true,
+                "selector": "h1"
+              },
+              {
+                "action": "assert_count",
+                "actual": 10,
+                "expected": 10,
+                "pageId": "main",
+                "passed": true,
+                "selector": "table.grid tbody tr"
+              },
+              {
+                "action": "assert_count",
+                "actual": 0,
+                "expected": 120,
+                "pageId": "main",
+                "passed": false,
+                "selector": "td.free"
+              }
+            ],
+            "failureObservation": {
+              "formValues": [
+                {
+                  "id": "dateInput",
+                  "name": "",
+                  "type": "date",
+                  "value": "2026-11-15"
+                },
+                {
+                  "id": "nameInput",
+                  "name": "",
+                  "type": "text",
+                  "value": ""
+                }
+              ],
+              "formValuesOmitted": 0,
+              "interpretation": "Untrusted observed state only; does not determine whether the test or product is wrong.",
+              "matchCount": 0,
+              "messagesOmitted": 0,
+              "pageId": "main",
+              "runtimeUTC": "2026-11-15T23:33:05.277Z",
+              "source": "actual failing-page DOM in this test",
+              "stepIndex": 2,
+              "textLimitCharacters": 120,
+              "timezone": "UTC",
+              "valuesAreBoundedPreviews": true,
+              "visibleMessages": []
+            }
+          }
+        }
+      },
+      {
+        "id": "call-a52c08fb12314e7e",
+        "tool": "code.test",
+        "taskId": "task-3df969bc9a204e50",
+        "agentId": "dev",
+        "revision": 0,
+        "args": {
+          "checks": [
+            {
+              "action": "assert_text",
+              "selector": "h1",
+              "text": "Meeting Room Booking"
+            },
+            {
+              "action": "assert_count",
+              "count": 10,
+              "selector": "table.grid tbody tr"
+            },
+            {
+              "action": "assert_count",
+              "count": 120,
+              "selector": "td.free"
+            },
+            {
+              "action": "fill",
+              "selector": "#nameInput",
+              "value": "Alice Chan"
+            },
+            {
+              "action": "click",
+              "selector": "td.free[data-room='room-3'][data-hour='9']"
+            },
+            {
+              "action": "assert_text",
+              "selector": "#message",
+              "text": "Booked Room 3 at 09:00-10:00 for Alice Chan."
+            },
+            {
+              "action": "assert_count",
+              "count": 1,
+              "selector": "td.booked"
+            },
+            {
+              "action": "assert_count",
+              "count": 119,
+              "selector": "td.free"
+            },
+            {
+              "action": "assert_text",
+              "selector": "#myBookings li.booking span",
+              "text": "Room 3 · 09:00-10:00"
+            },
+            {
+              "action": "click",
+              "selector": "td.free[data-room='room-3'][data-hour='9']"
+            },
+            {
+              "action": "assert_text",
+              "selector": "#message",
+              "text": "Room 3 at 09:00-10:00 is already booked by Alice Chan."
+            },
+            {
+              "action": "assert_count",
+              "count": 1,
+              "selector": "td.booked"
+            },
+            {
+              "action": "click",
+              "selector": "td.free[data-room='room-3'][data-hour='10']"
+            },
+            {
+              "action": "assert_count",
+              "count": 2,
+              "selector": "td.booked"
+            },
+            {
+              "action": "fill",
+              "selector": "#nameInput",
+              "value": "Bob Lee"
+            },
+            {
+              "action": "assert_count",
+              "count": 0,
+              "selector": "#myBookings li.booking"
+            },
+            {
+              "action": "fill",
+              "selector": "#nameInput",
+              "value": "Alice Chan"
+            },
+            {
+              "action": "assert_count",
+              "count": 2,
+              "selector": "#myBookings li.booking"
+            },
+            {
+              "accept": true,
+              "action": "respond_dialog",
+              "dialogType": "confirm"
+            },
+            {
+              "action": "click",
+              "selector": "#myBookings li.booking button.cancel"
+            },
+            {
+              "action": "assert_count",
+              "count": 1,
+              "selector": "td.booked"
+            },
+            {
+              "action": "assert_count",
+              "count": 119,
+              "selector": "td.free"
+            }
+          ],
+          "language": "browser",
+          "path": "index.html",
+          "resources": {
+            "app.js": "app.js",
+            "styles.css": "styles.css",
+            "ui.js": "ui.js"
+          },
+          "timeout": 20
+        },
+        "status": "failed",
+        "result": {
+          "ok": false,
+          "runtime": "browser",
+          "exitCode": 1,
+          "timedOut": false,
+          "outputLimitExceeded": false,
+          "browser": {
+            "engine": "chromium",
+            "executed": true,
+            "ok": false,
+            "entry": {
+              "path": "index.html",
+              "sha256": "77fd22574508ea7d2ea3271d01c3bdba30dae52e800e0300ce8ab006f0eb710c"
+            },
+            "sourceManifest": [
+              {
+                "path": "index.html",
+                "sha256": "77fd22574508ea7d2ea3271d01c3bdba30dae52e800e0300ce8ab006f0eb710c"
+              },
+              {
+                "path": "app.js",
+                "sha256": "df5a225099782ff7a40096a080954ed039cff1fb5c214e16433596b6646ba2f4"
+              },
+              {
+                "path": "ui.js",
+                "sha256": "fb89dd3b73274c7f5e4bfbb443eab56ed70ff07f551504df8c2be1394c1360d3"
+              },
+              {
+                "path": "styles.css",
+                "sha256": "819064c13eb7d3f1ec514493e75e1d138a9aa50ff2a959368ae556ef7739907d"
+              }
+            ],
+            "testedFiles": [
+              {
+                "path": "index.html",
+                "sha256": "77fd22574508ea7d2ea3271d01c3bdba30dae52e800e0300ce8ab006f0eb710c"
+              },
+              {
+                "path": "styles.css",
+                "sha256": "819064c13eb7d3f1ec514493e75e1d138a9aa50ff2a959368ae556ef7739907d"
+              },
+              {
+                "path": "app.js",
+                "sha256": "df5a225099782ff7a40096a080954ed039cff1fb5c214e16433596b6646ba2f4"
+              },
+              {
+                "path": "ui.js",
+                "sha256": "fb89dd3b73274c7f5e4bfbb443eab56ed70ff07f551504df8c2be1394c1360d3"
+              }
+            ],
+            "assertions": [
+              {
+                "action": "assert_text",
+                "actual": "Meeting Room Booking",
+                "expected": "Meeting Room Booking",
+                "pageId": "main",
+                "passed": true,
+                "selector": "h1"
+              },
+              {
+                "action": "assert_count",
+                "actual": 10,
+                "expected": 10,
+                "pageId": "main",
+                "passed": true,
+                "selector": "table.grid tbody tr"
+              },
+              {
+                "action": "assert_count",
+                "actual": 0,
+                "expected": 120,
+                "pageId": "main",
+                "passed": false,
+                "selector": "td.free"
+              }
+            ],
+            "failureObservation": {
+              "formValues": [
+                {
+                  "id": "dateInput",
+                  "name": "",
+                  "type": "date",
+                  "value": "2026-11-15"
+                },
+                {
+                  "id": "nameInput",
+                  "name": "",
+                  "type": "text",
+                  "value": ""
+                }
+              ],
+              "formValuesOmitted": 0,
+              "interpretation": "Untrusted observed state only; does not determine whether the test or product is wrong.",
+              "matchCount": 0,
+              "messagesOmitted": 0,
+              "pageId": "main",
+              "runtimeUTC": "2026-11-15T23:40:10.207Z",
+              "source": "actual failing-page DOM in this test",
+              "stepIndex": 2,
+              "textLimitCharacters": 120,
+              "timezone": "UTC",
+              "valuesAreBoundedPreviews": true,
+              "visibleMessages": []
+            }
+          }
+        }
+      },
+      {
+        "id": "call-3c68469e8da54b0d",
+        "tool": "code.test",
+        "taskId": "task-3df969bc9a204e50",
+        "agentId": "dev",
+        "revision": 0,
+        "args": {
+          "checks": [
+            {
+              "action": "assert_text",
+              "selector": "h1",
+              "text": "Meeting Room Booking"
+            },
+            {
+              "action": "assert_count",
+              "count": 10,
+              "selector": "table.grid tbody tr"
+            },
+            {
+              "action": "assert_count",
+              "count": 120,
+              "selector": "td.free"
+            },
+            {
+              "action": "fill",
+              "selector": "#nameInput",
+              "value": "Alice Chan"
+            },
+            {
+              "action": "click",
+              "selector": "td.free[data-room='room-3'][data-hour='9']"
+            },
+            {
+              "action": "assert_text",
+              "selector": "#message",
+              "text": "Booked Room 3 at 09:00-10:00 for Alice Chan."
+            },
+            {
+              "action": "assert_count",
+              "count": 1,
+              "selector": "td.booked"
+            },
+            {
+              "action": "assert_count",
+              "count": 119,
+              "selector": "td.free"
+            },
+            {
+              "action": "assert_text",
+              "selector": "#myBookings li.booking span",
+              "text": "Room 3 · 09:00-10:00"
+            },
+            {
+              "action": "click",
+              "selector": "td.free[data-room='room-3'][data-hour='9']"
+            },
+            {
+              "action": "assert_text",
+              "selector": "#message",
+              "text": "Room 3 at 09:00-10:00 is already booked by Alice Chan."
+            },
+            {
+              "action": "assert_count",
+              "count": 1,
+              "selector": "td.booked"
+            },
+            {
+              "action": "click",
+              "selector": "td.free[data-room='room-3'][data-hour='10']"
+            },
+            {
+              "action": "assert_count",
+              "count": 2,
+              "selector": "td.booked"
+            },
+            {
+              "action": "fill",
+              "selector": "#nameInput",
+              "value": "Bob Lee"
+            },
+            {
+              "action": "assert_count",
+              "count": 0,
+              "selector": "#myBookings li.booking"
+            },
+            {
+              "action": "fill",
+              "selector": "#nameInput",
+              "value": "Alice Chan"
+            },
+            {
+              "action": "assert_count",
+              "count": 2,
+              "selector": "#myBookings li.booking"
+            },
+            {
+              "accept": true,
+              "action": "respond_dialog",
+              "dialogType": "confirm"
+            },
+            {
+              "action": "click",
+              "selector": "#myBookings li.booking button.cancel"
+            },
+            {
+              "action": "assert_count",
+              "count": 1,
+              "selector": "td.booked"
+            },
+            {
+              "action": "assert_count",
+              "count": 119,
+              "selector": "td.free"
+            }
+          ],
+          "language": "browser",
+          "path": "index.html",
+          "resources": {
+            "app.js": "app.js",
+            "styles.css": "styles.css",
+            "ui.js": "ui.js"
+          },
+          "timeout": 20
+        },
+        "status": "failed",
+        "result": {
+          "ok": false,
+          "runtime": "browser",
+          "exitCode": 1,
+          "timedOut": false,
+          "outputLimitExceeded": false,
+          "browser": {
+            "engine": "chromium",
+            "executed": true,
+            "ok": false,
+            "entry": {
+              "path": "index.html",
+              "sha256": "77fd22574508ea7d2ea3271d01c3bdba30dae52e800e0300ce8ab006f0eb710c"
+            },
+            "sourceManifest": [
+              {
+                "path": "index.html",
+                "sha256": "77fd22574508ea7d2ea3271d01c3bdba30dae52e800e0300ce8ab006f0eb710c"
+              },
+              {
+                "path": "app.js",
+                "sha256": "df5a225099782ff7a40096a080954ed039cff1fb5c214e16433596b6646ba2f4"
+              },
+              {
+                "path": "ui.js",
+                "sha256": "fb89dd3b73274c7f5e4bfbb443eab56ed70ff07f551504df8c2be1394c1360d3"
+              },
+              {
+                "path": "styles.css",
+                "sha256": "819064c13eb7d3f1ec514493e75e1d138a9aa50ff2a959368ae556ef7739907d"
+              }
+            ],
+            "testedFiles": [
+              {
+                "path": "index.html",
+                "sha256": "77fd22574508ea7d2ea3271d01c3bdba30dae52e800e0300ce8ab006f0eb710c"
+              },
+              {
+                "path": "styles.css",
+                "sha256": "819064c13eb7d3f1ec514493e75e1d138a9aa50ff2a959368ae556ef7739907d"
+              },
+              {
+                "path": "app.js",
+                "sha256": "df5a225099782ff7a40096a080954ed039cff1fb5c214e16433596b6646ba2f4"
+              },
+              {
+                "path": "ui.js",
+                "sha256": "fb89dd3b73274c7f5e4bfbb443eab56ed70ff07f551504df8c2be1394c1360d3"
+              }
+            ],
+            "assertions": [
+              {
+                "action": "assert_text",
+                "actual": "Meeting Room Booking",
+                "expected": "Meeting Room Booking",
+                "pageId": "main",
+                "passed": true,
+                "selector": "h1"
+              },
+              {
+                "action": "assert_count",
+                "actual": 10,
+                "expected": 10,
+                "pageId": "main",
+                "passed": true,
+                "selector": "table.grid tbody tr"
+              },
+              {
+                "action": "assert_count",
+                "actual": 0,
+                "expected": 120,
+                "pageId": "main",
+                "passed": false,
+                "selector": "td.free"
+              }
+            ],
+            "failureObservation": {
+              "formValues": [
+                {
+                  "id": "dateInput",
+                  "name": "",
+                  "type": "date",
+                  "value": "2026-11-15"
+                },
+                {
+                  "id": "nameInput",
+                  "name": "",
+                  "type": "text",
+                  "value": ""
+                }
+              ],
+              "formValuesOmitted": 0,
+              "interpretation": "Untrusted observed state only; does not determine whether the test or product is wrong.",
+              "matchCount": 0,
+              "messagesOmitted": 0,
+              "pageId": "main",
+              "runtimeUTC": "2026-11-15T23:40:32.552Z",
+              "source": "actual failing-page DOM in this test",
+              "stepIndex": 2,
+              "textLimitCharacters": 120,
+              "timezone": "UTC",
+              "valuesAreBoundedPreviews": true,
+              "visibleMessages": []
+            }
+          }
+        }
+      },
+      {
+        "id": "call-1af069a141a94a65",
+        "tool": "code.test",
+        "taskId": "task-3df969bc9a204e50",
+        "agentId": "dev",
+        "revision": 0,
+        "args": {
+          "checks": [
+            {
+              "action": "assert_text",
+              "selector": "h1",
+              "text": "Meeting Room Booking"
+            },
+            {
+              "action": "assert_count",
+              "count": 10,
+              "selector": "table.grid tbody tr"
+            },
+            {
+              "action": "assert_count",
+              "count": 120,
+              "selector": "td.free"
+            },
+            {
+              "action": "fill",
+              "selector": "#nameInput",
+              "value": "Alice Chan"
+            },
+            {
+              "action": "click",
+              "selector": "td.free[data-room='room-3'][data-hour='9']"
+            },
+            {
+              "action": "assert_text",
+              "selector": "#message",
+              "text": "Booked Room 3 at 09:00-10:00 for Alice Chan."
+            },
+            {
+              "action": "assert_count",
+              "count": 1,
+              "selector": "td.booked"
+            },
+            {
+              "action": "assert_count",
+              "count": 119,
+              "selector": "td.free"
+            },
+            {
+              "action": "assert_text",
+              "selector": "#myBookings li.booking span",
+              "text": "Room 3 · 09:00-10:00"
+            },
+            {
+              "action": "click",
+              "selector": "td.free[data-room='room-3'][data-hour='9']"
+            },
+            {
+              "action": "assert_text",
+              "selector": "#message",
+              "text": "Room 3 at 09:00-10:00 is already booked by Alice Chan."
+            },
+            {
+              "action": "assert_count",
+              "count": 1,
+              "selector": "td.booked"
+            },
+            {
+              "action": "click",
+              "selector": "td.free[data-room='room-3'][data-hour='10']"
+            },
+            {
+              "action": "assert_count",
+              "count": 2,
+              "selector": "td.booked"
+            },
+            {
+              "action": "fill",
+              "selector": "#nameInput",
+              "value": "Bob Lee"
+            },
+            {
+              "action": "assert_count",
+              "count": 0,
+              "selector": "#myBookings li.booking"
+            },
+            {
+              "action": "fill",
+              "selector": "#nameInput",
+              "value": "Alice Chan"
+            },
+            {
+              "action": "assert_count",
+              "count": 2,
+              "selector": "#myBookings li.booking"
+            },
+            {
+              "accept": true,
+              "action": "respond_dialog",
+              "dialogType": "confirm"
+            },
+            {
+              "action": "click",
+              "selector": "#myBookings li.booking button.cancel"
+            },
+            {
+              "action": "assert_count",
+              "count": 1,
+              "selector": "td.booked"
+            },
+            {
+              "action": "assert_count",
+              "count": 119,
+              "selector": "td.free"
+            }
+          ],
+          "language": "browser",
+          "path": "index.html",
+          "resources": {
+            "app.js": "app.js",
+            "styles.css": "styles.css",
+            "ui.js": "ui.js"
+          },
+          "timeout": 20
+        },
+        "status": "failed",
+        "result": {
+          "ok": false,
+          "runtime": "browser",
+          "exitCode": 1,
+          "timedOut": false,
+          "outputLimitExceeded": false,
+          "browser": {
+            "engine": "chromium",
+            "executed": true,
+            "ok": false,
+            "entry": {
+              "path": "index.html",
+              "sha256": "77fd22574508ea7d2ea3271d01c3bdba30dae52e800e0300ce8ab006f0eb710c"
+            },
+            "sourceManifest": [
+              {
+                "path": "index.html",
+                "sha256": "77fd22574508ea7d2ea3271d01c3bdba30dae52e800e0300ce8ab006f0eb710c"
+              },
+              {
+                "path": "app.js",
+                "sha256": "df5a225099782ff7a40096a080954ed039cff1fb5c214e16433596b6646ba2f4"
+              },
+              {
+                "path": "ui.js",
+                "sha256": "fddb480b06aaa4da62675e738b9e3ca5b80a7fb4f126156e1068aecee48554f0"
+              },
+              {
+                "path": "styles.css",
+                "sha256": "819064c13eb7d3f1ec514493e75e1d138a9aa50ff2a959368ae556ef7739907d"
+              }
+            ],
+            "testedFiles": [
+              {
+                "path": "index.html",
+                "sha256": "77fd22574508ea7d2ea3271d01c3bdba30dae52e800e0300ce8ab006f0eb710c"
+              },
+              {
+                "path": "styles.css",
+                "sha256": "819064c13eb7d3f1ec514493e75e1d138a9aa50ff2a959368ae556ef7739907d"
+              },
+              {
+                "path": "app.js",
+                "sha256": "df5a225099782ff7a40096a080954ed039cff1fb5c214e16433596b6646ba2f4"
+              },
+              {
+                "path": "ui.js",
+                "sha256": "fddb480b06aaa4da62675e738b9e3ca5b80a7fb4f126156e1068aecee48554f0"
+              }
+            ],
+            "assertions": [
+              {
+                "action": "assert_text",
+                "actual": "Meeting Room Booking",
+                "expected": "Meeting Room Booking",
+                "pageId": "main",
+                "passed": true,
+                "selector": "h1"
+              },
+              {
+                "action": "assert_count",
+                "actual": 10,
+                "expected": 10,
+                "pageId": "main",
+                "passed": true,
+                "selector": "table.grid tbody tr"
+              },
+              {
+                "action": "assert_count",
+                "actual": 0,
+                "expected": 120,
+                "pageId": "main",
+                "passed": false,
+                "selector": "td.free"
+              }
+            ],
+            "failureObservation": {
+              "formValues": [
+                {
+                  "id": "dateInput",
+                  "name": "",
+                  "type": "date",
+                  "value": "2026-11-15"
+                },
+                {
+                  "id": "nameInput",
+                  "name": "",
+                  "type": "text",
+                  "value": ""
+                }
+              ],
+              "formValuesOmitted": 0,
+              "interpretation": "Untrusted observed state only; does not determine whether the test or product is wrong.",
+              "matchCount": 0,
+              "messagesOmitted": 0,
+              "pageId": "main",
+              "runtimeUTC": "2026-11-15T23:41:44.587Z",
+              "source": "actual failing-page DOM in this test",
+              "stepIndex": 2,
+              "textLimitCharacters": 120,
+              "timezone": "UTC",
+              "valuesAreBoundedPreviews": true,
+              "visibleMessages": []
+            }
+          }
+        }
+      }
+    ],
+    "steps": [
+      {
+        "id": "task-3df969bc9a204e50",
+        "agentId": "dev",
+        "revision": 0
+      }
+    ]
+  },
+  "task": {
+    "id": "task-3df969bc9a204e50",
+    "agentId": "dev",
+    "revision": 0
+  }
+}

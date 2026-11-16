@@ -39,10 +39,10 @@ def normalize_output_contract(value):
     if not isinstance(value, dict) or len(value) > 3:
         raise _protocol_error('outputContract must be a bounded JSON object.')
     kind = value.get('kind')
-    if not isinstance(kind, str) or kind not in ('text', 'artifact', 'json'):
-        raise _protocol_error('outputContract.kind must be text, artifact or json.')
+    if not isinstance(kind, str) or kind not in ('text', 'artifact', 'json', 'delivery'):
+        raise _protocol_error('outputContract.kind must be text, artifact, json or delivery.')
     allowed = {'text': {'kind'}, 'artifact': {'kind', 'extensions', 'minCount'},
-               'json': {'kind', 'requiredKeys'}}[kind]
+               'json': {'kind', 'requiredKeys'}, 'delivery': {'kind'}}[kind]
     if set(value) - allowed:
         raise _protocol_error('outputContract contains unsupported fields for its kind.')
     normalized = {'kind': kind}
@@ -114,6 +114,19 @@ def validate_task_output(task, run, artifact_store, final_text):
         return _result('not_configured', kind)
     if kind == 'text':
         return _result('passed', kind)
+    if kind == 'delivery':
+        from .delivery import validate_delivery
+        deliveries = [d for d in run.get('deliveries', []) if d.get('taskId') == task.get('id')
+                      and d.get('agentId') == task.get('agentId')]
+        if not deliveries:
+            return _result('failed', kind, ['Create a real package_delivery before final; prose is not a downloadable product.'])
+        try:
+            snapshots = validate_delivery(deliveries[-1], run, artifact_store)
+        except (ValueError, KeyError, TypeError) as error:
+            return _result('failed', kind, [str(error)])
+        result = _result('passed', kind, checked=[a['id'] for a in snapshots], matched=[a['id'] for a in snapshots])
+        result['deliveryId'] = deliveries[-1]['id']
+        return result
     if kind == 'json':
         try:
             parsed = json.loads(final_text, object_pairs_hook=_strict_object,

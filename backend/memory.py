@@ -102,15 +102,16 @@ class MemoryService:
                 lesson or item.get('id'), str(item.get('trigger', '')).strip(),
                 str(item.get('conditions', '')).strip())
 
-    def recall(self, agent_id, query, channel_id='group', limit=4):
+    def recall(self, agent_id, query, channel_id='group', limit=4, *, include_shared=False):
         owner = self._owner(agent_id)
         query_terms = tokens(query)
         if not query_terms:
             return []
         candidates = self.repo.memories(owner)
         # Cross-owner retrieval requires an explicit, audited sharing operation.
-        candidates += [item for item in self.repo.all_memories()
-                       if item.get('owner') != owner and item.get('visibility') == 'shared' and item.get('shareConfirmation')]
+        if include_shared is True:
+            candidates += [item for item in self.repo.all_memories()
+                           if item.get('owner') != owner and item.get('visibility') == 'shared' and item.get('shareConfirmation')]
         # Filter before computing corpus statistics: private/unverified records
         # must not influence another context's ranking, even indirectly.
         eligible = [item for item in candidates

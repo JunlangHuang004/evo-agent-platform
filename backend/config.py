@@ -31,27 +31,82 @@ class Config:
             raise ValueError('LLM_BASE_URL 必须是对应课程允许服务的 HTTPS 地址。')
         self.api_key = values.get('LLM_API_KEY', '')
         self.model = values.get('LLM_MODEL', 't2_hkgai-v3_fp8_1m_e7' if self.provider == 'hkgai' else 'deepseek-chat')
+        transport_mode=values.get('LLM_TRANSPORT_MODE','standard')
+        if not isinstance(transport_mode,str):
+            raise ValueError('LLM_TRANSPORT_MODE 必须为 standard 或 compatible。')
+        self.transport_mode = transport_mode.strip().lower()
+        if self.transport_mode not in ('standard','compatible'):
+            raise ValueError('LLM_TRANSPORT_MODE 必须为 standard 或 compatible。')
+        thinking_mode=values.get('LLM_THINKING_MODE','default')
+        if not isinstance(thinking_mode,str):
+            raise ValueError('LLM_THINKING_MODE 必须为 default 或 disabled。')
+        self.thinking_mode=thinking_mode.strip().lower()
+        if self.thinking_mode not in ('default','disabled'):
+            raise ValueError('LLM_THINKING_MODE 必须为 default 或 disabled。')
+        if self.thinking_mode=='disabled' and self.provider!='hkgai':
+            raise ValueError('LLM_THINKING_MODE=disabled 目前仅在 HKGAI 验证，不能用于其他 provider。')
+        json_mode=values.get('LLM_JSON_MODE','default')
+        if not isinstance(json_mode,str):
+            raise ValueError('LLM_JSON_MODE 必须为 default 或 json_object。')
+        self.json_mode=json_mode.strip().lower()
+        if self.json_mode not in ('default','json_object'):
+            raise ValueError('LLM_JSON_MODE 必须为 default 或 json_object。')
+        if self.json_mode=='json_object' and self.provider!='hkgai':
+            raise ValueError('LLM_JSON_MODE=json_object 目前仅在 HKGAI 验证，不能用于其他 provider。')
         self.host = values.get('HOST', '127.0.0.1')
         self.port = int(values.get('PORT', '8080'))
         self.data_dir = self.root / '.runtime'
         self.data_dir.mkdir(mode=0o700, parents=True, exist_ok=True)
         self.docker_image = values.get('DOCKER_IMAGE', 'python:3.11-alpine')
+        self.browser_image = values.get('BROWSER_IMAGE', 'evo-agent-browser:1.64.1')
         self.git_remote = values.get('GIT_REMOTE', '')
         self.git_token = values.get('GIT_TOKEN', '')
         self.git_username = values.get('GIT_USERNAME', 'x-access-token')
         self.max_model_calls = max(2, min(60, int(values.get('MAX_MODEL_CALLS', '28'))))
-        self.max_agent_turns = max(2, min(16, int(values.get('MAX_AGENT_TURNS', '8'))))
+        self.max_agent_turns = max(2, min(32, int(values.get('MAX_AGENT_TURNS', '8'))))
         self.model_timeout = max(5, min(180, int(values.get('MODEL_TIMEOUT', '120'))))
-        self.max_completion_tokens = max(256, min(8000, int(values.get('MODEL_MAX_TOKENS', '3000'))))
-        self.planning_max_tokens = int(values.get('PLANNING_MAX_TOKENS', '1200'))
+        self.max_completion_tokens = max(256, min(8000, int(values.get('MODEL_MAX_TOKENS', '6000'))))
+        self.planning_max_tokens = int(values.get('PLANNING_MAX_TOKENS', '3000'))
         self.max_run_seconds = max(10, min(3600, int(values.get('MAX_RUN_SECONDS', '600'))))
         self.max_run_tokens = max(1000, min(500000, int(values.get('MAX_RUN_TOKENS', '48000'))))
         self.max_tasks = max(2, min(32, int(values.get('MAX_TASKS', '12'))))
         self.max_depth = max(1, min(5, int(values.get('MAX_DELEGATION_DEPTH', '3'))))
         self.parallel_tasks = max(1, min(4, int(values.get('PARALLEL_TASKS', '2'))))
         self.max_retries = max(0, min(3, int(values.get('MAX_RETRIES', '1'))))
+        # Per text-generation operation only. Review/tool retry budgets retain
+        # their existing meaning and the run deadline is never replenished.
+        self.model_generation_retries=max(0,min(3,int(values.get('MODEL_GENERATION_RETRIES','2'))))
         self.approval_ttl = max(30, min(86400, int(values.get('APPROVAL_TTL_SECONDS', '900'))))
         self.max_context_chars = max(4000, min(80000, int(values.get('MAX_CONTEXT_CHARS', '28000'))))
+        self.initial_context_chars=self.max_context_chars
+        self.execution_profile='bounded'
+
+    def apply_delivery_profile(self):
+        """Apply explicit process-local delivery limits; never persist or change provider settings."""
+        self.execution_profile='bounded'
+        self.max_agent_turns = 24
+        self.max_model_calls = 60
+        self.max_run_tokens = 400000
+        self.max_run_seconds = 1800
+        self.max_context_chars = 40000
+        self.max_retries = 1
+        return {'maxAgentTurns': self.max_agent_turns, 'maxModelCalls': self.max_model_calls,
+                'maxRunTokens': self.max_run_tokens, 'maxRunSeconds': self.max_run_seconds,
+                'maxContextChars': self.max_context_chars, 'maxRetries': self.max_retries}
+
+    def apply_time_only_profile(self):
+        """Explicit process-local profile; effective run limits are truly null."""
+        if self.execution_profile!='time_only':
+            self._bounded_agent_turns=self.max_agent_turns
+        self.execution_profile='time_only'
+        self.max_agent_turns=self.max_model_calls=self.max_run_tokens=None
+        self.max_run_seconds=1800
+        self.max_context_chars=120000
+        self.initial_context_chars=40000
+        return {'profile':'time_only','maxAgentTurns':None,'maxModelCalls':None,'maxRunTokens':None,
+                'maxRunSeconds':1800,'timeBasis':'wall_including_human_pause_and_restart',
+                'maxContextChars':self.max_context_chars,'initialContextChars':self.initial_context_chars,
+                'maxCompletionTokens':self.max_completion_tokens}
 
     @property
     def planning_max_tokens(self):

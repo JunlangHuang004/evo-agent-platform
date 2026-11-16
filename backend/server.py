@@ -11,6 +11,7 @@ import threading
 from .config import Config
 from .engine import Platform, ActionError
 from .teams import DEFAULT_TEAM, get_team_agents, list_teams
+from .delivery import delivery_zip
 
 PUBLIC_FILES = {'index.html', 'styles.css', 'panels.css', 'js/main.js', 'js/view.js',
                 'js/store.js', 'js/workbench.js', 'js/panels.js', 'js/data.js'}
@@ -90,7 +91,7 @@ def make_handler(platform):
             # Request paths and bodies are deliberately not logged.
             pass
 
-        def _headers(self, status, content_type, length):
+        def _headers(self, status, content_type, length, disposition=None):
             self.send_response(status)
             self.send_header('Content-Type', content_type)
             self.send_header('Content-Length', str(length))
@@ -98,6 +99,8 @@ def make_handler(platform):
             self.send_header('X-Content-Type-Options', 'nosniff')
             self.send_header('Referrer-Policy', 'no-referrer')
             self.send_header('X-Frame-Options', 'DENY')
+            if disposition:
+                self.send_header('Content-Disposition', disposition)
             self.end_headers()
 
         def _json(self, status, body):
@@ -134,6 +137,19 @@ def make_handler(platform):
                         return self._json(200, selected.snapshot())
                     if path == '/api/runs':
                         return self._json(200, {'teamId': values[0], 'runs': _run_history(selected)})
+                    parts = path.strip('/').split('/')
+                    if len(parts) == 5 and parts[:2] == ['api','runs'] and parts[3] == 'deliveries':
+                        run = selected.repo.get_run(parts[2])
+                        delivery = next((d for d in (run or {}).get('deliveries',[]) if d.get('id') == parts[4]), None)
+                        if delivery is None:
+                            return self._json(404, {'error':'此团队中不存在该交付包。'})
+                        payload = delivery_zip(delivery, run, selected.artifacts)
+                        self._headers(200, 'application/zip', len(payload), 'attachment; filename="delivery.zip"')
+                        try:
+                            self.wfile.write(payload)
+                        except (BrokenPipeError, ConnectionResetError):
+                            pass
+                        return
                     if path.startswith('/api/runs/'):
                         run = _run_detail(selected, path[len('/api/runs/'):])
                         return self._json(200, run) if run else self._json(404, {'error': '此团队中不存在该任务。'})
@@ -186,15 +202,24 @@ def make_handler(platform):
 def main():
     parser = argparse.ArgumentParser(description='Run the EvoMAC local backend + UI')
     parser.add_argument('--port', type=int)
+    profiles=parser.add_mutually_exclusive_group()
+    profiles.add_argument('--delivery', action='store_true', help='Explicitly use the larger, bounded delivery profile for this process only')
+    profiles.add_argument('--time-only', action='store_true', help='Explicit 30-minute wall deadline; no total token, call or task-turn caps')
     args = parser.parse_args()
     root = Path(__file__).resolve().parent.parent
     config = Config(root)
+    delivery_limits = config.apply_delivery_profile() if args.delivery else None
+    time_limits = config.apply_time_only_profile() if args.time_only else None
     hub = TeamHub(config)
     port = args.port or config.port
     # Local development service. Exposing this on a public interface requires authentication.
     server = ThreadingHTTPServer(('127.0.0.1', port), make_handler(hub))
     print(f'EvoMAC: http://127.0.0.1:{port}/#workspace', flush=True)
     print(f'Provider: {config.provider} | Model: {config.model} | API configured: {bool(config.api_key)}', flush=True)
+    if delivery_limits is not None:
+        print('Delivery profile limits (upper bounds, not estimated usage): ' + json.dumps(delivery_limits), flush=True)
+    if time_limits is not None:
+        print('Time-only profile (wall time includes human waiting, pause and restart): '+json.dumps(time_limits),flush=True)
     try:
         server.serve_forever()
     except KeyboardInterrupt:

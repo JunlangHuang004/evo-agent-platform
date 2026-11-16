@@ -134,5 +134,6 @@ export const resumeRun=(channelId=state.activeChannel)=>action('resume',{},chann
 export const resetChannel=(channelId=state.activeChannel)=>action('reset',{},channelId);
 export const cancelRun=(channelId=state.activeChannel)=>action('cancel',{},channelId);
 export const recoverRun=(channelId=state.activeChannel)=>action('recover',{},channelId);
+export const retryTask=(taskId,runId,channelId=state.activeChannel)=>action('retry_task',{taskId,runId},channelId);
 export const resolveApproval=(approvalId,choiceId,answer='',modifiedArgs,channelId=state.activeChannel)=>action('approval',{approvalId,choiceId,answer,...(modifiedArgs?{modifiedArgs}:{})},channelId);
 export const confirmMemory=(agentId,memoryId,confirmed)=>action('memory_confirm',{agentId,memoryId,confirmed});

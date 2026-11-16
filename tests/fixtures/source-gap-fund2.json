@@ -1,0 +1,417 @@
+{
+  "case": "fund-2",
+  "runId": "run-7a8b646b2a874873",
+  "taskId": "task-924bf8fead874d77",
+  "revision": 0,
+  "sourceExportSha256": "c3899f52af05cb9233df40b3baf66d1eb59d7e662a1577f81aa66f93c3dac995",
+  "rawRunSha256": "a70a37e7ffd2f1c49bc5a726c76d3f7096da5c2bf1383b8cda7e31e060b91b56",
+  "actualBlockedFetchCount": 1,
+  "chains": [
+    {
+      "proposalTranscriptId": "dialogue-bfe79dff4340404d",
+      "modelCallId": "call-b03c526228314e91",
+      "time": "2026-11-15T23:43:14Z",
+      "action": {
+        "type": "tool",
+        "name": "web.fetch",
+        "args": {
+          "url": "https://www.infosys.com/iki/research/semiconductor-industry-outlook2026.html"
+        }
+      },
+      "topLevelEvidenceGapPresent": false,
+      "knownURLProofs": [
+        {
+          "callId": "call-cb9021bd36194599",
+          "taskId": "task-924bf8fead874d77",
+          "agentId": "research",
+          "revision": 0,
+          "tool": "web.search",
+          "status": "success",
+          "resultOk": true,
+          "resultIndex": 0,
+          "url": "https://www.infosys.com/iki/research/semiconductor-industry-outlook2026.html",
+          "title": "Semiconductor Industry Outlook 2026 - Infosys"
+        },
+        {
+          "callId": "call-e44bfa17b5404632",
+          "taskId": "task-924bf8fead874d77",
+          "agentId": "research",
+          "revision": 0,
+          "tool": "web.search",
+          "status": "success",
+          "resultOk": true,
+          "resultIndex": 0,
+          "url": "https://www.infosys.com/iki/research/semiconductor-industry-outlook2026.html",
+          "title": "Semiconductor Industry Outlook 2026 - Infosys"
+        }
+      ],
+      "feedbackTranscriptId": "dialogue-ca186e82fcb445a4",
+      "feedback": {
+        "ok": false,
+        "actionExecuted": false,
+        "error": {
+          "code": "stage_acquisition_closed",
+          "retryable": false,
+          "message": "已到固定阶段交接检查点；请利用已有真实材料形成成果并交棒，缺证据须如实说明。"
+        },
+        "stageControl": {
+          "schemaVersion": 1,
+          "runId": "run-7a8b646b2a874873",
+          "taskId": "task-924bf8fead874d77",
+          "agentId": "research",
+          "revision": 0,
+          "allocatedAt": 1794785997624,
+          "runDeadlineAt": 1794787751666,
+          "criticalStages": 6,
+          "synthesisAt": 1794786187645,
+          "handoffAt": 1794786260730,
+          "expectedHandoffBy": 1794786289964,
+          "policy": "fixed_wall_checkpoints_within_original_deadline",
+          "boundarySemantics": "Next action only; in-flight effects are not cancelled or replayed.",
+          "instruction": "Before synthesisAt collect necessary evidence and begin notes. In synthesis use actual retained sources to write/patch/test/publish the deliverable; no new web acquisition or delegation. From handoffAt complete locally: file.read/write/patch and code.test, plus publish_artifact(s), package_delivery, review and final remain allowed under original ACL/approval/contract checks. No web, delegation, deletion, Git or code.run. expectedHandoffBy is a soft scheduling target, not a second run deadline. Finish the handoff promptly with current output IDs, evidence and gaps. Only the original run deadline is hard. Unmet contracts stay partial/failed; no additional time, calls/turn caps, permissions or automatic acceptance. A necessary-source exception may admit only web.fetch of a URL actually recorded in this run human text or this task current-revision successful links, or URLs literally returned by this task current-revision file.read, with a concrete top-level evidenceGap. This is not free search or permission to invent content.",
+          "phase": "synthesis",
+          "remainingUntilHandoffMs": 95436,
+          "handoffTargetIsSoft": true,
+          "handoffTargetOverdueMs": 0,
+          "handoffAllowedActions": [
+            "publish_artifact",
+            "publish_artifacts",
+            "package_delivery",
+            "review",
+            "final"
+          ],
+          "handoffAllowedTools": [
+            "code.test",
+            "file.patch",
+            "file.read",
+            "file.write"
+          ]
+        },
+        "instruction": "No tool or delegation was executed. Write/patch/test and publish actual retained evidence during synthesis and local handoff. Handoff permits file.read/write/patch, code.test, publish_artifact(s), package_delivery, review and final under original checks; no web, delegation, deletion, Git or code.run. expectedHandoffBy is a soft target inside the unchanged hard run deadline. An action is never automatically performed or accepted. Missing facts are not permission to invent them."
+      }
+    }
+  ],
+  "note": "Actual original proposal and phase refusal; search links prove URL discovery only, not target content or source quality.",
+  "actualSourceCalls": [
+    {
+      "agentId": "research",
+      "args": {
+        "max_results": 8,
+        "query": "semiconductor industry outlook 2026 AI datacenter demand WSTS forecast"
+      },
+      "attempt": 1,
+      "durationMs": 2662,
+      "id": "call-cb9021bd36194599",
+      "result": {
+        "evidenceMeaning": "Search returned link titles only. Each target must be fetched/read before claims can be verified.",
+        "ok": true,
+        "provider": "Yahoo Search",
+        "providerAttempts": [
+          {
+            "error": {
+              "code": "permanent",
+              "message": "Public web server returned HTTP 202.",
+              "retryable": false
+            },
+            "provider": "DuckDuckGo Lite",
+            "sourceUrl": "https://lite.duckduckgo.com/lite/?q=semiconductor+industry+outlook+2026+AI+datacenter+demand+WSTS+forecast",
+            "status": "failed"
+          },
+          {
+            "provider": "Yahoo Search",
+            "resultCount": 7,
+            "sourceUrl": "https://search.yahoo.com/search?p=semiconductor+industry+outlook+2026+AI+datacenter+demand+WSTS+forecast",
+            "status": "success"
+          }
+        ],
+        "query": "semiconductor industry outlook 2026 AI datacenter demand WSTS forecast",
+        "results": [
+          {
+            "title": "Semiconductor Industry Outlook 2026 - Infosys",
+            "url": "https://www.infosys.com/iki/research/semiconductor-industry-outlook2026.html"
+          },
+          {
+            "title": "WSTS Semiconductor Industry Forecast",
+            "url": "https://www.wsts.org/61/Forecasts"
+          },
+          {
+            "title": "2026 Semiconductor Industry Outlook | Deloitte Insights",
+            "url": "https://www.deloitte.com/us/en/insights/industry/technology/technology-media-telecom-outlooks/semiconductor-industry-outlook.html"
+          },
+          {
+            "title": "Global Semiconductor Market Surges Beyond $1.5T 2026 - WSTS",
+            "url": "https://www.wsts.org/76/Recent-News-Release"
+          },
+          {
+            "title": "SEMICONDUCTOR INDUSTRY OUTLOOK 2026",
+            "url": "https://www.infosys.com/iki/documents/semiconductor-industry-outlook2026.pdf"
+          },
+          {
+            "title": "Semiconductor Industry Outlook 2026 - Morningstar",
+            "url": "https://www.morningstar.com/business/insights/research/semiconductor-industry-outlook"
+          },
+          {
+            "title": "Semiconductor Outlook 2026 | AI Growth & Packaging Shifts",
+            "url": "https://www.mckinsey-electronics.com/post/strategic-semiconductor-and-electronic-component-trends-to-shape-2026-market-dynamics-technologica"
+          }
+        ],
+        "resultsAreUnfetched": true,
+        "sourceUrl": "https://search.yahoo.com/search?p=semiconductor+industry+outlook+2026+AI+datacenter+demand+WSTS+forecast",
+        "sources": [
+          {
+            "title": "Semiconductor Industry Outlook 2026 - Infosys",
+            "url": "https://www.infosys.com/iki/research/semiconductor-industry-outlook2026.html"
+          },
+          {
+            "title": "WSTS Semiconductor Industry Forecast",
+            "url": "https://www.wsts.org/61/Forecasts"
+          },
+          {
+            "title": "2026 Semiconductor Industry Outlook | Deloitte Insights",
+            "url": "https://www.deloitte.com/us/en/insights/industry/technology/technology-media-telecom-outlooks/semiconductor-industry-outlook.html"
+          },
+          {
+            "title": "Global Semiconductor Market Surges Beyond $1.5T 2026 - WSTS",
+            "url": "https://www.wsts.org/76/Recent-News-Release"
+          },
+          {
+            "title": "SEMICONDUCTOR INDUSTRY OUTLOOK 2026",
+            "url": "https://www.infosys.com/iki/documents/semiconductor-industry-outlook2026.pdf"
+          },
+          {
+            "title": "Semiconductor Industry Outlook 2026 - Morningstar",
+            "url": "https://www.morningstar.com/business/insights/research/semiconductor-industry-outlook"
+          },
+          {
+            "title": "Semiconductor Outlook 2026 | AI Growth & Packaging Shifts",
+            "url": "https://www.mckinsey-electronics.com/post/strategic-semiconductor-and-electronic-component-trends-to-shape-2026-market-dynamics-technologica"
+          }
+        ]
+      },
+      "revision": 0,
+      "sandboxId": "research/run-7a8b646b2a874873",
+      "status": "success",
+      "taskId": "task-924bf8fead874d77",
+      "tool": "web.search"
+    },
+    {
+      "agentId": "research",
+      "args": {
+        "max_results": 6,
+        "query": "semiconductor capex 2026 TSMC Samsung Intel foundry spending outlook"
+      },
+      "attempt": 1,
+      "durationMs": 2415,
+      "id": "call-e44bfa17b5404632",
+      "result": {
+        "evidenceMeaning": "Search returned link titles only. Each target must be fetched/read before claims can be verified.",
+        "ok": true,
+        "provider": "Yahoo Search",
+        "providerAttempts": [
+          {
+            "error": {
+              "code": "permanent",
+              "message": "Public web server returned HTTP 202.",
+              "retryable": false
+            },
+            "provider": "DuckDuckGo Lite",
+            "sourceUrl": "https://lite.duckduckgo.com/lite/?q=semiconductor+capex+2026+TSMC+Samsung+Intel+foundry+spending+outlook",
+            "status": "failed"
+          },
+          {
+            "provider": "Yahoo Search",
+            "resultCount": 6,
+            "sourceUrl": "https://search.yahoo.com/search?p=semiconductor+capex+2026+TSMC+Samsung+Intel+foundry+spending+outlook",
+            "status": "success"
+          }
+        ],
+        "query": "semiconductor capex 2026 TSMC Samsung Intel foundry spending outlook",
+        "results": [
+          {
+            "title": "Semiconductor Industry Outlook 2026 - Infosys",
+            "url": "https://www.infosys.com/iki/research/semiconductor-industry-outlook2026.html"
+          },
+          {
+            "title": "CapEx Up for Foundry, Memory – SC-IQ: Semiconductor Intelligence",
+            "url": "https://www.semiconductorintelligence.com/capex-up-for-foundry-memory/"
+          },
+          {
+            "title": "Semiconductor Capex by Company — Historical Data & Chart",
+            "url": "https://siliconanalysts.com/market-data/semiconductor-capex"
+          },
+          {
+            "title": "TSMC Statistics 2026: Semiconductor Fabrication Output And ...",
+            "url": "https://www.quantumrun.com/consulting/tsmc-statistics/"
+          },
+          {
+            "title": "Semiconductor Capex Statistics 2026 — Axis Intelligence Research",
+            "url": "https://axis-intelligence.com/wp-content/dashboard/stats-semiconductor-capex-statistics-dashboard.html"
+          },
+          {
+            "title": "TSMC vs Samsung vs Intel Foundry 2026 | MachineHours",
+            "url": "https://machinehours.com/analysis/tsmc-vs-samsung-vs-intel-foundry-2026"
+          }
+        ],
+        "resultsAreUnfetched": true,
+        "sourceUrl": "https://search.yahoo.com/search?p=semiconductor+capex+2026+TSMC+Samsung+Intel+foundry+spending+outlook",
+        "sources": [
+          {
+            "title": "Semiconductor Industry Outlook 2026 - Infosys",
+            "url": "https://www.infosys.com/iki/research/semiconductor-industry-outlook2026.html"
+          },
+          {
+            "title": "CapEx Up for Foundry, Memory – SC-IQ: Semiconductor Intelligence",
+            "url": "https://www.semiconductorintelligence.com/capex-up-for-foundry-memory/"
+          },
+          {
+            "title": "Semiconductor Capex by Company — Historical Data & Chart",
+            "url": "https://siliconanalysts.com/market-data/semiconductor-capex"
+          },
+          {
+            "title": "TSMC Statistics 2026: Semiconductor Fabrication Output And ...",
+            "url": "https://www.quantumrun.com/consulting/tsmc-statistics/"
+          },
+          {
+            "title": "Semiconductor Capex Statistics 2026 — Axis Intelligence Research",
+            "url": "https://axis-intelligence.com/wp-content/dashboard/stats-semiconductor-capex-statistics-dashboard.html"
+          },
+          {
+            "title": "TSMC vs Samsung vs Intel Foundry 2026 | MachineHours",
+            "url": "https://machinehours.com/analysis/tsmc-vs-samsung-vs-intel-foundry-2026"
+          }
+        ]
+      },
+      "revision": 0,
+      "sandboxId": "research/run-7a8b646b2a874873",
+      "status": "success",
+      "taskId": "task-924bf8fead874d77",
+      "tool": "web.search"
+    }
+  ],
+  "testReplayNote": "Original compact actual links/proposal/refusal; tests reconstruct a prospective still-running same-revision admission check at the original blocked checkpoint, without making network/model calls or changing the original result.",
+  "actualModelCall": {
+    "agentId": "research",
+    "args": {
+      "max_tokens": 6000,
+      "model": "t2_hkgai-v3_fp8_1m_e7",
+      "provider": "hkgai"
+    },
+    "attempt": 1,
+    "contextCapacity": {
+      "activeChars": 80000,
+      "attempts": [
+        {
+          "limit": 80000,
+          "missingBodies": 0
+        }
+      ],
+      "ceilingChars": 120000,
+      "characters": 66185,
+      "initialChars": 40000,
+      "missingBodiesAfter": 0,
+      "missingBodyReferences": [],
+      "missingReferencesTruncated": false,
+      "note": "Actual working-message bodies only; time, output and permissions unchanged.",
+      "protectedFeedback": {
+        "modelCallId": "call-248f5a532fa64fe6",
+        "payloadSha256": "8a097e43876a417d8364102b6afab0d9a38e46b79d3c4b72da5504fc37104aa9",
+        "transcriptId": "dialogue-a3159f38d83f4d06"
+      },
+      "scope": "context_only",
+      "visibleBodiesBefore": 2
+    },
+    "durationMs": 7514,
+    "finishReason": "stop",
+    "id": "call-b03c526228314e91",
+    "reportedModel": "t2_hkgai-v3_fp8_1m_e10",
+    "requestStageControl": {
+      "agentId": "research",
+      "allocatedAt": 1794785997624,
+      "boundarySemantics": "Next action only; in-flight effects are not cancelled or replayed.",
+      "criticalStages": 6,
+      "expectedHandoffBy": 1794786289964,
+      "handoffAt": 1794786260730,
+      "instruction": "Before synthesisAt collect necessary evidence and begin notes. In synthesis use actual retained sources to write/patch/test/publish the deliverable; no new web acquisition or delegation. From handoffAt complete locally: file.read/write/patch and code.test, plus publish_artifact(s), package_delivery, review and final remain allowed under original ACL/approval/contract checks. No web, delegation, deletion, Git or code.run. expectedHandoffBy is a soft scheduling target, not a second run deadline. Finish the handoff promptly with current output IDs, evidence and gaps. Only the original run deadline is hard. Unmet contracts stay partial/failed; no additional time, calls/turn caps, permissions or automatic acceptance. A necessary-source exception may admit only web.fetch of a URL actually recorded in this run human text or this task current-revision successful links, or URLs literally returned by this task current-revision file.read, with a concrete top-level evidenceGap. This is not free search or permission to invent content.",
+      "policy": "fixed_wall_checkpoints_within_original_deadline",
+      "revision": 0,
+      "runDeadlineAt": 1794787751666,
+      "runId": "run-7a8b646b2a874873",
+      "schemaVersion": 1,
+      "synthesisAt": 1794786187645,
+      "taskId": "task-924bf8fead874d77"
+    },
+    "requestStagePhase": "work",
+    "requestStartedAt": 1794786186927,
+    "requestedMaxTokens": 6000,
+    "result": "已收到真实模型响应。",
+    "revision": 0,
+    "sandboxId": "model-gateway",
+    "status": "success",
+    "taskId": "task-924bf8fead874d77",
+    "tool": "llm.chat",
+    "transport": {
+      "bodyComplete": true,
+      "configuredWriteChunkBytes": 512,
+      "configuredWriteDelayMs": 30,
+      "deadlineBoundary": "provider_process",
+      "deadlineBoundaryElapsedMs": 7469.693,
+      "decodedBytes": 939,
+      "elapsedMs": 7355.607,
+      "expectedBytes": 939,
+      "headersReceived": true,
+      "headersWaitMs": 7354.869,
+      "httpStatus": 200,
+      "receivedBytes": 939,
+      "requestBytes": 70702,
+      "requestEncoding": "identity",
+      "requestMayContinueServerSide": false,
+      "requestedResponseFormat": {
+        "type": "json_object"
+      },
+      "requestedThinkingMode": "disabled",
+      "slotWaitMs": 0.004,
+      "transportMode": "compatible",
+      "usageUnknown": false,
+      "wireComplete": true,
+      "workerExitCode": 0,
+      "workerReaped": true,
+      "workerResponseBytes": 963,
+      "workerStarted": true,
+      "workerTerminated": true
+    },
+    "usage": {
+      "completion_tokens": 38,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      },
+      "prompt_tokens": 17253,
+      "prompt_tokens_details": {
+        "cached_tokens": 5184,
+        "created_cache_tokens": 12032,
+        "multimodal_tokens": null
+      },
+      "total_tokens": 17291
+    }
+  },
+  "actualProposalTranscript": {
+    "agentId": "research",
+    "callId": "call-b03c526228314e91",
+    "id": "dialogue-bfe79dff4340404d",
+    "kind": "model_response",
+    "role": "agent",
+    "runId": "run-7a8b646b2a874873",
+    "taskId": "task-924bf8fead874d77",
+    "text": "{\"type\":\"tool\",\"name\":\"web.fetch\",\"args\":{\"url\":\"https://www.infosys.com/iki/research/semiconductor-industry-outlook2026.html\"}}",
+    "time": "2026-11-15T23:43:14Z"
+  },
+  "actualFeedbackTranscript": {
+    "agentId": "research",
+    "id": "dialogue-ca186e82fcb445a4",
+    "kind": "stage_action_blocked",
+    "role": "system",
+    "runId": "run-7a8b646b2a874873",
+    "taskId": "task-924bf8fead874d77",
+    "text": "{\"ok\": false, \"actionExecuted\": false, \"error\": {\"code\": \"stage_acquisition_closed\", \"retryable\": false, \"message\": \"已到固定阶段交接检查点；请利用已有真实材料形成成果并交棒，缺证据须如实说明。\"}, \"stageControl\": {\"schemaVersion\": 1, \"runId\": \"run-7a8b646b2a874873\", \"taskId\": \"task-924bf8fead874d77\", \"agentId\": \"research\", \"revision\": 0, \"allocatedAt\": 1794785997624, \"runDeadlineAt\": 1794787751666, \"criticalStages\": 6, \"synthesisAt\": 1794786187645, \"handoffAt\": 1794786260730, \"expectedHandoffBy\": 1794786289964, \"policy\": \"fixed_wall_checkpoints_within_original_deadline\", \"boundarySemantics\": \"Next action only; in-flight effects are not cancelled or replayed.\", \"instruction\": \"Before synthesisAt collect necessary evidence and begin notes. In synthesis use actual retained sources to write/patch/test/publish the deliverable; no new web acquisition or delegation. From handoffAt complete locally: file.read/write/patch and code.test, plus publish_artifact(s), package_delivery, review and final remain allowed under original ACL/approval/contract checks. No web, delegation, deletion, Git or code.run. expectedHandoffBy is a soft scheduling target, not a second run deadline. Finish the handoff promptly with current output IDs, evidence and gaps. Only the original run deadline is hard. Unmet contracts stay partial/failed; no additional time, calls/turn caps, permissions or automatic acceptance. A necessary-source exception may admit only web.fetch of a URL actually recorded in this run human text or this task current-revision successful links, or URLs literally returned by this task current-revision file.read, with a concrete top-level evidenceGap. This is not free search or permission to invent content.\", \"phase\": \"synthesis\", \"remainingUntilHandoffMs\": 95436, \"handoffTargetIsSoft\": true, \"handoffTargetOverdueMs\": 0, \"handoffAllowedActions\": [\"publish_artifact\", \"publish_artifacts\", \"package_delivery\", \"review\", \"final\"], \"handoffAllowedTools\": [\"code.test\", \"file.patch\", \"file.read\", \"file.write\"]}, \"instruction\": \"No tool or delegation was executed. Write/patch/test and publish actual retained evidence during synthesis and local handoff. Handoff permits file.read/write/patch, code.test, publish_artifact(s), package_delivery, review and final under original checks; no web, delegation, deletion, Git or code.run. expectedHandoffBy is a soft target inside the unchanged hard run deadline. An action is never automatically performed or accepted. Missing facts are not permission to invent them.\"}",
+    "time": "2026-11-15T23:43:14Z"
+  }
+}

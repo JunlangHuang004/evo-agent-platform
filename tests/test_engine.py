@@ -200,10 +200,19 @@ class EngineTests(unittest.TestCase):
             app.action({'action': 'approval', 'channelId': 'research', 'approvalId': approval['id'], 'choiceId': 'allow'})
         with self.assertRaises(ActionError):
             app.action({'action': 'approval', 'channelId': 'group', 'runId': 'wrong-run', 'approvalId': approval['id'], 'choiceId': 'allow'})
-        self.answer(app, approval, 'deny')
+        reason='Keep the existing data.js API; read its current interface before extending it. '+self.config.api_key
+        self.answer(app, approval, 'deny', answer=reason)
         self.assertTrue(app.wait_for_idle(3))
         self.assertFalse(any(call['approved'] for call in tools.calls))
-        self.assertEqual(next(call for call in self.current_run(app)['calls'] if call['tool'] == 'file.delete')['status'], 'denied')
+        denied=next(call for call in self.current_run(app)['calls'] if call['tool'] == 'file.delete')
+        self.assertEqual(denied['status'], 'denied')
+        self.assertEqual(denied['result']['approvalFeedback'],self.config.scrub(reason))
+        self.assertNotIn(self.config.api_key,denied['result']['approvalFeedback'])
+        saved_task=next(step for step in app.state['sessions']['group']['run']['steps'] if step['title']=='remove')
+        actual_results=[json.loads(m['content'][len('动作的真实结果：'):]) for m in saved_task['_messages']
+                        if m['content'].startswith('动作的真实结果：')]
+        self.assertEqual(actual_results[0]['approvalFeedback'],self.config.scrub(reason))
+        self.assertTrue(actual_results[0]['denied']);self.assertFalse(actual_results[0]['ok'])
         with self.assertRaises(ActionError):
             self.answer(app, approval, 'allow')
 
@@ -503,7 +512,7 @@ class EngineTests(unittest.TestCase):
             self.assertEqual(cancelled['status'], 'cancelled')
             self.assertEqual(cancelled['activeMs'], 5000, 'success accounting followed by cancellation must not count twice')
 
-    def test_shared_memory_adoption_does_not_impersonate_owner_or_fail_delivered_work(self):
+    def test_runtime_owner_only_memory_preserves_historical_explicit_share_without_injection(self):
         title = 'offline Python dependency'
         plan = [task(title, 'executor', required=['coding'])]
         scripts = {title: [{'type': 'tool', 'name': 'code.test', 'args': {'code': 'assert True'}}, final('tested output')]}
@@ -516,16 +525,20 @@ class EngineTests(unittest.TestCase):
         self.assertTrue(app.wait_for_idle(3))
         run = self.current_run(app)
         self.assertEqual(run['status'], 'done')
-        hit = next(item for item in run['memoryHits'] if item['memoryId'] == candidate['id'])
-        self.assertEqual(hit['agentId'], 'executor')
-        self.assertEqual(hit['ownerAgentId'], 'research')
+        self.assertFalse(any(item['memoryId'] == candidate['id'] for item in run['memoryHits']))
+        self.assertTrue(app.provider.records)
+        self.assertTrue(all(not any(item.get('id') == candidate['id'] for item in record['context']['memories']) for record in app.provider.records))
         source = next(item for item in app.memory.list('research') if item['id'] == candidate['id'])
         self.assertEqual(source['uses'], 0, 'consumer cannot mutate original owner counters')
         self.assertEqual(source['success_count'], 0)
-        audit = next(event for event in run['events'] if event['type'] == 'memory_feedback_skipped')
-        self.assertTrue(audit['payload']['adopted'])
-        self.assertEqual(audit['payload']['ownerAgentId'], 'research')
-        self.assertEqual(audit['payload']['reason'], 'shared_memory_owner_boundary')
+        self.assertEqual(source['visibility'], 'shared', 'historical explicit publication is preserved, not copied or deleted')
+        self.assertEqual(source['shareConfirmation']['id'], 'explicit-publish')
+        self.assertFalse(any(event['type'] in ('memory_feedback', 'memory_feedback_skipped') and event['payload'].get('memoryId') == candidate['id'] for event in run['events']))
+        own_records = app.memory.list('executor')
+        self.assertTrue(all(item['owner'] == 'executor' and item['kind'] == 'episodic' for item in own_records))
+        self.assertFalse(any(item.get('source_task') == 'source-task' for item in own_records), 'no foreign strategy is copied into personal memory')
+        explicit = app.memory.recall('executor', title, include_shared=True)
+        self.assertEqual([item['id'] for item in explicit], [candidate['id']], 'legacy administrative opt-in remains explicit')
 
     def test_owner_feedback_updates_normally_and_feedback_failure_is_nonfatal(self):
         title = 'offline Python dependency'
