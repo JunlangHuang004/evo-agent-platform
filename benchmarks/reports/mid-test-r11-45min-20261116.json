@@ -1,0 +1,1208 @@
+{
+  "reportVersion": 1,
+  "recordedAtUTC": "2026-11-16T08:22:20.699246+00:00",
+  "evaluation": "R11 original six-task Mid-Test at45min per case; post-terminal independent product QA",
+  "officialRubric": false,
+  "sourceCommit": "7dfc9e69449c2e3f880526d8815dd85967f5f5cd",
+  "sourceFileCount": 219,
+  "sourceManifestSha256": "1829ecb05136f80e89e5a78f53beab906c2e10044904d9e9b61598ddaef6c7d5",
+  "preflightRegression": {
+    "passed": 880,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "durationSeconds": 244.024,
+    "logSha256": "eb8a2365aef1f958d7033d1c0cb664d8768f5168ae2577221685eb9c901fd029",
+    "sourceFileCount": 218,
+    "sourceManifestSha256": "e15bbaabc2826a85d6c77d9bf460a2e0bfe32e89b8cb6025214670cdd9f51c44",
+    "sourceUnchangedDuringRun": true,
+    "codeAndTestsManifestSha256": "2bee14ec2dc9d4d9550f6189a0c1c0a2298a31fc63d32cd23b74965a3a82b5c8",
+    "codeAndTestsFileCount": 216,
+    "command": "RUN_BROWSER_DOCKER_TESTS=1 RUN_AGENT_SANDBOX_DOCKER_TESTS=1 python3 -m unittest discover -s tests -v",
+    "liveModelCalls": 0
+  },
+  "settings": {
+    "max_model_calls": null,
+    "max_agent_turns": null,
+    "max_run_tokens": null,
+    "max_run_seconds": 2700,
+    "max_retries": 1,
+    "model_timeout": 60,
+    "model_generation_retries": 2,
+    "max_context_chars": 120000,
+    "max_completion_tokens": 6000,
+    "planning_max_tokens": 3000,
+    "transport_mode": "compatible",
+    "thinking_mode": "disabled",
+    "json_mode": "json_object",
+    "browser_image": "evo-agent-browser:1.64.1",
+    "initial_context_chars": 40000,
+    "execution_profile": "time_only",
+    "model": "t2_hkgai-v3_fp8_1m_e7"
+  },
+  "roleAndTaskPromptsUnchangedFromR10": true,
+  "freshStateAndMemory": true,
+  "sameTeamTask2ContinuesExactTask1": true,
+  "humanWaitCountsAgainstWallTime": true,
+  "inRunActions": "Original task submission, applicable prior user-answer relay/original-task restatement, and explicit bound reversible generated-file permissions. No product diagnosis or edit, no budgetextension, no live result analysis.",
+  "cases": [
+    {
+      "case": "software-1",
+      "runId": "run-2848772a96c94d96",
+      "previousRunId": null,
+      "workflowStatus": "partial",
+      "terminalExportSha256": "e3a97becf8570446e2e1004da892de069850988a2ccffd6733c823fd396c12c7",
+      "modelCalls": 39,
+      "reportedTokens": 532987,
+      "unknownUsageCalls": 3,
+      "wallElapsedMs": 623519,
+      "reviewPassEvents": 0,
+      "duplicateSameVersionReviewPassEvents": 0,
+      "idempotentReviewReturnReceipts": 0,
+      "publishedArtifacts": 5,
+      "deliveryRecords": 1,
+      "candidateDeliveryRecords": 1,
+      "formalDeliveryRecords": 0,
+      "newPublishedArtifacts": 5,
+      "inheritedArtifacts": 0,
+      "requestedProductFormProduced": true,
+      "allCallsAndEffectsSettled": true,
+      "failedLLMRequests": 3,
+      "failedWithKnownUsage": [],
+      "remainingSecondsAtEnd": 2076.481,
+      "actualDownloads": [
+        {
+          "id": "delivery-e375d80f569740b5820d3506817da858",
+          "status": "candidate",
+          "entrypoint": "app/index.html",
+          "path": "evidence/product-snapshots/software-1/delivery-e375d80f569740b5820d3506817da858.zip",
+          "sha256": "17cf2e79cfe6405467adbdaa0057e03688011abdb23ca396d9dbb111903d899a",
+          "bytes": 8602,
+          "CRCVerified": true,
+          "allPublishedBytesMatch": true,
+          "fileCount": 4,
+          "semanticQuality": "unassessed"
+        }
+      ],
+      "productQA": {
+        "productForm": "Actual downloadable candidate ZIP containing app HTML/JS/CSS/README plus RUN.txt/DELIVERY.json; independent review pending, not a formal release.",
+        "working": [
+          "10 rooms and capacities; 12 hourly slots; normal booking, cancellation, persistence, wrong-owner refusal, unchanged neighbor records.",
+          "Two same-slot dialogs opened before confirmation: second confirmation blocked against fresh storage.",
+          "Keyboard Enter activates booking cells; mobile overflow is contained.",
+          "Direct file:// launch following actual candidate README works and reload preserves records."
+        ],
+        "defects": [
+          {
+            "scope": "additional-robustness",
+            "issue": "Storage read exception is treated as empty storage; booking overwrites older records.",
+            "evidence": "summary.observations.readFault"
+          },
+          {
+            "scope": "additional-robustness",
+            "issue": "Booking/cancellation storage write exceptions are uncaught and no readable failure message is shown. Stored state remains intact, but the dialog appears stuck.",
+            "evidence": "summary.observations.writeFault and cancelWriteFault"
+          },
+          {
+            "scope": "documentation",
+            "issue": "README says already-started slots cannot be booked; at fixed 12:30, the 12:00 slot opens a booking dialog because code blocks only fully elapsed slots.",
+            "evidence": "summary.observations.startedSlot"
+          }
+        ],
+        "failureChain": {
+          "candidatePath": "candidateDelivery:true was present; developer successfully published the four files and packaged a candidate. No candidate opt-in/contract deadlock here.",
+          "qaEarlyErrors": "Invalid assert_storage fields and ambiguous multi-element selectors were attempted, then normal checks passed.",
+          "terminalActualCalls": [
+            "call-1eed6909d28644f7",
+            "call-bcb5635996534806"
+          ],
+          "terminalFailure": "Each repeated storage-write-denied test had 3/3 assertions pass but an uncaught pageError. This is real product fault handling evidence; test ok remains false.",
+          "stop": "Third consecutive identical proposed JSON was rejected by the existing generic repeated-action loop guard. Specialized browser guards require an actual failed assertion and do not cover pageErrors with all assertions passed.",
+          "warningIssued": true,
+          "reviewSubmitted": false,
+          "effect": "QA protocol failed; release dependency skipped; final synthesis honestly partial. More wall-clock budget was not the stopping condition.",
+          "terminalRejectedModelProposalCallId": "call-cdd90156bc724895"
+        },
+        "byObservedScope": {
+          "additional-robustness": {
+            "passed": 3,
+            "failed": 3
+          },
+          "additional-usability": {
+            "passed": 1,
+            "failed": 0
+          },
+          "candidate-package-launch": {
+            "passed": 1,
+            "failed": 0
+          },
+          "core": {
+            "passed": 16,
+            "failed": 0
+          },
+          "core-conflict": {
+            "passed": 1,
+            "failed": 0
+          },
+          "core-runtime": {
+            "passed": 1,
+            "failed": 0
+          },
+          "documentation-additional": {
+            "passed": 0,
+            "failed": 1
+          }
+        },
+        "countsAreNotQualityScores": true,
+        "comparisonToR10": "Candidate ZIP and keyboard support improved; storage-read data loss remains, and explicit write-failure handling regressed from R10. Different UI/check sets prevent interpreting observation counts as a quality percentage.",
+        "unchangedProductBytes": true
+      }
+    },
+    {
+      "case": "software-2",
+      "runId": "run-029c945e92a3417e",
+      "previousRunId": "run-2848772a96c94d96",
+      "workflowStatus": "partial",
+      "terminalExportSha256": "9668658d533f9e8358f97b5b38948a1845719d3fb3facdcce2bfe142c43475f5",
+      "modelCalls": 48,
+      "reportedTokens": 928894,
+      "unknownUsageCalls": 8,
+      "wallElapsedMs": 1065945,
+      "reviewPassEvents": 0,
+      "duplicateSameVersionReviewPassEvents": 0,
+      "idempotentReviewReturnReceipts": 0,
+      "publishedArtifacts": 6,
+      "deliveryRecords": 0,
+      "candidateDeliveryRecords": 0,
+      "formalDeliveryRecords": 0,
+      "newPublishedArtifacts": 1,
+      "inheritedArtifacts": 5,
+      "requestedProductFormProduced": false,
+      "allCallsAndEffectsSettled": true,
+      "failedLLMRequests": 9,
+      "failedWithKnownUsage": [
+        {
+          "id": "call-015da920c37b449f",
+          "finishReason": "length",
+          "usage": {
+            "completion_tokens": 6000,
+            "completion_tokens_details": {
+              "reasoning_tokens": 0
+            },
+            "prompt_tokens": 23117,
+            "prompt_tokens_details": {
+              "cached_tokens": 4992,
+              "created_cache_tokens": 18112,
+              "multimodal_tokens": null
+            },
+            "total_tokens": 29117
+          },
+          "error": {
+            "code": "output_truncated",
+            "retryable": false
+          }
+        }
+      ],
+      "remainingSecondsAtEnd": 1634.055,
+      "actualDownloads": [],
+      "productQA": {
+        "productForm": "Only a new dashboard design brief. Five inherited S1 artifacts remain, including the four booking app files. No new published dashboard code, candidate ZIP, or final delivery.",
+        "failureChain": {
+          "candidateOptIn": "candidateDelivery:true present in the developer contract. No publication/candidate proposal was made by S2 developer; there was no candidate-contract rejection.",
+          "privateProgress": "Six private code files written, no successful browser test, no publication.",
+          "badSelector": "Final tests click #gridBody tr:nth-child(1) td:nth-child(1) .cell.free. The first child is a th, so that selector cannot find a cell; scope-aware data-room/data-slot selectors are available in source.",
+          "terminalActualCalls": [
+            "call-0daf9140bcbd4209",
+            "call-ee2ecc12a6bf448d"
+          ],
+          "stop": "Third consecutive same proposal triggers existing generic loop stop. Earlier altered checks also fail; no failed passed:false assertion exists for the click timeout, so specialized assertion guard does not run.",
+          "privateImplementationGap": "Private app/index.html only loads app.js. The three dashboard JS files are not included. app.js checks window.MRBDashboardUI before init/refresh and does not load those scripts. Actual browser call call-241c5d7c94e14fbc cannot find dashboard metric content; testedFiles includes only HTML/CSS/app.js. Bad click selectors are not the only issue in the private draft.",
+          "effect": "Developer protocol failed; QA/release skipped; final lead partial. This is neither a 45-minute budget expiry nor proof that more rounds alone would finish.",
+          "terminalRejectedModelProposalCallId": "call-aaaa09f2043644f5"
+        },
+        "comparisonToR10": "Delivered dashboard progress is worse than R10: R10 had five new published runnable dashboard files despite defects; R11 only publishes a design brief. Its private implementation cannot be counted as improvement.",
+        "dashboardProductQa": "Not executable as a new delivered dashboard: no published dashboard bundle exists. Inherited booking bytes must not be scored as new S2 output."
+      }
+    },
+    {
+      "case": "newsroom-1",
+      "runId": "run-f7c38a253d3248f0",
+      "previousRunId": null,
+      "workflowStatus": "done",
+      "terminalExportSha256": "d4703957fee8b0175538390df02f6ecce579f03cb53f83c5cf6e55631a8aa73f",
+      "modelCalls": 88,
+      "reportedTokens": 1214271,
+      "unknownUsageCalls": 11,
+      "wallElapsedMs": 2064295,
+      "reviewPassEvents": 2,
+      "duplicateSameVersionReviewPassEvents": 0,
+      "idempotentReviewReturnReceipts": 0,
+      "publishedArtifacts": 9,
+      "deliveryRecords": 1,
+      "candidateDeliveryRecords": 0,
+      "formalDeliveryRecords": 1,
+      "newPublishedArtifacts": 9,
+      "inheritedArtifacts": 0,
+      "requestedProductFormProduced": true,
+      "allCallsAndEffectsSettled": true,
+      "failedLLMRequests": 11,
+      "failedWithKnownUsage": [],
+      "remainingSecondsAtEnd": 635.705,
+      "actualDownloads": [
+        {
+          "id": "delivery-a5312e38e56c4a43922d5d67726e778f",
+          "status": "packaged",
+          "entrypoint": "README.md",
+          "path": "evidence/product-snapshots/newsroom-1/delivery-a5312e38e56c4a43922d5d67726e778f.zip",
+          "sha256": "37c7866f4a91ab5c91e269d9065b629b8afd3277943fe7393fc4e2894c4b7adb",
+          "bytes": 9001,
+          "CRCVerified": true,
+          "allPublishedBytesMatch": true,
+          "fileCount": 4,
+          "semanticQuality": "unassessed"
+        }
+      ],
+      "productQA": {
+        "articleWhitespaceWordCountBeforeSourceList": 673,
+        "articleWordCountMethod": "Whitespace-separated tokens including headings/byline/caveats, before final source list; approximate words.",
+        "reviewCoverage": "Formal pass is bound to current main/social IDs and hashes, but recorded independent read evidence covers current main and stale social only; packaging documentation remains unassessed.",
+        "productJudgment": "Usable editorial draft after targeted factual/framing fixes; not publication-ready exactly as packaged.",
+        "strengths": [
+          "Current campus event rather than six-month-old feature",
+          "Future activities marked as planned",
+          "Main article plus four channel posts and a valid formal ZIP",
+          "Leader final summary completes without new product publishing"
+        ],
+        "limitations": [
+          "Approx. 673 whitespace words before Sources, shorter than requested ~800; this is not a hard numeric rubric failure.",
+          "Prior-edition February range misleading",
+          "Instructions overstate the applied corrections",
+          "No independent primary-source read by fact-checker"
+        ],
+        "candidateContractsSelected": []
+      }
+    },
+    {
+      "case": "newsroom-2",
+      "runId": "run-51da6d3a2ee34b8a",
+      "previousRunId": "run-f7c38a253d3248f0",
+      "workflowStatus": "done",
+      "terminalExportSha256": "e1bfdc8cdd5ac316897acb2e2065ef8a1074e2fbc4995b33c78cb616a4e283dd",
+      "modelCalls": 91,
+      "reportedTokens": 1699710,
+      "unknownUsageCalls": 3,
+      "wallElapsedMs": 1462628,
+      "reviewPassEvents": 2,
+      "duplicateSameVersionReviewPassEvents": 0,
+      "idempotentReviewReturnReceipts": 0,
+      "publishedArtifacts": 20,
+      "deliveryRecords": 1,
+      "candidateDeliveryRecords": 0,
+      "formalDeliveryRecords": 1,
+      "newPublishedArtifacts": 11,
+      "inheritedArtifacts": 9,
+      "requestedProductFormProduced": true,
+      "allCallsAndEffectsSettled": true,
+      "failedLLMRequests": 4,
+      "failedWithKnownUsage": [
+        {
+          "id": "call-bfca079eeac34bd5",
+          "finishReason": "length",
+          "usage": {
+            "completion_tokens": 6000,
+            "completion_tokens_details": {
+              "reasoning_tokens": 0
+            },
+            "prompt_tokens": 16252,
+            "prompt_tokens_details": {
+              "cached_tokens": 4160,
+              "created_cache_tokens": 12032,
+              "multimodal_tokens": null
+            },
+            "total_tokens": 22252
+          },
+          "error": {
+            "code": "output_truncated",
+            "retryable": false
+          }
+        }
+      ],
+      "remainingSecondsAtEnd": 1237.372,
+      "actualDownloads": [
+        {
+          "id": "delivery-5dd067bba9884e2dbff9cb4ef99e4489",
+          "status": "packaged",
+          "entrypoint": "README.md",
+          "path": "evidence/product-snapshots/newsroom-2/delivery-5dd067bba9884e2dbff9cb4ef99e4489.zip",
+          "sha256": "1454730b396061f8c996fc649771daf90c7ac0a1dfa29f81d47e9a4f9614773f",
+          "bytes": 9995,
+          "CRCVerified": true,
+          "allPublishedBytesMatch": true,
+          "fileCount": 4,
+          "semanticQuality": "unassessed"
+        }
+      ],
+      "productQA": {
+        "articleWhitespaceWordCountBeforeSourceList": 1184,
+        "articleWordCountMethod": "Whitespace-separated tokens including headings/byline/caveats, before final source list; approximate words.",
+        "reviewCoverage": "Formal pass is bound to current main/social IDs and hashes, but recorded independent read evidence covers current main and stale social only; packaging documentation remains unassessed.",
+        "productJudgment": "Complete publishable-format bundle, but substantive source/provenance corrections required before publication.",
+        "strengths": [
+          "Structured fact-check and audience guidance",
+          "Historical figure attributed to a named 2023 study",
+          "Vendor self-report distinguished",
+          "Formal package and leader summary complete before 30 minutes"
+        ],
+        "limitations": [
+          "False 2025–2026 evidence-gap claim despite fetched and cited 2026 research",
+          "False citation-not-fetched claim",
+          "Contrary findings underrepresented; tool/version/sample scope overgeneralized",
+          "Approx.1184 whitespace words before final sources; no user-imposed 800-word limit for this task"
+        ],
+        "candidateContractsSelected": []
+      }
+    },
+    {
+      "case": "fund-1",
+      "runId": "run-6234fc933d26447e",
+      "previousRunId": null,
+      "workflowStatus": "partial",
+      "terminalExportSha256": "07ad0550dc3a790e66153cfed1dc77279d5b683a416c43bb35fcc61befefd3e2",
+      "modelCalls": 84,
+      "reportedTokens": 1517670,
+      "unknownUsageCalls": 6,
+      "wallElapsedMs": 1369959,
+      "reviewPassEvents": 2,
+      "duplicateSameVersionReviewPassEvents": 0,
+      "idempotentReviewReturnReceipts": 0,
+      "publishedArtifacts": 6,
+      "deliveryRecords": 0,
+      "candidateDeliveryRecords": 0,
+      "formalDeliveryRecords": 0,
+      "newPublishedArtifacts": 6,
+      "inheritedArtifacts": 0,
+      "requestedProductFormProduced": true,
+      "allCallsAndEffectsSettled": true,
+      "failedLLMRequests": 6,
+      "failedWithKnownUsage": [],
+      "remainingSecondsAtEnd": 1330.041,
+      "actualDownloads": [],
+      "productQA": {
+        "objectiveProductForm": "Actual Markdown client mandate, sourced research, allocation, risk assessment, plain-language introduction and independent review. Original pure-analysis proposal does not require a ZIP; absence alone is not a failure.",
+        "math": "Both actual seven-row tables independently parsed:45/15/10/8/7/10/5 sum100%; amounts sumHKD1,000,000 and every amount matches weight.95% equity,5%cash,0%fixed income.50%loss arithmeticHKD500,000 is correct but loss scenario is not empirically validated.",
+        "provenance": "All6 business predecessors plus planning done;2 real independent editorial PASS decisions, verified=false, current allocation/introduction hashes bound. No code.test, no duplicateReview results, no real rework. Review compares actual bodies; does not independently refetch underlying primary pages.",
+        "earlyPartialChain": "Final summary9turns: malformed type=file.read;6 real reads;one proposed final_synthesis.md write correctly rejected by text-only summary guard;one actual final partial. No deadline exhaustion. Its reasons include no extra summary artifact/ZIP and unconfirmed delegated simulation assumptions, neither mandatory for this text-only synthesis. The model overstates closure criteria; this does not eliminate the genuine risk/content issues.",
+        "remainingIssues": [
+          {
+            "priority": "high",
+            "issue": "Allocation and assumed risk profile remain inconsistent:95% equities versus an assumed30% tolerance; risk report itself flags50–60% stress and recommends defensive changes, yet reviewer PASS leaves original proposal unchanged. Warnings are not a suitability repair."
+          },
+          {
+            "priority": "medium",
+            "issue": "55–70% correlated tech/growth exposure has no selected instruments/holdings-based calculation. The introduction promotes an illustrative50% stress to realistic worst case; disclaimer elsewhere does not establish a maximum loss."
+          },
+          {
+            "priority": "medium",
+            "issue": "HKD/USD risk explanation omits the linked exchange-rate regime. Tax-residency assumptions, FX costs, instrument selection and rebalancing are not operationally specified."
+          },
+          {
+            "priority": "medium",
+            "issue": "Reviewer identified wording corrections but treated them as non-blocking, so product files retain them. Missing mandate/source-body access in risk/review is honestly disclosed but limits verification."
+          }
+        ],
+        "assessment": "A substantial simulated proposal draft with correct allocation arithmetic and visible assumptions, not a finished risk-consistent client product. Better workflow closure and actual review than R10; formal completion status is partly overly conservative for the wrong reasons."
+      }
+    },
+    {
+      "case": "fund-2",
+      "runId": "run-81d8528ce2804094",
+      "previousRunId": "run-6234fc933d26447e",
+      "workflowStatus": "done",
+      "terminalExportSha256": "8190ff3d9075e25f45f505514a8a3b84105d90cca788095768b7dbecf6a134ee",
+      "modelCalls": 70,
+      "reportedTokens": 1422115,
+      "unknownUsageCalls": 2,
+      "wallElapsedMs": 1167859,
+      "reviewPassEvents": 2,
+      "duplicateSameVersionReviewPassEvents": 0,
+      "idempotentReviewReturnReceipts": 0,
+      "publishedArtifacts": 14,
+      "deliveryRecords": 2,
+      "candidateDeliveryRecords": 1,
+      "formalDeliveryRecords": 1,
+      "newPublishedArtifacts": 8,
+      "inheritedArtifacts": 6,
+      "requestedProductFormProduced": true,
+      "allCallsAndEffectsSettled": true,
+      "failedLLMRequests": 3,
+      "failedWithKnownUsage": [
+        {
+          "id": "call-b4fd2e0c2cde464b",
+          "finishReason": "length",
+          "usage": {
+            "completion_tokens": 6000,
+            "completion_tokens_details": {
+              "reasoning_tokens": 0
+            },
+            "prompt_tokens": 12735,
+            "prompt_tokens_details": {
+              "cached_tokens": 2688,
+              "created_cache_tokens": 9984,
+              "multimodal_tokens": null
+            },
+            "total_tokens": 18735
+          },
+          "error": {
+            "code": "output_truncated",
+            "retryable": false
+          }
+        }
+      ],
+      "remainingSecondsAtEnd": 1532.141,
+      "actualDownloads": [
+        {
+          "id": "delivery-8c5caa773345423c88bbe070aa8deb9c",
+          "status": "candidate",
+          "entrypoint": "deck/index.html",
+          "path": "evidence/product-snapshots/fund-2/delivery-8c5caa773345423c88bbe070aa8deb9c.zip",
+          "sha256": "a6703fc35d9bb93873390c587e03913e10c9c1e3e251784e96f9ed3a621dd942",
+          "bytes": 10167,
+          "CRCVerified": true,
+          "allPublishedBytesMatch": true,
+          "fileCount": 4,
+          "semanticQuality": "unassessed"
+        },
+        {
+          "id": "delivery-449220c582bb40598a7a8d47648bb076",
+          "status": "packaged",
+          "entrypoint": "deck/index.html",
+          "path": "evidence/product-snapshots/fund-2/delivery-449220c582bb40598a7a8d47648bb076.zip",
+          "sha256": "2d7f8f53980c77b04ec5a21caca9e62fd8c78ef0feb15d5379d1e8fd38835108",
+          "bytes": 11688,
+          "CRCVerified": true,
+          "allPublishedBytesMatch": true,
+          "fileCount": 4,
+          "semanticQuality": "unassessed"
+        }
+      ],
+      "productQA": {
+        "objectiveProductForm": "Actual offline HTML presentation:15slides,5tables,index.html+styles.css+deck.js+README. Candidate and formal ZIPs downloaded,CRC clean, manifest equals unique export and every file SHA equals published bytes.",
+        "provenance": "Candidate created before independent QA; one editorial PASS for full draft and one real browser PASS for current HTML/CSS/JS. First code.test proposal rejected before browser execution because press used value instead of key; next model action corrected schema and12/12 assertions passed. Formal packaging then used the same4 exact reviewed artifact hashes. No duplicate passes/rework or hand-edited products.",
+        "assessment": "Clear improvement from R10noHTML/noZIP to an actually usable desktop presentation and reviewed downloadable product. Workflow done is supported; mobile polish and evidence freshness/valuation depth prevent calling analytical product quality fully passed.",
+        "browserQA": {
+          "environment": "Docker evo-agent-browser:1.64.1; Chromium156.0.8078.4; networknone; file:// actual downloaded bundle; read-onlyproduct",
+          "viewports": [
+            "1280x800",
+            "390x844",
+            "320x568"
+          ],
+          "firstPassChecks": 136,
+          "firstPassPassed": 133,
+          "followupColdLinkChecks": 21,
+          "followupPassed": 21,
+          "working": [
+            "All15slides reached sequentially",
+            "Prev/Next clamp",
+            "Arrow/Home/End/PageUp/PageDown/Space/Enter",
+            "fresh URL#7 and reload",
+            "mobile swipe",
+            "desktop fullscreen enter/exit",
+            "no page/console errors",
+            "no external requests",
+            "long-slide bottom remains reachable above HUD"
+          ],
+          "qualifiedFindings": "3 initial hash probes changed only the fragment of an already loaded page; no hashchange handler, so current slide did not update.21 fresh-document deep-link follow-ups passed. Do not misreport this as broken initial deep linking. First-pass screenshots caught the250msfade; settled follow-up screenshots confirm visible content.",
+          "defects": [
+            {
+              "viewport": "mobile",
+              "slide": "s7",
+              "clientWidth": 390,
+              "scrollWidth": 430
+            },
+            {
+              "viewport": "mobile",
+              "slide": "s12",
+              "clientWidth": 390,
+              "scrollWidth": 415
+            },
+            {
+              "viewport": "small-mobile",
+              "slide": "s7",
+              "clientWidth": 320,
+              "scrollWidth": 423
+            },
+            {
+              "viewport": "small-mobile",
+              "slide": "s10",
+              "clientWidth": 320,
+              "scrollWidth": 325
+            },
+            {
+              "viewport": "small-mobile",
+              "slide": "s12",
+              "clientWidth": 320,
+              "scrollWidth": 408
+            },
+            {
+              "viewport": "small-mobile",
+              "slide": "s13",
+              "clientWidth": 320,
+              "scrollWidth": 365
+            }
+          ],
+          "layoutConclusion": "Desktop readable. Mobile slides7/12 overflow at390px; slides7/10/12/13 overflow at320px, clipping source/mitigation columns until horizontal scrolling. Horizontal swipe also serves slide navigation, making wide tables awkward. Sources are plain URLs rather than clickable links."
+        },
+        "contentFindings": [
+          {
+            "priority": "medium",
+            "issue": "Dated primary-source attribution is largely faithful, and forecasts/scenarios/gaps are visible. However the headline2026industry size uses a January975B/25% outlook despite a newer WSTS Q2 update; fresh primary evidence is needed for an end-2026 briefing."
+          },
+          {
+            "priority": "medium",
+            "issue": "Valuation conclusion uses old S&P50021.3x/18.6x figures rather than current semiconductor valuation. No sector multiples, earnings revisions or peer comparison substantiate the blanket elevated-semiconductors judgment."
+          },
+          {
+            "priority": "medium",
+            "issue": "20–30%drawdown sizing, highest-beta memory,30–50%onshoring wafer premium,B200BOM and >90%advanced-logic concentration are not independently quantified/primary-verified here. Labels identify opinion/vendor uncertainty, but do not make the numbers a validated risk model."
+          },
+          {
+            "priority": "medium",
+            "issue": "No dedicated auto/industrial demand source or independent bear-case evidence. These omissions are honestly disclosed, leaving research coverage narrower than the polished deck form suggests."
+          }
+        ],
+        "whyCompleted": "Research now explicitly finishes its bounded sourced brief with gaps; downstream draft and real HTML builder run; builder fulfills candidateDelivery; reviewer fixes one schema error and returns two real verdicts/final; release packages exact originals; final-summary closes in one turn. R10researchpartial had blocked the downstream chain. Plan/output differences plus wider stage windows mean causality cannot be assigned to one fix.",
+        "formalFilesEqualReviewHashes": true,
+        "candidateFormalSameFiles": true
+      }
+    }
+  ],
+  "totals": {
+    "modelCalls": 420,
+    "reportedTokens": 7315647,
+    "unknownUsageCalls": 33,
+    "deliveryRecords": 5,
+    "candidateDeliveryRecords": 2,
+    "formalDeliveryRecords": 3,
+    "duplicateSameVersionReviewPassEvents": 0,
+    "failedLLMRequests": 36,
+    "unknownUsageFailedRequests": 33,
+    "knownUsageTruncatedRequests": 3,
+    "requestedProductForms": 5,
+    "expectedProductForms": 6,
+    "casesWithDownloadableBundle": 4
+  },
+  "workflowStatuses": {
+    "partial": 3,
+    "done": 3
+  },
+  "reportedModelsObserved": {
+    "t2_hkgai-v3_fp8_1m_e10": 387
+  },
+  "reportedModelNote": "387 returned model labels include384successful requests and3failed truncated outputs withknownusage; all report e10.33failedrequests haveunknownusage.",
+  "comparison": {
+    "recordedAtUTC": "2026-11-16T08:17:19.901750+00:00",
+    "comparison": "R10 at30min and R11 at45min; source and time changed together, one round each.",
+    "rows": [
+      {
+        "case": "software-1",
+        "R10": {
+          "workflowStatus": "partial",
+          "modelCalls": 97,
+          "reportedTokens": 1407104,
+          "unknownUsageCalls": 9,
+          "wallElapsedMs": 1800376,
+          "deliveryRecords": 0,
+          "duplicateSameVersionReviewPassEvents": 0
+        },
+        "R11": {
+          "workflowStatus": "partial",
+          "modelCalls": 39,
+          "reportedTokens": 532987,
+          "unknownUsageCalls": 3,
+          "wallElapsedMs": 623519,
+          "deliveryRecords": 1,
+          "duplicateSameVersionReviewPassEvents": 0,
+          "candidateDeliveryRecords": 1,
+          "formalDeliveryRecords": 0
+        }
+      },
+      {
+        "case": "software-2",
+        "R10": {
+          "workflowStatus": "partial",
+          "modelCalls": 71,
+          "reportedTokens": 1607751,
+          "unknownUsageCalls": 14,
+          "wallElapsedMs": 1800006,
+          "deliveryRecords": 0,
+          "duplicateSameVersionReviewPassEvents": 0
+        },
+        "R11": {
+          "workflowStatus": "partial",
+          "modelCalls": 48,
+          "reportedTokens": 928894,
+          "unknownUsageCalls": 8,
+          "wallElapsedMs": 1065945,
+          "deliveryRecords": 0,
+          "duplicateSameVersionReviewPassEvents": 0,
+          "candidateDeliveryRecords": 0,
+          "formalDeliveryRecords": 0
+        }
+      },
+      {
+        "case": "newsroom-1",
+        "R10": {
+          "workflowStatus": "partial",
+          "modelCalls": 86,
+          "reportedTokens": 1357143,
+          "unknownUsageCalls": 14,
+          "wallElapsedMs": 1800004,
+          "deliveryRecords": 1,
+          "duplicateSameVersionReviewPassEvents": 0
+        },
+        "R11": {
+          "workflowStatus": "done",
+          "modelCalls": 88,
+          "reportedTokens": 1214271,
+          "unknownUsageCalls": 11,
+          "wallElapsedMs": 2064295,
+          "deliveryRecords": 1,
+          "duplicateSameVersionReviewPassEvents": 0,
+          "candidateDeliveryRecords": 0,
+          "formalDeliveryRecords": 1
+        }
+      },
+      {
+        "case": "newsroom-2",
+        "R10": {
+          "workflowStatus": "partial",
+          "modelCalls": 84,
+          "reportedTokens": 1423049,
+          "unknownUsageCalls": 15,
+          "wallElapsedMs": 1771977,
+          "deliveryRecords": 1,
+          "duplicateSameVersionReviewPassEvents": 0
+        },
+        "R11": {
+          "workflowStatus": "done",
+          "modelCalls": 91,
+          "reportedTokens": 1699710,
+          "unknownUsageCalls": 3,
+          "wallElapsedMs": 1462628,
+          "deliveryRecords": 1,
+          "duplicateSameVersionReviewPassEvents": 0,
+          "candidateDeliveryRecords": 0,
+          "formalDeliveryRecords": 1
+        }
+      },
+      {
+        "case": "fund-1",
+        "R10": {
+          "workflowStatus": "partial",
+          "modelCalls": 73,
+          "reportedTokens": 1099101,
+          "unknownUsageCalls": 15,
+          "wallElapsedMs": 1800001,
+          "deliveryRecords": 0,
+          "duplicateSameVersionReviewPassEvents": 0
+        },
+        "R11": {
+          "workflowStatus": "partial",
+          "modelCalls": 84,
+          "reportedTokens": 1517670,
+          "unknownUsageCalls": 6,
+          "wallElapsedMs": 1369959,
+          "deliveryRecords": 0,
+          "duplicateSameVersionReviewPassEvents": 0,
+          "candidateDeliveryRecords": 0,
+          "formalDeliveryRecords": 0
+        }
+      },
+      {
+        "case": "fund-2",
+        "R10": {
+          "workflowStatus": "partial",
+          "modelCalls": 43,
+          "reportedTokens": 661517,
+          "unknownUsageCalls": 3,
+          "wallElapsedMs": 695325,
+          "deliveryRecords": 0,
+          "duplicateSameVersionReviewPassEvents": 0
+        },
+        "R11": {
+          "workflowStatus": "done",
+          "modelCalls": 70,
+          "reportedTokens": 1422115,
+          "unknownUsageCalls": 2,
+          "wallElapsedMs": 1167859,
+          "deliveryRecords": 2,
+          "duplicateSameVersionReviewPassEvents": 0,
+          "candidateDeliveryRecords": 1,
+          "formalDeliveryRecords": 1
+        }
+      }
+    ],
+    "totals": {
+      "R10": {
+        "modelCalls": 454,
+        "reportedTokens": 7555665,
+        "unknownUsageCalls": 70,
+        "deliveryRecords": 2,
+        "duplicateSameVersionReviewPassEvents": 0
+      },
+      "R11": {
+        "modelCalls": 420,
+        "reportedTokens": 7315647,
+        "unknownUsageCalls": 33,
+        "deliveryRecords": 5,
+        "candidateDeliveryRecords": 2,
+        "formalDeliveryRecords": 3,
+        "duplicateSameVersionReviewPassEvents": 0
+      }
+    },
+    "workflowStatuses": {
+      "R10": {
+        "partial": 6
+      },
+      "R11": {
+        "partial": 3,
+        "done": 3
+      }
+    },
+    "claimLimits": [
+      "Not a controlled isolated time-only experiment.",
+      "Candidate and formal packages are different statuses; five ZIP records cover four cases, not five completed products.",
+      "Known tokens do not include unknown failed-request usage.",
+      "Fewer failures and different human waits confound time/cost comparisons."
+    ]
+  },
+  "timeExtensionAnalysis": {
+    "scope": "Retrospective observations only; no in-run checkpoints or intervention",
+    "round": 11,
+    "wallMinutes": 45,
+    "codeAndTimeBothChangedFromR10": true,
+    "rows": [
+      {
+        "case": "fund-1",
+        "runId": "run-6234fc933d26447e",
+        "workflowStatus": "partial",
+        "elapsedSeconds": 1369.959,
+        "remainingSecondsAtEnd": 1330.041,
+        "crossed30Minutes": false,
+        "after30Milestones": [],
+        "after30NewPublishedArtifacts": [],
+        "after30LLMCalls": 0,
+        "failedLLMRequests": 6,
+        "unknownUsageLLMRequests": 6,
+        "failedWithKnownUsage": []
+      },
+      {
+        "case": "fund-2",
+        "runId": "run-81d8528ce2804094",
+        "workflowStatus": "done",
+        "elapsedSeconds": 1167.859,
+        "remainingSecondsAtEnd": 1532.141,
+        "crossed30Minutes": false,
+        "after30Milestones": [],
+        "after30NewPublishedArtifacts": [],
+        "after30LLMCalls": 0,
+        "failedLLMRequests": 3,
+        "unknownUsageLLMRequests": 2,
+        "failedWithKnownUsage": [
+          {
+            "id": "call-b4fd2e0c2cde464b",
+            "finishReason": "length",
+            "usage": {
+              "completion_tokens": 6000,
+              "completion_tokens_details": {
+                "reasoning_tokens": 0
+              },
+              "prompt_tokens": 12735,
+              "prompt_tokens_details": {
+                "cached_tokens": 2688,
+                "created_cache_tokens": 9984,
+                "multimodal_tokens": null
+              },
+              "total_tokens": 18735
+            },
+            "error": {
+              "code": "output_truncated",
+              "retryable": false
+            }
+          }
+        ]
+      },
+      {
+        "case": "newsroom-1",
+        "runId": "run-f7c38a253d3248f0",
+        "workflowStatus": "done",
+        "elapsedSeconds": 2064.295,
+        "remainingSecondsAtEnd": 635.705,
+        "crossed30Minutes": true,
+        "after30Milestones": [
+          {
+            "elapsedSeconds": 1912.285,
+            "event": "artifact_registered",
+            "taskId": "task-1f3b6fb8ea494ef9",
+            "status": null,
+            "deliveryId": null,
+            "artifactId": null
+          },
+          {
+            "elapsedSeconds": 1912.285,
+            "event": "artifact_registered",
+            "taskId": "task-1f3b6fb8ea494ef9",
+            "status": null,
+            "deliveryId": null,
+            "artifactId": null
+          },
+          {
+            "elapsedSeconds": 1993.285,
+            "event": "delivery_packaged",
+            "taskId": "task-1f3b6fb8ea494ef9",
+            "status": null,
+            "deliveryId": "delivery-a5312e38e56c4a43922d5d67726e778f",
+            "artifactId": null
+          },
+          {
+            "elapsedSeconds": 2008.285,
+            "event": "task_finished",
+            "taskId": "task-1f3b6fb8ea494ef9",
+            "status": "done",
+            "deliveryId": null,
+            "artifactId": null
+          },
+          {
+            "elapsedSeconds": 2063.285,
+            "event": "task_finished",
+            "taskId": "task-9340c36eb8884404",
+            "status": "done",
+            "deliveryId": null,
+            "artifactId": null
+          },
+          {
+            "elapsedSeconds": 2064.285,
+            "event": "run_finished",
+            "taskId": null,
+            "status": "done",
+            "deliveryId": null,
+            "artifactId": null
+          }
+        ],
+        "after30NewPublishedArtifacts": [
+          {
+            "id": "artifact-1fc4ae6a10704512a2e709c2c9739b18",
+            "path": "README.md",
+            "sha256": "8c9ee7e6c8ff62a985188c74e73b310fc11dc10e48cb916b29715b8a0c4221af",
+            "elapsedSeconds": 1912.289
+          },
+          {
+            "id": "artifact-f2dac844648243558beda9f3e2b36840",
+            "path": "publication_instructions.md",
+            "sha256": "e4b3c3cb7f898882d7ca771d5fa99836ed019670f0853fc3ded77f097c95f483",
+            "elapsedSeconds": 1912.449
+          }
+        ],
+        "after30LLMCalls": 11,
+        "failedLLMRequests": 11,
+        "unknownUsageLLMRequests": 11,
+        "failedWithKnownUsage": []
+      },
+      {
+        "case": "newsroom-2",
+        "runId": "run-51da6d3a2ee34b8a",
+        "workflowStatus": "done",
+        "elapsedSeconds": 1462.628,
+        "remainingSecondsAtEnd": 1237.372,
+        "crossed30Minutes": false,
+        "after30Milestones": [],
+        "after30NewPublishedArtifacts": [],
+        "after30LLMCalls": 0,
+        "failedLLMRequests": 4,
+        "unknownUsageLLMRequests": 3,
+        "failedWithKnownUsage": [
+          {
+            "id": "call-bfca079eeac34bd5",
+            "finishReason": "length",
+            "usage": {
+              "completion_tokens": 6000,
+              "completion_tokens_details": {
+                "reasoning_tokens": 0
+              },
+              "prompt_tokens": 16252,
+              "prompt_tokens_details": {
+                "cached_tokens": 4160,
+                "created_cache_tokens": 12032,
+                "multimodal_tokens": null
+              },
+              "total_tokens": 22252
+            },
+            "error": {
+              "code": "output_truncated",
+              "retryable": false
+            }
+          }
+        ]
+      },
+      {
+        "case": "software-1",
+        "runId": "run-2848772a96c94d96",
+        "workflowStatus": "partial",
+        "elapsedSeconds": 623.519,
+        "remainingSecondsAtEnd": 2076.481,
+        "crossed30Minutes": false,
+        "after30Milestones": [],
+        "after30NewPublishedArtifacts": [],
+        "after30LLMCalls": 0,
+        "failedLLMRequests": 3,
+        "unknownUsageLLMRequests": 3,
+        "failedWithKnownUsage": []
+      },
+      {
+        "case": "software-2",
+        "runId": "run-029c945e92a3417e",
+        "workflowStatus": "partial",
+        "elapsedSeconds": 1065.945,
+        "remainingSecondsAtEnd": 1634.055,
+        "crossed30Minutes": false,
+        "after30Milestones": [],
+        "after30NewPublishedArtifacts": [],
+        "after30LLMCalls": 0,
+        "failedLLMRequests": 9,
+        "unknownUsageLLMRequests": 8,
+        "failedWithKnownUsage": [
+          {
+            "id": "call-015da920c37b449f",
+            "finishReason": "length",
+            "usage": {
+              "completion_tokens": 6000,
+              "completion_tokens_details": {
+                "reasoning_tokens": 0
+              },
+              "prompt_tokens": 23117,
+              "prompt_tokens_details": {
+                "cached_tokens": 4992,
+                "created_cache_tokens": 18112,
+                "multimodal_tokens": null
+              },
+              "total_tokens": 29117
+            },
+            "error": {
+              "code": "output_truncated",
+              "retryable": false
+            }
+          }
+        ]
+      }
+    ],
+    "fund2ResearchStageComparison": [
+      {
+        "round": 10,
+        "runId": "run-966736e0584d441b",
+        "taskId": "task-912cb82653b14947",
+        "criticalStages": 7,
+        "acquisitionWindowSeconds": 150.618,
+        "handoffWindowSeconds": 231.721
+      },
+      {
+        "round": 11,
+        "runId": "run-81d8528ce2804094",
+        "taskId": "task-1f4fced9937b41bf",
+        "criticalStages": 7,
+        "acquisitionWindowSeconds": 235.541,
+        "handoffWindowSeconds": 362.372
+      }
+    ],
+    "interpretation": [
+      "Only N1 used wall time beyond 30 minutes; actual ZIP packaging and final summary completed during that extension.",
+      "Five cases ending before 30 minutes does not prove the larger budget had no effect: stage allocation depends on the original wall deadline.",
+      "F2 research acquisition window grew from 150.618s to235.541s, but source/version, planning, provider failures and stochastic responses also differ.",
+      "Software early repeated-action stops cannot be fixed merely by unused extra total time.",
+      "This is one R11 45-minute round compared with one R10 30-minute round, not a same-version randomized time-only comparison."
+    ]
+  },
+  "newsExtraTime": {
+    "intervalMinutes": [
+      30,
+      34.404916666666665
+    ],
+    "coreArticleAndSocialPublishedByMinute": 28.244,
+    "latestDraftReviewPassMinute": 29.071,
+    "coreBytesChangedAfter30": false,
+    "newPublishedAfter30": [
+      "README.md",
+      "publication_instructions.md"
+    ],
+    "documentsPublishedMinute": 31.871,
+    "formalZipMinute": 33.221,
+    "leaderSummaryMinute": 34.388,
+    "permissionWaitAfter30Seconds": 0,
+    "failedModelRequestsAfter30": 2,
+    "failedModelSecondsAfter30": 134.715,
+    "interpretation": "The extra 4.405 minutes completed packaging documentation, formal ZIP and leader summary; it did not improve article/social bytes or add new fact checks. Roughly 2.245 minutes in that interval were failed requests. Earlier permissions totaled 503.557 seconds plus 41.678 seconds requester wait; not all duration components should be added as mutually exclusive wall-time categories.",
+    "causalLimit": "R11 source and allowed wall time changed together. The 45-minute deadline also changes stage allocation from the beginning; neither this timeline nor N2 finishing before 30 minutes isolates the benefit of extra time."
+  },
+  "newsSourceFindings": [
+    {
+      "id": "N1-current-event",
+      "case": "newsroom-1",
+      "severity": "positive",
+      "finding": "The selected workshop series is current as of 16 November 2026. Official pages support the October–November workshop schedule, free participation, team size, registration deadline and February 2027 final. The manuscript distinguishes future hackathon/screening plans from completed events; the timing match is stronger than R10.",
+      "urls": [
+        "https://aifilmhackathon.hkust.edu.hk/",
+        "https://amc.hkust.edu.hk/events/call-applications-2nd-hkust-ai-film-hackathon-hk-secondary-school-students"
+      ]
+    },
+    {
+      "id": "N1-prior-edition-date",
+      "case": "newsroom-1",
+      "severity": "correction",
+      "finding": "The manuscript says the first hackathon ran 1–26 February 2026. That range is the call-for-applications page header; the page body schedules workshops in March and the hackathon on 28–29 March. Do not present the application-page range as the actual hackathon duration.",
+      "urls": [
+        "https://amc.hkust.edu.hk/events/call-applications-hkust-ai-film-hackathon-hk-secondary-school-students"
+      ]
+    },
+    {
+      "id": "N1-festival-figures",
+      "case": "newsroom-1",
+      "severity": "positive",
+      "finding": "The figures 1,100 attendees, about 1,300 submissions, 55 selected projects and 12 awards match AMC’s retrospective account and are explicitly attributed to the organizer. This is not independent attendance verification.",
+      "urls": [
+        "https://amc.hkust.edu.hk/events/call-submissions-3rd-hkust-ai-film-festival-pulsant"
+      ]
+    },
+    {
+      "id": "N1-false-uncorroborated-label",
+      "case": "newsroom-1",
+      "severity": "review-defect",
+      "finding": "The reviewer calls the AIFH 2027 label uncorroborated. The official second-edition AMC page expressly uses that label, including the original retained fetch. Omitting it is harmless, but the review criticism is factually wrong.",
+      "urls": [
+        "https://amc.hkust.edu.hk/events/call-applications-2nd-hkust-ai-film-hackathon-hk-secondary-school-students"
+      ]
+    },
+    {
+      "id": "N1-corrections-not-all-applied",
+      "case": "newsroom-1",
+      "severity": "correction",
+      "finding": "Publication instructions and final synthesis claim every requested correction was applied. The final main article still presents the broad industry-transformation sentence and institutional-strategy characterization as factual prose. The LinkedIn post adds an explicit framing qualifier, but the main article does not. Packaging notes must not upgrade edits that did not occur.",
+      "evidence": "Compare final news_report.md and publication_instructions.md section 3; exact byte bindings retained in newsroom-1-integrity-timeline-provenance.json."
+    },
+    {
+      "id": "N2-new-study-already-fetched",
+      "case": "newsroom-2",
+      "severity": "material",
+      "finding": "The article’s prominent claim that no 2025–2026 independent comparison was located contradicts its own cited June 2026 higher-education study and the retained fetch. That study compares four tools on 160 known-ground-truth documents; its conclusions combine detector weaknesses with materially better Pangram performance. The article omits this countervailing result. Its advice against sole-evidence misconduct decisions remains supported, but broad failure claims must be narrowed.",
+      "urls": [
+        "https://link.springer.com/article/10.1007/s40979-026-00226-w"
+      ],
+      "actualRunCallIds": [
+        "call-a87d735caff743bb"
+      ],
+      "actualBodyChars": 70223
+    },
+    {
+      "id": "N2-latest-relevant-source-dropped",
+      "case": "newsroom-2",
+      "severity": "material",
+      "finding": "The reporter also successfully fetched an August 2026 paper on editing and non-native writing but omitted it from the brief/article. Its abstract describes 135,389 paired documents and 13 detectors, finding heterogeneous responses to editing. This is relevant new evidence, not a missing-search gap.",
+      "urls": [
+        "https://arxiv.org/abs/2608.26710"
+      ],
+      "actualRunCallIds": [
+        "call-44b28c9cfd1f4df9"
+      ]
+    },
+    {
+      "id": "N2-false-unread-citation",
+      "case": "newsroom-2",
+      "severity": "material",
+      "finding": "The reviewer, article and release notes say arXiv:2306.04723 was not fetched, citing an unrelated recent log entry instead. The original run contains a successful fetch of the exact correct identifier and 5,263 retained characters. The abstract reports a proposed method’s stable cross-domain performance; framing this merely as support for universal robustness failure is one-sided.",
+      "urls": [
+        "https://arxiv.org/abs/2306.04723"
+      ],
+      "actualRunCallIds": [
+        "call-4129a34bcd934c31"
+      ]
+    },
+    {
+      "id": "N2-statistical-scope",
+      "case": "newsroom-2",
+      "severity": "correction",
+      "finding": "The Liang result supports a 2023 sample-specific bias finding: seven detectors, 91 human TOEFL essays and 88 US eighth-grade essays, with 61.22% mean false-positive rate on the TOEFL sample. The manuscript’s more-than-half summary is broadly supported, but should state that it is a mean across those tools and cannot be transferred to every current detector. Pangram was not among the seven, so a later different model’s low-bias claim is not logically a direct contradiction.",
+      "urls": [
+        "https://arxiv.org/html/2304.02819v3",
+        "https://arxiv.org/abs/2402.14873"
+      ]
+    },
+    {
+      "id": "N2-social-overstatement",
+      "case": "newsroom-2",
+      "severity": "correction",
+      "finding": "The current X/LinkedIn posts attribute the historical finding, contrary to the reviewer’s criticism based on the old social file. Other posts still generalize all detectors and omit the version/sample caveat. Short posts require their own evidence-preserving check, not only consistency with a flawed parent article."
+    },
+    {
+      "id": "Both-primary-review-handoff",
+      "case": "both",
+      "severity": "material-platform-gap",
+      "finding": "Both fact-checkers made zero web calls and zero reads of web-source snapshots. They read reporter briefs and manuscripts. Full source text remains in run records and same-agent snapshots, so not retained anywhere in this run is false; access/visibility for the reviewer is the narrower limitation. A recent-fetch list is not a complete provenance ledger, and missing from that list is not proof a source was not fetched. No reviewer source-fetch attempt or corresponding access-denial is recorded; this does not establish that the permission system made source verification impossible."
+    },
+    {
+      "id": "Both-social-review-version",
+      "case": "both",
+      "severity": "material-platform-gap",
+      "finding": "Both final article/social SHA pairs match the server’s current editorial review binding and the actual ZIP bytes. However, exact cited read evidence covers the revised main article but only the old social version, not the packaged social bytes. The N1 pass feedback also names old article IDs. A bundle-level hash binding must not be described as proof that every revised file was independently inspected."
+    }
+  ],
+  "fundQAComparisonCaution": "Both cases ended before30min, but R11 budget45min scales stage windows. F2 research acquisition R10=150.618s vs R11=235.541s; expected handoff231.721s vs362.372s. This is not an isolated code-effect or proof that extra time had no effect.",
+  "candidateAdoption": {
+    "software-1": "explicit contract and real candidate; QA fails later",
+    "software-2": "explicit contract but producer fails before publication; no candidate",
+    "newsroom-1": "no candidate contract selected; formal bundle only",
+    "newsroom-2": "no candidate contract selected; formal bundle only",
+    "fund-1": "pure analysis outputs, no delivery requirement",
+    "fund-2": "candidate -> independent review -> matching formal package -> final summary"
+  },
+  "nextPriorities": [
+    "Handle browser pageErrors and locator timeouts as distinct recovery cases before generic repeated-action termination; real defects go to rework, not fake acceptance.",
+    "Publish a declared minimum usable snapshot before extended self-testing, preserving private/unpublished vs delivered distinction.",
+    "Maintain complete source receipts and authorized snapshots for reviewers; missing from recent window is not unread.",
+    "Require current-version per-file review coverage and confirm claimed corrections against actual delivered bytes.",
+    "Final summary uses original task/output requirements and accepted assumptions; do not invent a mandatory ZIP or second user confirmation for pure analysis.",
+    "Improve actual product error handling, mobile tables and evidence freshness/contrary evidence before claiming production delivery."
+  ],
+  "stableSixTaskDeliveryEstablished": false,
+  "causalEffectOfTimeIsolated": false,
+  "platformSourceChangedDuringRound": false,
+  "manualGeneratedProductEdits": false,
+  "independentQAReplacesInternalAcceptance": false,
+  "additionalLiveRunsStarted": false,
+  "githubPushed": false,
+  "user8080Changed": false,
+  "owned8101StoppedAfterAllExportsAndDownloads": true,
+  "localEvidence": {
+    "rawEvidenceIncludedInRepository": false,
+    "pathsRelativeToRoundEvidenceDirectory": true,
+    "sha256": {
+      "final-freeze-and-export-check.json": "7dc1ae24eabc1eb3d6c471a2a282e2151baf5c41ec03b819ee4b490c804a1051",
+      "time-extension-analysis.json": "f13e32ecc3ed4ce3b3f3e5f95bd466c04b0e3d05a7cb610182b636e914d7080b",
+      "wait-summary.json": "9475e655b55217d5d3d4355022688031921e98a3d305eb0fb6b676f29ac220b8",
+      "r10-r11-workflow-comparison.json": "22f1e5b22a84f76628932ff4e7ebedc994b77323d16642df77919d01662e2ca8",
+      "r10-r11-wait-comparison.json": "43f1566913432e4e15cb0f96817896f72dd451103eae28009aee6d42c51eff7a",
+      "software-qa/software-final-analysis.json": "7373c6ad841d2207f0a0f066a4a829766676cd53b07bc82767ebeb815b54d47e",
+      "software-qa/software-1-candidate-qa/summary.json": "24adf244f8ce7f3841a66d04fe0b8c7f4e34bcd425b40e5fc5972cf0a94b403b",
+      "newsroom-qa/summary.json": "d65c220e81a3c8298af6b763040e331cc8ec653b822d9f28a0b45df5b0a0bf65",
+      "newsroom-qa/source-audits.json": "36103f419409cdf7fde89f29e2a00146f01928e5acd07fbb0fe2b51e7b7965d8",
+      "fund-qa/summary.json": "e8c96725118bc82cc33b259514a474661227dd1c908c581ae20ece4bdfa98092",
+      "fund-qa/primary-source-audit.json": "284bdb4282a5fda867af59200ecd5b396a82eaf6c9ee2a4ecece2f8f3752dec0",
+      "server-stopped.json": "3158ec3bb8b4d2e471dbf50dca49b6b1278219061e619c16f2ae56cb038b4c89"
+    }
+  },
+  "limitations": [
+    "One round each, source and time changed together, with differing failures/approvals/modeldecisions.",
+    "Done, producedform, validZIP and independent productquality are distinct.",
+    "Unknown failed-request usage is not zero; lower known tokens do not prove totalcost savings.",
+    "F2 mobile layout and current-page fragment changes differ from working desktop navigation and cold deep links.",
+    "N2 historical/current-study scope and missing-source statements require real correction.",
+    "All generated products and unique terminal exports remain unchanged."
+  ]
+}
