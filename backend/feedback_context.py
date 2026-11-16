@@ -40,6 +40,78 @@ class FeedbackProof:
     proposal_characters:int=0
 
 
+def _current_review_result(run,task,payload,response):
+    """Protect one actual success receipt, never grant authority from its prefix.
+
+    This preserves a pass/reject decision (including verified=false), not a new
+    review or proof of product quality. Unaccepted review actions still use the
+    existing error path; rework has its separate wait path. No tool qualifies.
+    """
+    if not response or not any(t is task for t in run.get('steps',[])):return False
+    call=next((c for c in run.get('calls',[]) if c.get('id')==response.get('callId')),None)
+    if not call or call.get('runId',run['id'])!=run['id']:return False
+    try:action=json.loads(response['text'])
+    except (KeyError,TypeError,ValueError):return False
+    validation=payload.get('validation')
+    if (not isinstance(action,dict) or action.get('type')!='review' or action.get('verdict') not in ('pass','reject')
+            or payload.get('ok') is not True or not isinstance(validation,dict)
+            or validation.get('verdict')!=action['verdict'] or validation.get('reviewerTaskId')!=task['id']
+            or type(validation.get('reviewerRevision')) is not int
+            or validation['reviewerRevision']!=task['revision']
+            or action['verdict']=='pass' and not (validation.get('verified') is True or validation.get('kind')=='editorial_assessment'
+                    and validation.get('verified') is False and validation.get('assessed') is True)):return False
+    matches=[t for t in run.get('steps',[]) if t.get('id')==action.get('taskId')]
+    if len(matches)!=1:return False
+    target=matches[0];owner=target.get('agentId')
+    if (not isinstance(owner,str) or owner==task.get('agentId') or payload.get('targetAgentId')!=owner
+            or payload.get('targetTaskId')!=target['id']
+            or target.get('status') not in (('done','partial') if action['verdict']=='pass' else ('failed',))
+            or payload.get('status')!=target['status']
+            or type(target.get('revision')) is not int or type(validation.get('targetRevision')) is not int
+            or validation['targetRevision']!=target['revision'] or target.get('validation')!=validation):return False
+    hashes={}
+    for artifact_id in target.get('outputs',[]):
+        rows=[a for a in run.get('artifacts',[]) if a.get('id')==artifact_id]
+        if len(rows)!=1:return False
+        artifact=rows[0]
+        if (artifact.get('runId')!=run['id'] or artifact.get('taskId')!=target['id']
+                or artifact.get('ownerAgentId',artifact.get('owner'))!=owner
+                or not isinstance(artifact.get('sha256'),str)):return False
+        hashes[artifact_id]=artifact['sha256']
+    if validation.get('artifactHashes')!=hashes:return False
+    # Recorded upstream versions are part of the current review boundary too.
+    # Missing legacy snapshots are not invented; a recorded mismatch is stale.
+    visiting=set();checked=set()
+    def current_inputs(item):
+        if item['id'] in checked:return True
+        if item['id'] in visiting:return False
+        visiting.add(item['id'])
+        snapshots=item.get('dependencySnapshots')
+        if snapshots is not None:
+            if not isinstance(snapshots,dict):return False
+            for dependency_id,expected in snapshots.items():
+                rows=[t for t in run.get('steps',[]) if t.get('id')==dependency_id]
+                if len(rows)!=1 or not isinstance(expected,dict) or type(expected.get('targetRevision')) is not int:return False
+                dependency=rows[0]
+                if type(dependency.get('revision')) is not int:return False
+                actual={'status':dependency.get('status'),'targetRevision':dependency['revision'],
+                        'artifactHashes':{a['id']:a['sha256'] for a in run.get('artifacts',[])
+                            if a.get('id') in dependency.get('outputs',[]) and a.get('sha256')}}
+                if actual!=expected or not current_inputs(dependency):return False
+        visiting.remove(item['id']);checked.add(item['id']);return True
+    if not current_inputs(target):return False
+    events=[e for e in run.get('events',[]) if e.get('type')=='review_'+action['verdict']
+            and e.get('agentId')==task['agentId'] and e.get('actor')==task['agentId']
+            and e.get('payload')=={'taskId':target['id'],'validation':validation}]
+    event_id=payload.get('existingReviewEventId') if payload.get('duplicateReview') is True else payload.get('reviewEventId')
+    if (not isinstance(event_id,str) or not event_id or not any(e.get('id')==event_id for e in events)
+            or sum(e.get('id')==event_id for e in run.get('events',[]))!=1):return False
+    if payload.get('duplicateReview') is True:
+        return (action['verdict']=='pass' and payload.get('actionExecuted') is False and payload.get('newDecision') is False
+                and any(e.get('id')==payload.get('existingReviewEventId') for e in events))
+    return bool(validation.get('feedback')==str(action.get('feedback',''))[:3000])
+
+
 def latest_feedback_proof(run,task):
     """Read actual ledger/transcript only; never infer authority from model text."""
     if not all(isinstance(v,dict) for v in (run,task)):return None
@@ -76,13 +148,15 @@ def latest_feedback_proof(run,task):
             _fail('真实服务端执行约束JSON无效；未静默丢弃后继续请求模型。')
         if not isinstance(payload,dict):continue
         error=payload.get('error')
+        review_success=(kind=='action_result' and row.get('role')=='tool' and row.get('action')=='review' and payload.get('ok') is True
+                        and _current_review_result(run,task,payload,latest_response))
         if kind=='repeated_action_warning':
             if (payload.get('runId')!=run['id'] or payload.get('taskId')!=task_id
                     or type(payload.get('revision')) is not int or payload['revision']!=revision
                     or type(payload.get('consecutiveIdenticalProposals')) is not int
                     or payload['consecutiveIdenticalProposals']!=2
                     or payload.get('thirdProposalStopsIfExistingGuardsPermit') is not True):continue
-        elif (payload.get('ok') is not False or not isinstance(error,dict)
+        elif not review_success and (payload.get('ok') is not False or not isinstance(error,dict)
                 or not isinstance(error.get('code'),str)):continue
         if kind=='action_result' and row.get('action') not in ('final','tool','review','reject','accept','delegate','publish_artifact','publish_artifacts','package_delivery','ask_human'):continue
         if len(canonical)>_MAX_FEEDBACK:_fail('真实服务端执行约束超过16000字符上限；未截掉条件后发送模型。')
@@ -136,6 +210,11 @@ def latest_feedback_proof(run,task):
         else:citation['noAcceptedModelProposal']=True
         messages.append(('user','服务端执行约束来源：'+_encode(citation)))
         messages.append(('user',_PREFIXES[kind]+canonical))
+        if review_success:
+            # Successful decisions need their exact result, not another copy
+            # of the already accepted proposal and verbose error provenance.
+            # Full provenance remains bound in this typed proof and raw audit.
+            messages=messages[-1:]
         return FeedbackProof(run['id'],task_id,actor,revision,row['id'],call['id'],
                              hashlib.sha256(canonical.encode()).hexdigest(),tuple(messages),proposal_sha,proposal_chars)
     return None

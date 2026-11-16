@@ -20,14 +20,17 @@ from .generation_cooldown import new_cooldown,cooldown_binding
 from .readonly_recovery import readonly_failure_feedback
 from .necessary_source import necessary_source_admission
 from .browser_failure_recovery import browser_failure_feedback,browser_failure_trend
+from .browser_stagnation import browser_stagnation_feedback
 from .handoff_priority import handoff_priority,priority_tail,PREFIX as HANDOFF_PRIORITY_PREFIX
 from .sandbox import read_text
 from .delivery import create_delivery, _snapshot as _delivery_snapshot, _current_source as _current_delivery_source
+from .delivery_review import reviewed_sources, handoff_context, unchanged_bundle_binding, current_packaging_binding
 from .memory import MemoryService
 from .learning import LearningService
 from .partial_review import budget_partial_receipt, review_dependency_exceptions
 from .partial_review_completion import make_partial_review_admission,partial_review_context,partial_review_completion_feedback
 from .review_target_feedback import review_target_feedback
+from .review_lifecycle import current_pass_receipt,review_context,current_repeat_state,record_duplicate,review_model_view
 from .completion_guardrail import completion_clarification_feedback
 from .persistence import Repository
 from .provider import ModelClient, ProviderError
@@ -102,6 +105,8 @@ class ActionError(ValueError):
 
 
 class Stopped(Exception): pass
+class ReviewFinalizationError(Exception):
+    code='review_final_invalid'
 class BudgetExceeded(Exception): pass
 class UncertainEffect(Exception):
     code='uncertain'
@@ -1525,6 +1530,8 @@ class Platform:
                      'humanClarifications':self._human_clarifications(run,task,channel),
                      'previousArtifacts':run.get('previousArtifacts',[]),
                      'recentCalls':[{'id':c['id'],'tool':c['tool'],'status':c['status'],'result':c.get('result')} for c in run['calls'] if c['taskId']==task['id'] and c['tool']!='llm.chat'][-8:]}
+            delivery_handoff=handoff_context(self._reviewed_delivery_sources(run,task))
+            if delivery_handoff:context['deliverySourceHandoff']=delivery_handoff
             partial_review=partial_review_context(run,task,self.agents)
             if partial_review:context['partialDependencyReview']=partial_review
             if not task.get('_messages'):
@@ -1544,12 +1551,14 @@ class Platform:
                     initial_context['personalLearning']=personal
                     initial_context['memories']=[]
                     initial_context['taskBoard']=context['taskBoard']
+                    initial_context.pop('deliverySourceHandoff',None)
+                    if delivery_handoff:initial_context['deliverySourceHandoff']=delivery_handoff
                     initial_context.pop('partialDependencyReview',None)
                     if partial_review:initial_context['partialDependencyReview']=partial_review
                     if isinstance(initial_context.get('task'),dict) and initial_context['task'].get('id')==task['id']:
                         initial_context['task']['childIds']=list(task.get('childIds',[]))
                     initial_message['content']=json.dumps(self.config.scrub(initial_context),ensure_ascii=False)
-                    restored_context={key:value for key,value in context.items() if key not in ('humanClarifications','taskBoard','personalLearning','partialDependencyReview')}
+                    restored_context={key:value for key,value in context.items() if key not in ('humanClarifications','taskBoard','personalLearning','partialDependencyReview','deliverySourceHandoff')}
                     restored_context['humanClarificationsInInitialContext']=True
                     restored_context['taskBoardInInitialContext']=True
                 elif context['humanClarifications']:
@@ -1742,8 +1751,13 @@ class Platform:
         children=[{'id':child['id'],'revision':child.get('revision',0),'outputs':child.get('outputs',[])}
                   for child in run.get('steps',[]) if child.get('parentId')==task['id'] and child.get('status')=='done']
         browser_coverage,qa_evidence=self._browser_progress_coverage(run,task)
+        # A read window (especially a failed/irrelevant one) must not reset
+        # duplicate-review recovery. Changed report bytes/publication are work.
+        task['_reviewWorkSignature']=fingerprint({'files':files,'outputs':outputs})
+        review_progress=self._review_context(run,task)
+        review_receipts=[row['passReceipt'] for row in review_progress['targets'] if row['passReceipt']] if review_progress else []
         signature=fingerprint({'files':files,'outputs':outputs,'tests':sorted(test_progress),'browserCoverage':sorted(browser_coverage),
-                               'children':children,'readWindows':sorted(read_windows)})
+                               'children':children,'readWindows':sorted(read_windows),'reviewReceipts':review_receipts})
         unchanged=task.get('_progressSignature')==signature
         stagnant=task.get('_stagnantTurns',0)+1 if unchanged else 0
         task.update(_progressSignature=signature,_stagnantTurns=stagnant)
@@ -1820,6 +1834,10 @@ class Platform:
         if isinstance(initial.get('task'),dict) and initial['task'].get('id')==task['id']:
             initial['task']['childIds']=list(task.get('childIds',[]))
         initial['progressReceipt']=feedback
+        initial.pop('reviewProgress',None)
+        if review_progress and (review_progress['completedTargetIds'] or review_progress['reviewInputs']):
+            repeat=current_repeat_state(task,review_progress)
+            initial['reviewProgress']=review_model_view(review_progress,repeat)
         initial.pop('partialDependencyReview',None)
         partial_review=partial_review_context(run,task,self.agents)
         if partial_review:initial['partialDependencyReview']=partial_review
@@ -1913,6 +1931,13 @@ class Platform:
                 task['turns']+=1
                 self._progress_receipt(run,task)
                 final_only=task['progress']['executionPhase']=='final_only'
+                # This protected constraint is binding-specific, not permanent
+                # history. A changed target or real delivery work may invalidate it.
+                task['_messages'][:]=[m for m in task['_messages'] if not
+                    (m.get('role')=='user' and m.get('content','').startswith('最后收尾约束：审核重复恢复。'))]
+                review_checkpoint=self._review_checkpoint(run,task) if not final_only else None
+                if review_checkpoint:
+                    task['_messages'].append({'role':'user','content':'最后收尾约束：审核重复恢复。'+json.dumps(review_checkpoint,ensure_ascii=False,separators=(',',':'))})
                 if final_only:
                     if self._time_only(run):
                         if task.get('_timeFinalRevision')==task.get('revision',0) and not task.get('generationCooldown'):
@@ -1931,7 +1956,7 @@ class Platform:
                     with self.lock:
                         self._apply_generation_refresh(self._gate(channel,run_id),task,task['_messages'],exc)
                     continue
-                if exc.code!='output_truncated':raise
+                if exc.code!='output_truncated' or review_checkpoint:raise
                 with self.lock:
                     clean=getattr(exc,'response_content','')
                     repairs=task.get('_truncationRepairs',0)
@@ -1961,6 +1986,9 @@ class Platform:
             try:
                 action=parse_object(content)
             except ProtocolError as exc:
+                if review_checkpoint:
+                    task['_messages'].append({'role':'assistant','content':self.config.scrub(content)})
+                    raise ProtocolError('审核重复恢复要求一次真实 final；模型仍返回无效 JSON，未合成完成。') from exc
                 with self.lock:
                     # Retain the failed generation as well as the actual parser
                     # error. A format repair is a new model turn, never a replay
@@ -1993,10 +2021,28 @@ class Platform:
             with self.lock:
                 task['_messages'].append({'role':'assistant','content':content})
                 key=fingerprint(action)
+                if action.get('type')=='review' and (target:=self._task(run,action.get('taskId'))) is not None:
+                    version=fingerprint({'reviewerRevision':task.get('revision'),'reviewerAgentId':task.get('agentId'),
+                                         'targetAgentId':target.get('agentId'),**self._review_snapshot(run,target),
+                                         'dependencies':self._dependency_validation(run,target)})
+                    if task.get('_reviewProposalVersion') not in (None,version):
+                        # The same JSON on changed target/reviewer bytes is a new
+                        # decision, not the third proposal on the old version.
+                        task['_actions']=[]
+                    task['_reviewProposalVersion']=version
                 task.setdefault('_actions',[]).append(key)
                 repairing_contract=action.get('type')=='final' and task.get('outputContract') is not None and task.get('_outputContractRepairs',0)<=2
                 self._persist()
             self._gate(channel,run_id)
+            # Recheck after generation: changed target bytes/decisions invalidate
+            # the old checkpoint. This boundary never replays or invents final.
+            if review_checkpoint and self._review_checkpoint(run,task) and action.get('type')!='final':
+                task['finalizationFailure']={'turn':task['turns'],'action':action.get('type'),'code':'review_final_required'}
+                self._event(run,'review_finalization_rejected',task['agentId'],
+                    '重复有效审查后仍未显式收尾；新动作未执行，原审查与产物保留。',
+                    {'taskId':task['id'],**task['finalizationFailure']})
+                raise ProtocolError('重复有效审查恢复已要求一次 final，模型仍未交棒；未执行新动作或合成完成。')
+            review_closing=bool(review_checkpoint and self._review_checkpoint(run,task))
             current_stage=stage_control(run,task,clock_ms())
             protocol_feedback=_action_not_tool_feedback(action)
             phase_feedback=stage_action_feedback(current_stage,action)
@@ -2024,8 +2070,13 @@ class Platform:
                     self._persist()
                 continue
             recovery=readonly_failure_feedback(run,task,action) if not final_only else None
-            browser_recovery=browser_failure_feedback(run,task,action) if not final_only else None
-            if task['_actions'][-3:]==[key]*3 and not repairing_contract and recovery is None and browser_recovery is None:
+            browser_recovery=(browser_stagnation_feedback(run,task,action)
+                              or browser_failure_feedback(run,task,action)) if not final_only else None
+            current_duplicate=(action.get('type')=='review' and action.get('verdict')=='pass'
+                and self._current_review_receipt(run,task,self._task(run,action.get('taskId'))) is not None
+                and (scope:=self._review_context(run,task)) is not None
+                and action.get('taskId') in [row['taskId'] for row in scope['targets']])
+            if task['_actions'][-3:]==[key]*3 and not repairing_contract and recovery is None and browser_recovery is None and not current_duplicate:
                 raise ProtocolError('检测到重复动作循环，已停止。')
             if recovery is not None:
                 with self.lock:
@@ -2041,8 +2092,12 @@ class Platform:
                     task['_messages'].append({'role':'user','content':'浏览器测试失败恢复：'+json.dumps(clean,ensure_ascii=False,separators=(',',':'))})
                     self._transcript(run,'system',json.dumps(clean,ensure_ascii=False),task['agentId'],kind='browser_failure_recovery',taskId=task['id'])
                     self._event(run,'browser_failure_recovery',task['agentId'],'同版本浏览器断言重复失败，未重跑；保留实际诊断并要求核对测试或修复真实缺陷。',
-                                {'taskId':task['id'],'observedCallIds':clean['observedFailures']['callIds']})
+                                {'taskId':task['id'],'observedCallIds':clean['observedFailures']['callIds'],
+                                 **({'failureSignature':clean['failureSignature'],'recovery':clean['recovery']}
+                                    if clean.get('failureSignature') else {})})
                     self._persist()
+                if (browser_recovery.get('recovery') or {}).get('stopTask'):
+                    raise ProtocolError('同一已执行的浏览器失败在两次诊断反馈后仍未修正；第三次无进展提案未执行，停止该任务并保留真实失败与验收缺口。')
                 continue
             try:
                 self._gate(channel,run_id)
@@ -2056,7 +2111,18 @@ class Platform:
                     text=action.get('text')
                     status=action.get('status','done')
                     if not isinstance(text,str) or not text.strip() or status not in ('done','partial','failed'):
+                        if review_closing:
+                            # The model's malformed proposal is retained, never
+                            # converted to a successful synthetic completion.
+                            task['finalizationFailure']={'turn':task['turns'],'action':'final','code':'review_final_invalid'}
+                            raise ReviewFinalizationError('审核收尾的实际 final 缺少有效 text/status；未合成完成。')
                         raise ProtocolError('final 必须有有效 text 和 status。')
+                    if status=='done' and review_closing and self._review_context(run,task)['remainingTargetIds']:
+                        task['error']={'code':'review_incomplete','message':'尚有当前版本未完成的独立审查，不能把重复审查计为完成。'}
+                        return {'text':text[:18000],'status':'partial','reflection':action.get('reflection')}
+                    if status=='done' and task.get('_recheckTargets') and review_closing:
+                        task['error']={'code':'review_incomplete','message':'返工后的成果尚未显式重验；不自动完成。'}
+                        return {'text':text[:18000],'status':'partial','reflection':action.get('reflection')}
                     if status=='done' and task.get('_recheckTargets'):
                         raise ProtocolError('返工后的成果仍需读取新 imports 并重新测试/提交有效 review pass；不能在重验前 final done。可如实 final partial/failed。')
                     delivered=text[:18000]
@@ -2069,7 +2135,7 @@ class Platform:
                             self._persist()
                         if validation['status']=='failed':
                             repairs=task.get('_outputContractRepairs',0)
-                            if repairs>=2 or final_only:
+                            if repairs>=2 or final_only or review_closing:
                                 task['error']={'code':'output_contract','message':'；'.join(validation['issues'])[:1200]}
                                 return {'text':delivered+'\n\n交付契约未满足：'+'；'.join(validation['issues']),
                                         'status':'partial','reflection':action.get('reflection')}
@@ -2085,7 +2151,7 @@ class Platform:
                                 already_prompted=(previous is not None and (not isinstance(previous,dict)
                                     or type(previous.get('reviewerRevision')) is not int
                                     or previous['reviewerRevision']>=task['revision']))
-                                if final_only or already_prompted:
+                                if final_only or review_closing or already_prompted:
                                     task['error']=copy.deepcopy(completion_feedback['error'])
                                     self._event(run,'partial_review_completion_unresolved',task['agentId'],
                                         '未提交当前partial输入的真实审查决定；保留部分成果，不增加收尾轮次。',completion_feedback['binding'])
@@ -2100,7 +2166,7 @@ class Platform:
                     else:
                         result={'text':delivered,'status':status,'reflection':action.get('reflection')}
                         clarification=None
-                        if status=='partial' and not final_only:
+                        if status=='partial' and not final_only and not review_closing:
                             validation=validate_task_output(task,run,self.artifacts,delivered)
                             clarification=completion_clarification_feedback(run,task,action,validation,
                                 final_only=final_only,stage_phase=(current_stage or {}).get('phase'),now_ms=clock_ms())
@@ -2178,6 +2244,9 @@ class Platform:
                             run.setdefault('lateDeliveries',[]).append(delivery)
                             self._expire_time_budget(channel,run)
                             raise Stopped()
+                        binding=unchanged_bundle_binding(run,task,delivery,self.artifacts,
+                            self._reviewed_delivery_sources(run,task))
+                        if binding:delivery['reviewedSourceBinding']=binding
                         run.setdefault('deliveries',[]).append(delivery)
                         self._event(run,'delivery_packaged',task['agentId'],'已从显式选择的快照创建可下载产品包；打包不等于验收通过。',
                                     {'deliveryId':delivery['id'],'taskId':task['id'],'entrypoint':delivery['entrypoint'],
@@ -2265,6 +2334,7 @@ class Platform:
                 # Warn one proposal before the existing three-action stop. This
                 # is decision feedback, not a replay, publication or extra turn.
                 if (task['_actions'][-2:]==[key]*2 and not repairing_contract
+                        and not result.get('duplicateReview')
                         and readonly_failure_feedback(run,task,action) is None
                         and browser_failure_feedback(run,task,action) is None):
                     warning={'runId':run_id,'taskId':task['id'],'revision':task.get('revision',0),
@@ -2454,6 +2524,13 @@ class Platform:
         inspect_task(task)
         return {'status':'stale' if issues else 'passed','issues':issues,'semanticQuality':'unassessed'}
 
+    def _reviewed_delivery_sources(self,run,task):
+        return reviewed_sources(run,task,self.artifacts,self.agents,self._review_snapshot,
+                                self._valid_review,self._dependency_validation,self._browser_review_evidence)
+
+    def _current_packaging_binding(self,run,task):
+        return current_packaging_binding(run,task,self.artifacts,self._reviewed_delivery_sources(run,task))
+
     def _requires_browser(self,run,task):
         contract=task.get('outputContract') or {}
         return (any(a['id'] in task.get('outputs',[]) and a.get('name','').lower().endswith(('.html','.htm'))
@@ -2513,6 +2590,46 @@ class Platform:
         return any(artifact['id'] in task.get('outputs',[]) and artifact.get('name','').lower().endswith(extensions)
                    for artifact in run.get('artifacts',[]))
 
+    def _current_review_receipt(self,run,reviewer,target):
+        if target is None:return None
+        validation=target.get('validation') or {}
+        needs_browser=self._requires_browser(run,target)
+        needs_code=self._has_code_work(run,target) or needs_browser
+        if needs_code and validation.get('kind')=='editorial_assessment':return None
+        snapshot=self._review_snapshot(run,target)
+        def actual_test(call):
+            result=call.get('result');bound=call.get('reviewTargets',{}).get(target['id'])
+            if (call.get('id') not in validation.get('evidenceCallIds',[]) or call.get('runId',run['id'])!=run['id']
+                    or call.get('taskId')!=reviewer['id'] or call.get('agentId')!=reviewer.get('agentId')
+                    or type(call.get('revision')) is not int or call['revision']!=reviewer.get('revision')
+                    or call.get('tool')!='code.test' or call.get('status')!='success'
+                    or not isinstance(result,dict) or result.get('ok') is not True
+                    or type(result.get('exitCode')) is not int or result['exitCode']!=0
+                    or not isinstance(bound,dict) or type(bound.get('targetRevision')) is not int or bound!=snapshot
+                    or any(row.get(k) for row in (call,result) for k in
+                           ('outcomeUnknown','deadlineExceeded','timedOut','cancelled','outputLimitExceeded','modelViewOnly','notExecuted','error'))
+                    or any(row.get('actionExecuted') is False for row in (call,result))):return False
+            if not needs_browser:return True
+            browser=result.get('browser')
+            return bool(isinstance(browser,dict) and browser.get('ok') is True
+                        and not any(browser.get(k) for k in ('error','pageErrors','httpErrors','blockedRequests','timedOut','cancelled'))
+                        and self._browser_review_evidence(run,target,call))
+        valid_code=self._valid_review(run,target) and any(actual_test(call) for call in run.get('calls',[]))
+        return current_pass_receipt(run,reviewer,target,self.agents,self._dependency_validation(run,target),valid_code)
+
+    def _review_context(self,run,reviewer):
+        return review_context(run,reviewer,self.agents,
+                              lambda target:self._current_review_receipt(run,reviewer,target),self.artifacts.can_access)
+
+    def _review_checkpoint(self,run,reviewer):
+        context=self._review_context(run,reviewer)
+        repeat=current_repeat_state(reviewer,context)
+        if not repeat or not repeat['finalRequired']:return None
+        return {'bindingSha256':context['bindingSha256'],'remainingTargetIds':context['remainingTargetIds'],
+                'instruction':'Repeated current passes added no delivery work. Return ONE actual final now; no other action will execute. '
+                    'Use done only if required current reviews and task.outputContract are satisfied, otherwise partial/failed with missing work. '
+                    'Refer to reviewProgress. No automatic verdict, publication, completion or extra budget.'}
+
     def _review(self, run, reviewer, action):
         if 'review' not in self.agents[reviewer['agentId']].get('capabilities',[]):
             raise ProtocolError('只有具有review能力的成员可提交审查决定。')
@@ -2538,6 +2655,22 @@ class Platform:
                     self._persist()
                     return feedback
                 raise ProtocolError('审查对象必须是其他已交付子任务。')
+            existing=self._current_review_receipt(run,reviewer,target) if verdict=='pass' else None
+            if existing is not None:
+                context=self._review_context(run,reviewer)
+                # An out-of-scope explicit review is idempotent too, but cannot
+                # manufacture a scope or cause an unrelated task to close.
+                recovery=record_duplicate(reviewer,context) if context and target['id'] in [row['taskId'] for row in context['targets']] else None
+                self._persist()
+                return {'ok':True,'duplicateReview':True,'actionExecuted':False,'newDecision':False,
+                        'validation':copy.deepcopy(target['validation']),'status':target['status'],
+                        'targetTaskId':target['id'],'targetAgentId':target['agentId'],
+                        'existingReviewEventId':existing['eventId'],
+                        'reviewProgress':({key:context[key] for key in ('completedTargetIds','remainingTargetIds')} if context else None),
+                        'duplicateRecovery':({key:value for key,value in recovery.items() if key!='binding'} if recovery else None),
+                        'instruction':'This exact current pass was already recorded; no review event, verdict or progress was added. '
+                            'Use remainingTargetIds for unresolved scope. If none remain, finish the original report/publication contract and explicitly final. '
+                            'Do not alternate passed targets or change feedback merely to repeat a decision. No completion or permission was inferred.'}
             if verdict=='rework' and target['revision']>=self.config.max_retries:
                 raise ProtocolError('该子任务已达到返工次数上限。')
             snapshot=self._review_snapshot(run,target)
@@ -2549,7 +2682,7 @@ class Platform:
                       and (not needs_browser or self._browser_review_evidence(run,target,call))]
             validation={'verdict':verdict,'feedback':str(action.get('feedback',''))[:3000],
                         'verified':bool(evidence) and verdict=='pass','evidenceCallIds':[call['id'] for call in evidence],
-                        'reviewerTaskId':reviewer['id'],**snapshot}
+                        'reviewerTaskId':reviewer['id'],'reviewerRevision':reviewer.get('revision',0),**snapshot}
             code_work=self._has_code_work(run,target) or needs_browser
             dependency_validation=self._dependency_validation(run,target)
             if dependency_validation['status']=='stale':validation['verified']=False
@@ -2598,13 +2731,19 @@ class Platform:
                 target['validation']=validation
                 if verdict=='reject':
                     target.update(status='failed',error={'code':'review','message':validation['feedback']})
-            self._event(run,'review_'+verdict,reviewer['agentId'],'审核角色给出审查决定。',{'taskId':target['id'],'validation':validation})
+            review_event=self._event(run,'review_'+verdict,reviewer['agentId'],'审核角色给出审查决定。',{'taskId':target['id'],'validation':validation})
             self._persist()
             accepted=verdict!='pass' or validation['verified'] or (not code_work and validation['assessed'])
             if accepted and verdict=='pass' and (reviewer.get('_recheckTargets') or {}).get(target['id'])==target.get('revision',0):
                 reviewer['_recheckTargets'].pop(target['id'],None)
                 self._persist()
-            result={'ok':accepted,'validation':validation,'status':target['status']}
+            result={'ok':accepted,'validation':validation,'status':target['status'],'targetTaskId':target['id'],'targetAgentId':target['agentId'],
+                    'reviewEventId':review_event['id']}
+            context=self._review_context(run,reviewer)
+            if context:
+                # The canonical initial context carries the full current ledger.
+                # Repeating it here can evict this actual validation receipt.
+                result['reviewProgress']={key:context[key] for key in ('completedTargetIds','remainingTargetIds')}
             if not accepted:
                 message=('HTML 独立验收未通过：需要审核员真实 browser code.test、通过的断言及当前 HTML/JS/CSS 产物 SHA256；Python 测试成功不能替代浏览器验收。'
                          if needs_browser else '独立验收未通过：需要审核员本任务成功的 code.test 证据，且目标 revision 与产物 SHA256 必须匹配。')
@@ -3053,6 +3192,7 @@ class Platform:
             tasks=[t for t in run['steps'] if not t.get('_planning')]
             stale=[]
             for task in tasks:
+                task.pop('deliveryReviewBinding',None)
                 validation=self._dependency_validation(run,task)
                 task['dependencyValidation']=validation
                 if task['status']=='done' and validation['status']=='stale':
@@ -3069,7 +3209,13 @@ class Platform:
                 for task in tasks:
                     if ('review' not in self.agents.get(task.get('agentId'),{}).get('capabilities',[])
                             and task.get('status') in ('done','partial') and (self._has_code_work(run,task) or self._requires_browser(run,task)) and not self._valid_review(run,task)):
-                        gaps.append(task['title']+'：最新代码 revision / 产物尚无匹配的审核角色独立验收。')
+                        binding=self._current_packaging_binding(run,task)
+                        if binding:
+                            # Derived packaging integrity, not a new reviewer verdict.
+                            task['deliveryReviewBinding']=binding
+                        else:
+                            task.pop('deliveryReviewBinding',None)
+                            gaps.append(task['title']+'：最新代码 revision / 产物尚无匹配的审核角色独立验收。')
                 if gaps and status=='done': status='partial'
             summaries=[f"- {t['title']} [{t['status']}]：{t.get('result') or (t.get('error') or {}).get('message','未交付')}" for t in tasks]
             synthesis=next((task for task in reversed(tasks) if task.get('finalSummary') and task['status']=='done'),None)

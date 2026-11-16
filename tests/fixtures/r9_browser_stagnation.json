@@ -1,0 +1,1291 @@
+{
+  "sourceExportSha256": "3e687b7fe8e82be3a029871d21ed835d1d283c5137eec24088b240cfcfb5f67c",
+  "sourceCase": "Round9 software-2",
+  "originalCallSha256": {
+    "call-d4adbe6134b04e0b": "f7c6c0330439d1cda282c639e8c88a949a2606f49974b027b8a997a70152d346",
+    "call-38b35685fa75408a": "3af95ef16129119727ce7e0a0d6ef584a26f7b58d6d4d6e0b4cf6bf98c855cb1",
+    "call-b4d8a44416ff4925": "fc2501a2eb78e0647905e17d6922b0c224e231e4f2b8383845d89f85209bebbd"
+  },
+  "run": {
+    "id": "run-50e7499b88e24c07",
+    "events": [],
+    "calls": [
+      {
+        "id": "call-d4adbe6134b04e0b",
+        "taskId": "task-7672a01e10234ec7",
+        "agentId": "qa",
+        "tool": "code.test",
+        "args": {
+          "checks": [
+            {
+              "action": "click",
+              "selector": "#tabDashboard"
+            },
+            {
+              "action": "fill",
+              "selector": "#dashFrom",
+              "value": "2026-11-02"
+            },
+            {
+              "action": "fill",
+              "selector": "#dashTo",
+              "value": "2026-11-06"
+            },
+            {
+              "action": "click",
+              "selector": "#dashRefresh"
+            },
+            {
+              "action": "assert_text",
+              "selector": "#dashSummary",
+              "text": "Total bookings"
+            },
+            {
+              "action": "assert_text",
+              "selector": "#dashSummary",
+              "text": "6"
+            },
+            {
+              "action": "assert_text",
+              "selector": "#dashSummary",
+              "text": "Total cancellations"
+            },
+            {
+              "action": "assert_text",
+              "selector": "#dashSummary",
+              "text": "2"
+            },
+            {
+              "action": "assert_text",
+              "selector": "#dashSummary",
+              "text": "25.0%"
+            },
+            {
+              "action": "assert_text",
+              "selector": "#dashSummary",
+              "text": "Boardroom"
+            },
+            {
+              "action": "assert_count",
+              "count": 5,
+              "selector": "#dashCharts .chart-card"
+            },
+            {
+              "action": "assert_count",
+              "count": 10,
+              "selector": "#dashCharts .chart-card:nth-child(1) .bar"
+            },
+            {
+              "action": "assert_count",
+              "count": 7,
+              "selector": "#dashCharts .chart-card:nth-child(3) .bar"
+            },
+            {
+              "action": "assert_count",
+              "count": 12,
+              "selector": "#dashCharts .chart-card:nth-child(4) .bar"
+            },
+            {
+              "action": "assert_count",
+              "count": 10,
+              "selector": "#dashCharts .chart-card:nth-child(1) .bar-value"
+            },
+            {
+              "action": "assert_count",
+              "count": 10,
+              "selector": "#dashCharts .chart-card:nth-child(5) .bar-value"
+            },
+            {
+              "action": "assert_count",
+              "count": 7,
+              "selector": "#dashCharts .chart-card:nth-child(3) .bar-value"
+            },
+            {
+              "action": "assert_count",
+              "count": 12,
+              "selector": "#dashCharts .chart-card:nth-child(4) .bar-value"
+            },
+            {
+              "action": "assert_text",
+              "selector": "#dashCharts .chart-card:nth-child(1) .bar-value >> nth=0",
+              "text": "3"
+            },
+            {
+              "action": "assert_text",
+              "selector": "#dashCharts .chart-card:nth-child(1) .bar-value >> nth=3",
+              "text": "1"
+            },
+            {
+              "action": "assert_text",
+              "selector": "#dashCharts .chart-card:nth-child(5) .bar-value >> nth=0",
+              "text": "1"
+            },
+            {
+              "action": "assert_text",
+              "selector": "#dashCharts .chart-card:nth-child(3) .bar-value >> nth=0",
+              "text": "3"
+            },
+            {
+              "action": "assert_text",
+              "selector": "#dashCharts .chart-card:nth-child(4) .bar-value >> nth=1",
+              "text": "3"
+            }
+          ],
+          "language": "browser",
+          "path": "app/index.html",
+          "resources": {
+            "app.js": "app/app.js",
+            "dashboard.js": "app/dashboard.js",
+            "styles.css": "app/styles.css"
+          },
+          "storage": {
+            "mrb.bookings.v1": "[{\"id\":\"b1\",\"roomId\":\"boardroom\",\"date\":\"2026-11-02\",\"hour\":9,\"bookerName\":\"Ann\",\"createdAt\":\"2026-11-01T08:00:00.000Z\"},{\"id\":\"b2\",\"roomId\":\"boardroom\",\"date\":\"2026-11-02\",\"hour\":10,\"bookerName\":\"Bob\",\"createdAt\":\"2026-11-01T08:05:00.000Z\"},{\"id\":\"b3\",\"roomId\":\"boardroom\",\"date\":\"2026-11-03\",\"hour\":9,\"bookerName\":\"Ann\",\"createdAt\":\"2026-11-01T08:10:00.000Z\"},{\"id\":\"b4\",\"roomId\":\"meeting-1\",\"date\":\"2026-11-02\",\"hour\":9,\"bookerName\":\"Cara\",\"createdAt\":\"2026-11-01T08:15:00.000Z\"},{\"id\":\"b5\",\"roomId\":\"meeting-2\",\"date\":\"2026-11-04\",\"hour\":14,\"bookerName\":\"Dan\",\"createdAt\":\"2026-11-01T08:20:00.000Z\"},{\"id\":\"b6\",\"roomId\":\"huddle\",\"date\":\"2026-11-05\",\"hour\":9,\"bookerName\":\"Eve\",\"createdAt\":\"2026-11-01T08:25:00.000Z\"}]",
+            "mrb.cancellations.v1": "[{\"bookingId\":\"x1\",\"roomId\":\"boardroom\",\"date\":\"2026-11-02\",\"hour\":11,\"bookerName\":\"Ann\",\"cancelledBy\":\"Ann\",\"cancelledAt\":\"2026-11-01T09:00:00.000Z\"},{\"bookingId\":\"x2\",\"roomId\":\"meeting-1\",\"date\":\"2026-11-03\",\"hour\":9,\"bookerName\":\"Cara\",\"cancelledBy\":\"Cara\",\"cancelledAt\":\"2026-11-01T09:05:00.000Z\"}]"
+          },
+          "timeout": 20
+        },
+        "revision": 0,
+        "status": "failed",
+        "result": {
+          "ok": false,
+          "runtime": "browser",
+          "exitCode": 1,
+          "browser": {
+            "assertionCount": 16,
+            "assertions": [
+              {
+                "action": "assert_text",
+                "actual": "6Total bookings6Total reserved hours2Total cancellations25.0%Cancellation rateMost booked room: Boardroom (3 bookings).Least booked room (with bookings): Meeting Room 1 (1 bookings).Never booked in range: Meeting Room 3, Meeting Room 4, Meeting Room 5, Meeting Room 6, Meeting Room 7, Meeting Room 8.Busiest day: Mon (3 bookings).Busiest hour: 09:00 (4 bookings).Allocation hint: Meeting Room 1 is at 1.7% utilisation while Boardroom is at 5.0% — consider reallocating.",
+                "expected": "Total bookings",
+                "pageId": "main",
+                "passed": true,
+                "selector": "#dashSummary"
+              },
+              {
+                "action": "assert_text",
+                "actual": "6Total bookings6Total reserved hours2Total cancellations25.0%Cancellation rateMost booked room: Boardroom (3 bookings).Least booked room (with bookings): Meeting Room 1 (1 bookings).Never booked in range: Meeting Room 3, Meeting Room 4, Meeting Room 5, Meeting Room 6, Meeting Room 7, Meeting Room 8.Busiest day: Mon (3 bookings).Busiest hour: 09:00 (4 bookings).Allocation hint: Meeting Room 1 is at 1.7% utilisation while Boardroom is at 5.0% — consider reallocating.",
+                "expected": "6",
+                "pageId": "main",
+                "passed": true,
+                "selector": "#dashSummary"
+              },
+              {
+                "action": "assert_text",
+                "actual": "6Total bookings6Total reserved hours2Total cancellations25.0%Cancellation rateMost booked room: Boardroom (3 bookings).Least booked room (with bookings): Meeting Room 1 (1 bookings).Never booked in range: Meeting Room 3, Meeting Room 4, Meeting Room 5, Meeting Room 6, Meeting Room 7, Meeting Room 8.Busiest day: Mon (3 bookings).Busiest hour: 09:00 (4 bookings).Allocation hint: Meeting Room 1 is at 1.7% utilisation while Boardroom is at 5.0% — consider reallocating.",
+                "expected": "Total cancellations",
+                "pageId": "main",
+                "passed": true,
+                "selector": "#dashSummary"
+              },
+              {
+                "action": "assert_text",
+                "actual": "6Total bookings6Total reserved hours2Total cancellations25.0%Cancellation rateMost booked room: Boardroom (3 bookings).Least booked room (with bookings): Meeting Room 1 (1 bookings).Never booked in range: Meeting Room 3, Meeting Room 4, Meeting Room 5, Meeting Room 6, Meeting Room 7, Meeting Room 8.Busiest day: Mon (3 bookings).Busiest hour: 09:00 (4 bookings).Allocation hint: Meeting Room 1 is at 1.7% utilisation while Boardroom is at 5.0% — consider reallocating.",
+                "expected": "2",
+                "pageId": "main",
+                "passed": true,
+                "selector": "#dashSummary"
+              },
+              {
+                "action": "assert_text",
+                "actual": "6Total bookings6Total reserved hours2Total cancellations25.0%Cancellation rateMost booked room: Boardroom (3 bookings).Least booked room (with bookings): Meeting Room 1 (1 bookings).Never booked in range: Meeting Room 3, Meeting Room 4, Meeting Room 5, Meeting Room 6, Meeting Room 7, Meeting Room 8.Busiest day: Mon (3 bookings).Busiest hour: 09:00 (4 bookings).Allocation hint: Meeting Room 1 is at 1.7% utilisation while Boardroom is at 5.0% — consider reallocating.",
+                "expected": "25.0%",
+                "pageId": "main",
+                "passed": true,
+                "selector": "#dashSummary"
+              },
+              {
+                "action": "assert_text",
+                "actual": "6Total bookings6Total reserved hours2Total cancellations25.0%Cancellation rateMost booked room: Boardroom (3 bookings).Least booked room (with bookings): Meeting Room 1 (1 bookings).Never booked in range: Meeting Room 3, Meeting Room 4, Meeting Room 5, Meeting Room 6, Meeting Room 7, Meeting Room 8.Busiest day: Mon (3 bookings).Busiest hour: 09:00 (4 bookings).Allocation hint: Meeting Room 1 is at 1.7% utilisation while Boardroom is at 5.0% — consider reallocating.",
+                "expected": "Boardroom",
+                "pageId": "main",
+                "passed": true,
+                "selector": "#dashSummary"
+              },
+              {
+                "action": "assert_count",
+                "actual": 5,
+                "expected": 5,
+                "pageId": "main",
+                "passed": true,
+                "selector": "#dashCharts .chart-card"
+              },
+              {
+                "action": "assert_count",
+                "actual": 10,
+                "expected": 10,
+                "pageId": "main",
+                "passed": true,
+                "selector": "#dashCharts .chart-card:nth-child(1) .bar"
+              },
+              {
+                "action": "assert_count",
+                "actual": 7,
+                "expected": 7,
+                "pageId": "main",
+                "passed": true,
+                "selector": "#dashCharts .chart-card:nth-child(3) .bar"
+              },
+              {
+                "action": "assert_count",
+                "actual": 12,
+                "expected": 12,
+                "pageId": "main",
+                "passed": true,
+                "selector": "#dashCharts .chart-card:nth-child(4) .bar"
+              },
+              {
+                "action": "assert_count",
+                "actual": 10,
+                "expected": 10,
+                "pageId": "main",
+                "passed": true,
+                "selector": "#dashCharts .chart-card:nth-child(1) .bar-value"
+              },
+              {
+                "action": "assert_count",
+                "actual": 10,
+                "expected": 10,
+                "pageId": "main",
+                "passed": true,
+                "selector": "#dashCharts .chart-card:nth-child(5) .bar-value"
+              },
+              {
+                "action": "assert_count",
+                "actual": 7,
+                "expected": 7,
+                "pageId": "main",
+                "passed": true,
+                "selector": "#dashCharts .chart-card:nth-child(3) .bar-value"
+              },
+              {
+                "action": "assert_count",
+                "actual": 12,
+                "expected": 12,
+                "pageId": "main",
+                "passed": true,
+                "selector": "#dashCharts .chart-card:nth-child(4) .bar-value"
+              },
+              {
+                "action": "assert_text",
+                "actual": "3",
+                "expected": "3",
+                "pageId": "main",
+                "passed": true,
+                "selector": "#dashCharts .chart-card:nth-child(1) .bar-value >> nth=0"
+              },
+              {
+                "action": "assert_text",
+                "actual": "0",
+                "expected": "1",
+                "pageId": "main",
+                "passed": false,
+                "selector": "#dashCharts .chart-card:nth-child(1) .bar-value >> nth=3"
+              }
+            ],
+            "assertionsPassed": 15,
+            "blockedRequests": [],
+            "chromiumSandbox": false,
+            "console": [],
+            "dialogCoverageComplete": true,
+            "dialogResponses": [],
+            "engine": "chromium",
+            "entry": {
+              "path": "app/index.html",
+              "sha256": "b1b1a94103c39df7f5b9bc65f0b4d85090c6c404b44bc61d7e6d54d8c339e0e5"
+            },
+            "error": "Browser step failed: Assertion failed",
+            "executed": true,
+            "failureObservation": {
+              "formValues": [
+                {
+                  "id": "dashFrom",
+                  "name": "",
+                  "type": "date",
+                  "value": "2026-11-02"
+                },
+                {
+                  "id": "dashTo",
+                  "name": "",
+                  "type": "date",
+                  "value": "2026-11-06"
+                }
+              ],
+              "formValuesOmitted": 0,
+              "interpretation": "Untrusted observed state only; does not determine whether the test or product is wrong.",
+              "matchCount": 1,
+              "messagesOmitted": 0,
+              "pageId": "main",
+              "runtimeUTC": "2026-11-16T02:42:43.910Z",
+              "source": "actual failing-page DOM in this test",
+              "stepIndex": 19,
+              "target": {
+                "id": "",
+                "tag": "text",
+                "text": "0"
+              },
+              "textLimitCharacters": 120,
+              "timezone": "UTC",
+              "valuesAreBoundedPreviews": true,
+              "visibleMessages": [
+                {
+                  "id": "dashSummary",
+                  "role": "live-region",
+                  "text": "6 Total bookings 6 Total reserved hours 2 Total cancellations 25.0% Cancellation rate Most booked room: Boardroom (3 boo"
+                }
+              ]
+            },
+            "faultCoverageComplete": true,
+            "faults": [],
+            "httpErrors": [],
+            "ok": false,
+            "pageErrors": [],
+            "pages": [
+              {
+                "entryPath": "app/index.html",
+                "pageId": "main"
+              }
+            ],
+            "readFaultCoverageComplete": true,
+            "readFaults": [],
+            "reportPath": "browser-evidence/browser-0b07c8c2aea3484095304c8f63b8b1eb/report.json",
+            "screenshot": {
+              "bytes": 120907,
+              "path": "browser-evidence/browser-0b07c8c2aea3484095304c8f63b8b1eb/screenshot.png",
+              "sha256": "1b36153efbab9f6ae0d4ed64397dfb10080737265c592b554a538279670f8890"
+            },
+            "screenshotCaptured": true,
+            "screenshotPageId": "main",
+            "sourceManifest": [
+              {
+                "path": "app/index.html",
+                "sha256": "b1b1a94103c39df7f5b9bc65f0b4d85090c6c404b44bc61d7e6d54d8c339e0e5"
+              },
+              {
+                "path": "app/styles.css",
+                "sha256": "c73e2bae3c1aa2aa86261bf7420c55d4aa8321dabb0e0efab8785e483d95f85d"
+              },
+              {
+                "path": "app/app.js",
+                "sha256": "b365f7e2cdc2243b01dc6d96f97b3336105f8375de6b521084cc62c7eae99395"
+              },
+              {
+                "path": "app/dashboard.js",
+                "sha256": "a463d0872ac6d743894e0121c62a50bc347acc01f47de22bb95ec422a111f932"
+              }
+            ],
+            "steps": [
+              {
+                "action": "click",
+                "ok": true,
+                "pageId": "main",
+                "selector": "#tabDashboard"
+              },
+              {
+                "action": "fill",
+                "ok": true,
+                "pageId": "main",
+                "selector": "#dashFrom"
+              },
+              {
+                "action": "fill",
+                "ok": true,
+                "pageId": "main",
+                "selector": "#dashTo"
+              },
+              {
+                "action": "click",
+                "ok": true,
+                "pageId": "main",
+                "selector": "#dashRefresh"
+              },
+              {
+                "action": "assert_text",
+                "actual": "6Total bookings6Total reserved hours2Total cancellations25.0%Cancellation rateMost booked room: Boardroom (3 bookings).Least booked room (with bookings): Meeting Room 1 (1 bookings).Never booked in range: Meeting Room 3, Meeting Room 4, Meeting Room 5, Meeting Room 6, Meeting Room 7, Meeting Room 8.Busiest day: Mon (3 bookings).Busiest hour: 09:00 (4 bookings).Allocation hint: Meeting Room 1 is at 1.7% utilisation while Boardroom is at 5.0% — consider reallocating.",
+                "expected": "Total bookings",
+                "ok": true,
+                "pageId": "main",
+                "passed": true,
+                "selector": "#dashSummary"
+              },
+              {
+                "action": "assert_text",
+                "actual": "6Total bookings6Total reserved hours2Total cancellations25.0%Cancellation rateMost booked room: Boardroom (3 bookings).Least booked room (with bookings): Meeting Room 1 (1 bookings).Never booked in range: Meeting Room 3, Meeting Room 4, Meeting Room 5, Meeting Room 6, Meeting Room 7, Meeting Room 8.Busiest day: Mon (3 bookings).Busiest hour: 09:00 (4 bookings).Allocation hint: Meeting Room 1 is at 1.7% utilisation while Boardroom is at 5.0% — consider reallocating.",
+                "expected": "6",
+                "ok": true,
+                "pageId": "main",
+                "passed": true,
+                "selector": "#dashSummary"
+              },
+              {
+                "action": "assert_text",
+                "actual": "6Total bookings6Total reserved hours2Total cancellations25.0%Cancellation rateMost booked room: Boardroom (3 bookings).Least booked room (with bookings): Meeting Room 1 (1 bookings).Never booked in range: Meeting Room 3, Meeting Room 4, Meeting Room 5, Meeting Room 6, Meeting Room 7, Meeting Room 8.Busiest day: Mon (3 bookings).Busiest hour: 09:00 (4 bookings).Allocation hint: Meeting Room 1 is at 1.7% utilisation while Boardroom is at 5.0% — consider reallocating.",
+                "expected": "Total cancellations",
+                "ok": true,
+                "pageId": "main",
+                "passed": true,
+                "selector": "#dashSummary"
+              },
+              {
+                "action": "assert_text",
+                "actual": "6Total bookings6Total reserved hours2Total cancellations25.0%Cancellation rateMost booked room: Boardroom (3 bookings).Least booked room (with bookings): Meeting Room 1 (1 bookings).Never booked in range: Meeting Room 3, Meeting Room 4, Meeting Room 5, Meeting Room 6, Meeting Room 7, Meeting Room 8.Busiest day: Mon (3 bookings).Busiest hour: 09:00 (4 bookings).Allocation hint: Meeting Room 1 is at 1.7% utilisation while Boardroom is at 5.0% — consider reallocating.",
+                "expected": "2",
+                "ok": true,
+                "pageId": "main",
+                "passed": true,
+                "selector": "#dashSummary"
+              },
+              {
+                "action": "assert_text",
+                "actual": "6Total bookings6Total reserved hours2Total cancellations25.0%Cancellation rateMost booked room: Boardroom (3 bookings).Least booked room (with bookings): Meeting Room 1 (1 bookings).Never booked in range: Meeting Room 3, Meeting Room 4, Meeting Room 5, Meeting Room 6, Meeting Room 7, Meeting Room 8.Busiest day: Mon (3 bookings).Busiest hour: 09:00 (4 bookings).Allocation hint: Meeting Room 1 is at 1.7% utilisation while Boardroom is at 5.0% — consider reallocating.",
+                "expected": "25.0%",
+                "ok": true,
+                "pageId": "main",
+                "passed": true,
+                "selector": "#dashSummary"
+              },
+              {
+                "action": "assert_text",
+                "actual": "6Total bookings6Total reserved hours2Total cancellations25.0%Cancellation rateMost booked room: Boardroom (3 bookings).Least booked room (with bookings): Meeting Room 1 (1 bookings).Never booked in range: Meeting Room 3, Meeting Room 4, Meeting Room 5, Meeting Room 6, Meeting Room 7, Meeting Room 8.Busiest day: Mon (3 bookings).Busiest hour: 09:00 (4 bookings).Allocation hint: Meeting Room 1 is at 1.7% utilisation while Boardroom is at 5.0% — consider reallocating.",
+                "expected": "Boardroom",
+                "ok": true,
+                "pageId": "main",
+                "passed": true,
+                "selector": "#dashSummary"
+              },
+              {
+                "action": "assert_count",
+                "actual": 5,
+                "expected": 5,
+                "ok": true,
+                "pageId": "main",
+                "passed": true,
+                "selector": "#dashCharts .chart-card"
+              },
+              {
+                "action": "assert_count",
+                "actual": 10,
+                "expected": 10,
+                "ok": true,
+                "pageId": "main",
+                "passed": true,
+                "selector": "#dashCharts .chart-card:nth-child(1) .bar"
+              },
+              {
+                "action": "assert_count",
+                "actual": 7,
+                "expected": 7,
+                "ok": true,
+                "pageId": "main",
+                "passed": true,
+                "selector": "#dashCharts .chart-card:nth-child(3) .bar"
+              },
+              {
+                "action": "assert_count",
+                "actual": 12,
+                "expected": 12,
+                "ok": true,
+                "pageId": "main",
+                "passed": true,
+                "selector": "#dashCharts .chart-card:nth-child(4) .bar"
+              },
+              {
+                "action": "assert_count",
+                "actual": 10,
+                "expected": 10,
+                "ok": true,
+                "pageId": "main",
+                "passed": true,
+                "selector": "#dashCharts .chart-card:nth-child(1) .bar-value"
+              },
+              {
+                "action": "assert_count",
+                "actual": 10,
+                "expected": 10,
+                "ok": true,
+                "pageId": "main",
+                "passed": true,
+                "selector": "#dashCharts .chart-card:nth-child(5) .bar-value"
+              },
+              {
+                "action": "assert_count",
+                "actual": 7,
+                "expected": 7,
+                "ok": true,
+                "pageId": "main",
+                "passed": true,
+                "selector": "#dashCharts .chart-card:nth-child(3) .bar-value"
+              },
+              {
+                "action": "assert_count",
+                "actual": 12,
+                "expected": 12,
+                "ok": true,
+                "pageId": "main",
+                "passed": true,
+                "selector": "#dashCharts .chart-card:nth-child(4) .bar-value"
+              },
+              {
+                "action": "assert_text",
+                "actual": "3",
+                "expected": "3",
+                "ok": true,
+                "pageId": "main",
+                "passed": true,
+                "selector": "#dashCharts .chart-card:nth-child(1) .bar-value >> nth=0"
+              },
+              {
+                "action": "assert_text",
+                "actual": "0",
+                "error": "Assertion failed",
+                "expected": "1",
+                "ok": false,
+                "pageId": "main",
+                "passed": false,
+                "selector": "#dashCharts .chart-card:nth-child(1) .bar-value >> nth=3"
+              }
+            ],
+            "testedFiles": [
+              {
+                "path": "app/index.html",
+                "sha256": "b1b1a94103c39df7f5b9bc65f0b4d85090c6c404b44bc61d7e6d54d8c339e0e5"
+              },
+              {
+                "path": "app/styles.css",
+                "sha256": "c73e2bae3c1aa2aa86261bf7420c55d4aa8321dabb0e0efab8785e483d95f85d"
+              },
+              {
+                "path": "app/dashboard.js",
+                "sha256": "a463d0872ac6d743894e0121c62a50bc347acc01f47de22bb95ec422a111f932"
+              },
+              {
+                "path": "app/app.js",
+                "sha256": "b365f7e2cdc2243b01dc6d96f97b3336105f8375de6b521084cc62c7eae99395"
+              }
+            ],
+            "version": "156.0.8078.4"
+          }
+        }
+      },
+      {
+        "id": "call-38b35685fa75408a",
+        "taskId": "task-7672a01e10234ec7",
+        "agentId": "qa",
+        "tool": "code.test",
+        "args": {
+          "checks": [
+            {
+              "action": "click",
+              "selector": "#tabDashboard"
+            },
+            {
+              "action": "fill",
+              "selector": "#dashFrom",
+              "value": "2026-11-02"
+            },
+            {
+              "action": "fill",
+              "selector": "#dashTo",
+              "value": "2026-11-06"
+            },
+            {
+              "action": "click",
+              "selector": "#dashRefresh"
+            },
+            {
+              "action": "assert_text",
+              "selector": "#dashSummary",
+              "text": "Total bookings"
+            },
+            {
+              "action": "assert_text",
+              "selector": "#dashSummary",
+              "text": "6"
+            },
+            {
+              "action": "assert_text",
+              "selector": "#dashSummary",
+              "text": "Total cancellations"
+            },
+            {
+              "action": "assert_text",
+              "selector": "#dashSummary",
+              "text": "2"
+            },
+            {
+              "action": "assert_text",
+              "selector": "#dashSummary",
+              "text": "25.0%"
+            },
+            {
+              "action": "assert_text",
+              "selector": "#dashSummary",
+              "text": "Boardroom"
+            },
+            {
+              "action": "assert_count",
+              "count": 5,
+              "selector": "#dashCharts .chart-card"
+            },
+            {
+              "action": "assert_count",
+              "count": 10,
+              "selector": "#dashCharts .chart-card:nth-child(1) .bar"
+            },
+            {
+              "action": "assert_count",
+              "count": 7,
+              "selector": "#dashCharts .chart-card:nth-child(3) .bar"
+            },
+            {
+              "action": "assert_count",
+              "count": 12,
+              "selector": "#dashCharts .chart-card:nth-child(4) .bar"
+            },
+            {
+              "action": "assert_count",
+              "count": 10,
+              "selector": "#dashCharts .chart-card:nth-child(1) .bar-value"
+            },
+            {
+              "action": "assert_count",
+              "count": 10,
+              "selector": "#dashCharts .chart-card:nth-child(5) .bar-value"
+            },
+            {
+              "action": "assert_count",
+              "count": 7,
+              "selector": "#dashCharts .chart-card:nth-child(3) .bar-value"
+            },
+            {
+              "action": "assert_count",
+              "count": 12,
+              "selector": "#dashCharts .chart-card:nth-child(4) .bar-value"
+            },
+            {
+              "action": "assert_text",
+              "selector": "#dashCharts .chart-card:nth-child(1) .bar-value >> nth=0",
+              "text": "3"
+            },
+            {
+              "action": "assert_text",
+              "selector": "#dashCharts .chart-card:nth-child(1) .bar-value >> nth=3",
+              "text": "1"
+            },
+            {
+              "action": "assert_text",
+              "selector": "#dashCharts .chart-card:nth-child(5) .bar-value >> nth=0",
+              "text": "1"
+            },
+            {
+              "action": "assert_text",
+              "selector": "#dashCharts .chart-card:nth-child(3) .bar-value >> nth=0",
+              "text": "3"
+            },
+            {
+              "action": "assert_text",
+              "selector": "#dashCharts .chart-card:nth-child(4) .bar-value >> nth=1",
+              "text": "3"
+            },
+            {
+              "action": "assert_text",
+              "selector": "#dashCharts .chart-card:nth-child(2) .bar-value >> nth=0",
+              "text": "3h"
+            },
+            {
+              "action": "assert_text",
+              "selector": "#dashCharts .chart-card:nth-child(2) .bar-value >> nth=3",
+              "text": "1h"
+            }
+          ],
+          "language": "browser",
+          "path": "app/index.html",
+          "resources": {
+            "app.js": "app/app.js",
+            "dashboard.js": "app/dashboard.js",
+            "styles.css": "app/styles.css"
+          },
+          "storage": {
+            "mrb.bookings.v1": "[{\"id\":\"b1\",\"roomId\":\"boardroom\",\"date\":\"2026-11-02\",\"hour\":9,\"bookerName\":\"Ann\",\"createdAt\":\"2026-11-01T08:00:00.000Z\"},{\"id\":\"b2\",\"roomId\":\"boardroom\",\"date\":\"2026-11-02\",\"hour\":10,\"bookerName\":\"Bob\",\"createdAt\":\"2026-11-01T08:05:00.000Z\"},{\"id\":\"b3\",\"roomId\":\"boardroom\",\"date\":\"2026-11-03\",\"hour\":9,\"bookerName\":\"Ann\",\"createdAt\":\"2026-11-01T08:10:00.000Z\"},{\"id\":\"b4\",\"roomId\":\"meeting-1\",\"date\":\"2026-11-02\",\"hour\":9,\"bookerName\":\"Cara\",\"createdAt\":\"2026-11-01T08:15:00.000Z\"},{\"id\":\"b5\",\"roomId\":\"meeting-2\",\"date\":\"2026-11-04\",\"hour\":14,\"bookerName\":\"Dan\",\"createdAt\":\"2026-11-01T08:20:00.000Z\"},{\"id\":\"b6\",\"roomId\":\"huddle\",\"date\":\"2026-11-05\",\"hour\":9,\"bookerName\":\"Eve\",\"createdAt\":\"2026-11-01T08:25:00.000Z\"}]",
+            "mrb.cancellations.v1": "[{\"bookingId\":\"x1\",\"roomId\":\"boardroom\",\"date\":\"2026-11-02\",\"hour\":11,\"bookerName\":\"Ann\",\"cancelledBy\":\"Ann\",\"cancelledAt\":\"2026-11-01T09:00:00.000Z\"},{\"bookingId\":\"x2\",\"roomId\":\"meeting-1\",\"date\":\"2026-11-03\",\"hour\":9,\"bookerName\":\"Cara\",\"cancelledBy\":\"Cara\",\"cancelledAt\":\"2026-11-01T09:05:00.000Z\"}]"
+          },
+          "timeout": 20
+        },
+        "revision": 0,
+        "status": "failed",
+        "result": {
+          "ok": false,
+          "runtime": "browser",
+          "exitCode": 1,
+          "browser": {
+            "assertionCount": 16,
+            "assertions": [
+              {
+                "action": "assert_text",
+                "actual": "6Total bookings6Total reserved hours2Total cancellations25.0%Cancellation rateMost booked room: Boardroom (3 bookings).Least booked room (with bookings): Meeting Room 1 (1 bookings).Never booked in range: Meeting Room 3, Meeting Room 4, Meeting Room 5, Meeting Room 6, Meeting Room 7, Meeting Room 8.Busiest day: Mon (3 bookings).Busiest hour: 09:00 (4 bookings).Allocation hint: Meeting Room 1 is at 1.7% utilisation while Boardroom is at 5.0% — consider reallocating.",
+                "expected": "Total bookings",
+                "pageId": "main",
+                "passed": true,
+                "selector": "#dashSummary"
+              },
+              {
+                "action": "assert_text",
+                "actual": "6Total bookings6Total reserved hours2Total cancellations25.0%Cancellation rateMost booked room: Boardroom (3 bookings).Least booked room (with bookings): Meeting Room 1 (1 bookings).Never booked in range: Meeting Room 3, Meeting Room 4, Meeting Room 5, Meeting Room 6, Meeting Room 7, Meeting Room 8.Busiest day: Mon (3 bookings).Busiest hour: 09:00 (4 bookings).Allocation hint: Meeting Room 1 is at 1.7% utilisation while Boardroom is at 5.0% — consider reallocating.",
+                "expected": "6",
+                "pageId": "main",
+                "passed": true,
+                "selector": "#dashSummary"
+              },
+              {
+                "action": "assert_text",
+                "actual": "6Total bookings6Total reserved hours2Total cancellations25.0%Cancellation rateMost booked room: Boardroom (3 bookings).Least booked room (with bookings): Meeting Room 1 (1 bookings).Never booked in range: Meeting Room 3, Meeting Room 4, Meeting Room 5, Meeting Room 6, Meeting Room 7, Meeting Room 8.Busiest day: Mon (3 bookings).Busiest hour: 09:00 (4 bookings).Allocation hint: Meeting Room 1 is at 1.7% utilisation while Boardroom is at 5.0% — consider reallocating.",
+                "expected": "Total cancellations",
+                "pageId": "main",
+                "passed": true,
+                "selector": "#dashSummary"
+              },
+              {
+                "action": "assert_text",
+                "actual": "6Total bookings6Total reserved hours2Total cancellations25.0%Cancellation rateMost booked room: Boardroom (3 bookings).Least booked room (with bookings): Meeting Room 1 (1 bookings).Never booked in range: Meeting Room 3, Meeting Room 4, Meeting Room 5, Meeting Room 6, Meeting Room 7, Meeting Room 8.Busiest day: Mon (3 bookings).Busiest hour: 09:00 (4 bookings).Allocation hint: Meeting Room 1 is at 1.7% utilisation while Boardroom is at 5.0% — consider reallocating.",
+                "expected": "2",
+                "pageId": "main",
+                "passed": true,
+                "selector": "#dashSummary"
+              },
+              {
+                "action": "assert_text",
+                "actual": "6Total bookings6Total reserved hours2Total cancellations25.0%Cancellation rateMost booked room: Boardroom (3 bookings).Least booked room (with bookings): Meeting Room 1 (1 bookings).Never booked in range: Meeting Room 3, Meeting Room 4, Meeting Room 5, Meeting Room 6, Meeting Room 7, Meeting Room 8.Busiest day: Mon (3 bookings).Busiest hour: 09:00 (4 bookings).Allocation hint: Meeting Room 1 is at 1.7% utilisation while Boardroom is at 5.0% — consider reallocating.",
+                "expected": "25.0%",
+                "pageId": "main",
+                "passed": true,
+                "selector": "#dashSummary"
+              },
+              {
+                "action": "assert_text",
+                "actual": "6Total bookings6Total reserved hours2Total cancellations25.0%Cancellation rateMost booked room: Boardroom (3 bookings).Least booked room (with bookings): Meeting Room 1 (1 bookings).Never booked in range: Meeting Room 3, Meeting Room 4, Meeting Room 5, Meeting Room 6, Meeting Room 7, Meeting Room 8.Busiest day: Mon (3 bookings).Busiest hour: 09:00 (4 bookings).Allocation hint: Meeting Room 1 is at 1.7% utilisation while Boardroom is at 5.0% — consider reallocating.",
+                "expected": "Boardroom",
+                "pageId": "main",
+                "passed": true,
+                "selector": "#dashSummary"
+              },
+              {
+                "action": "assert_count",
+                "actual": 5,
+                "expected": 5,
+                "pageId": "main",
+                "passed": true,
+                "selector": "#dashCharts .chart-card"
+              },
+              {
+                "action": "assert_count",
+                "actual": 10,
+                "expected": 10,
+                "pageId": "main",
+                "passed": true,
+                "selector": "#dashCharts .chart-card:nth-child(1) .bar"
+              },
+              {
+                "action": "assert_count",
+                "actual": 7,
+                "expected": 7,
+                "pageId": "main",
+                "passed": true,
+                "selector": "#dashCharts .chart-card:nth-child(3) .bar"
+              },
+              {
+                "action": "assert_count",
+                "actual": 12,
+                "expected": 12,
+                "pageId": "main",
+                "passed": true,
+                "selector": "#dashCharts .chart-card:nth-child(4) .bar"
+              },
+              {
+                "action": "assert_count",
+                "actual": 10,
+                "expected": 10,
+                "pageId": "main",
+                "passed": true,
+                "selector": "#dashCharts .chart-card:nth-child(1) .bar-value"
+              },
+              {
+                "action": "assert_count",
+                "actual": 10,
+                "expected": 10,
+                "pageId": "main",
+                "passed": true,
+                "selector": "#dashCharts .chart-card:nth-child(5) .bar-value"
+              },
+              {
+                "action": "assert_count",
+                "actual": 7,
+                "expected": 7,
+                "pageId": "main",
+                "passed": true,
+                "selector": "#dashCharts .chart-card:nth-child(3) .bar-value"
+              },
+              {
+                "action": "assert_count",
+                "actual": 12,
+                "expected": 12,
+                "pageId": "main",
+                "passed": true,
+                "selector": "#dashCharts .chart-card:nth-child(4) .bar-value"
+              },
+              {
+                "action": "assert_text",
+                "actual": "3",
+                "expected": "3",
+                "pageId": "main",
+                "passed": true,
+                "selector": "#dashCharts .chart-card:nth-child(1) .bar-value >> nth=0"
+              },
+              {
+                "action": "assert_text",
+                "actual": "0",
+                "expected": "1",
+                "pageId": "main",
+                "passed": false,
+                "selector": "#dashCharts .chart-card:nth-child(1) .bar-value >> nth=3"
+              }
+            ],
+            "assertionsPassed": 15,
+            "blockedRequests": [],
+            "chromiumSandbox": false,
+            "console": [],
+            "dialogCoverageComplete": true,
+            "dialogResponses": [],
+            "engine": "chromium",
+            "entry": {
+              "path": "app/index.html",
+              "sha256": "b1b1a94103c39df7f5b9bc65f0b4d85090c6c404b44bc61d7e6d54d8c339e0e5"
+            },
+            "error": "Browser step failed: Assertion failed",
+            "executed": true,
+            "failureObservation": {
+              "formValues": [
+                {
+                  "id": "dashFrom",
+                  "name": "",
+                  "type": "date",
+                  "value": "2026-11-02"
+                },
+                {
+                  "id": "dashTo",
+                  "name": "",
+                  "type": "date",
+                  "value": "2026-11-06"
+                }
+              ],
+              "formValuesOmitted": 0,
+              "interpretation": "Untrusted observed state only; does not determine whether the test or product is wrong.",
+              "matchCount": 1,
+              "messagesOmitted": 0,
+              "pageId": "main",
+              "runtimeUTC": "2026-11-16T02:43:06.945Z",
+              "source": "actual failing-page DOM in this test",
+              "stepIndex": 19,
+              "target": {
+                "id": "",
+                "tag": "text",
+                "text": "0"
+              },
+              "textLimitCharacters": 120,
+              "timezone": "UTC",
+              "valuesAreBoundedPreviews": true,
+              "visibleMessages": [
+                {
+                  "id": "dashSummary",
+                  "role": "live-region",
+                  "text": "6 Total bookings 6 Total reserved hours 2 Total cancellations 25.0% Cancellation rate Most booked room: Boardroom (3 boo"
+                }
+              ]
+            },
+            "faultCoverageComplete": true,
+            "faults": [],
+            "httpErrors": [],
+            "ok": false,
+            "pageErrors": [],
+            "pages": [
+              {
+                "entryPath": "app/index.html",
+                "pageId": "main"
+              }
+            ],
+            "readFaultCoverageComplete": true,
+            "readFaults": [],
+            "reportPath": "browser-evidence/browser-8a31e40258a2478d9fd00710fb99c195/report.json",
+            "screenshot": {
+              "bytes": 120907,
+              "path": "browser-evidence/browser-8a31e40258a2478d9fd00710fb99c195/screenshot.png",
+              "sha256": "1b36153efbab9f6ae0d4ed64397dfb10080737265c592b554a538279670f8890"
+            },
+            "screenshotCaptured": true,
+            "screenshotPageId": "main",
+            "sourceManifest": [
+              {
+                "path": "app/index.html",
+                "sha256": "b1b1a94103c39df7f5b9bc65f0b4d85090c6c404b44bc61d7e6d54d8c339e0e5"
+              },
+              {
+                "path": "app/styles.css",
+                "sha256": "c73e2bae3c1aa2aa86261bf7420c55d4aa8321dabb0e0efab8785e483d95f85d"
+              },
+              {
+                "path": "app/app.js",
+                "sha256": "b365f7e2cdc2243b01dc6d96f97b3336105f8375de6b521084cc62c7eae99395"
+              },
+              {
+                "path": "app/dashboard.js",
+                "sha256": "a463d0872ac6d743894e0121c62a50bc347acc01f47de22bb95ec422a111f932"
+              }
+            ],
+            "steps": [
+              {
+                "action": "click",
+                "ok": true,
+                "pageId": "main",
+                "selector": "#tabDashboard"
+              },
+              {
+                "action": "fill",
+                "ok": true,
+                "pageId": "main",
+                "selector": "#dashFrom"
+              },
+              {
+                "action": "fill",
+                "ok": true,
+                "pageId": "main",
+                "selector": "#dashTo"
+              },
+              {
+                "action": "click",
+                "ok": true,
+                "pageId": "main",
+                "selector": "#dashRefresh"
+              },
+              {
+                "action": "assert_text",
+                "actual": "6Total bookings6Total reserved hours2Total cancellations25.0%Cancellation rateMost booked room: Boardroom (3 bookings).Least booked room (with bookings): Meeting Room 1 (1 bookings).Never booked in range: Meeting Room 3, Meeting Room 4, Meeting Room 5, Meeting Room 6, Meeting Room 7, Meeting Room 8.Busiest day: Mon (3 bookings).Busiest hour: 09:00 (4 bookings).Allocation hint: Meeting Room 1 is at 1.7% utilisation while Boardroom is at 5.0% — consider reallocating.",
+                "expected": "Total bookings",
+                "ok": true,
+                "pageId": "main",
+                "passed": true,
+                "selector": "#dashSummary"
+              },
+              {
+                "action": "assert_text",
+                "actual": "6Total bookings6Total reserved hours2Total cancellations25.0%Cancellation rateMost booked room: Boardroom (3 bookings).Least booked room (with bookings): Meeting Room 1 (1 bookings).Never booked in range: Meeting Room 3, Meeting Room 4, Meeting Room 5, Meeting Room 6, Meeting Room 7, Meeting Room 8.Busiest day: Mon (3 bookings).Busiest hour: 09:00 (4 bookings).Allocation hint: Meeting Room 1 is at 1.7% utilisation while Boardroom is at 5.0% — consider reallocating.",
+                "expected": "6",
+                "ok": true,
+                "pageId": "main",
+                "passed": true,
+                "selector": "#dashSummary"
+              },
+              {
+                "action": "assert_text",
+                "actual": "6Total bookings6Total reserved hours2Total cancellations25.0%Cancellation rateMost booked room: Boardroom (3 bookings).Least booked room (with bookings): Meeting Room 1 (1 bookings).Never booked in range: Meeting Room 3, Meeting Room 4, Meeting Room 5, Meeting Room 6, Meeting Room 7, Meeting Room 8.Busiest day: Mon (3 bookings).Busiest hour: 09:00 (4 bookings).Allocation hint: Meeting Room 1 is at 1.7% utilisation while Boardroom is at 5.0% — consider reallocating.",
+                "expected": "Total cancellations",
+                "ok": true,
+                "pageId": "main",
+                "passed": true,
+                "selector": "#dashSummary"
+              },
+              {
+                "action": "assert_text",
+                "actual": "6Total bookings6Total reserved hours2Total cancellations25.0%Cancellation rateMost booked room: Boardroom (3 bookings).Least booked room (with bookings): Meeting Room 1 (1 bookings).Never booked in range: Meeting Room 3, Meeting Room 4, Meeting Room 5, Meeting Room 6, Meeting Room 7, Meeting Room 8.Busiest day: Mon (3 bookings).Busiest hour: 09:00 (4 bookings).Allocation hint: Meeting Room 1 is at 1.7% utilisation while Boardroom is at 5.0% — consider reallocating.",
+                "expected": "2",
+                "ok": true,
+                "pageId": "main",
+                "passed": true,
+                "selector": "#dashSummary"
+              },
+              {
+                "action": "assert_text",
+                "actual": "6Total bookings6Total reserved hours2Total cancellations25.0%Cancellation rateMost booked room: Boardroom (3 bookings).Least booked room (with bookings): Meeting Room 1 (1 bookings).Never booked in range: Meeting Room 3, Meeting Room 4, Meeting Room 5, Meeting Room 6, Meeting Room 7, Meeting Room 8.Busiest day: Mon (3 bookings).Busiest hour: 09:00 (4 bookings).Allocation hint: Meeting Room 1 is at 1.7% utilisation while Boardroom is at 5.0% — consider reallocating.",
+                "expected": "25.0%",
+                "ok": true,
+                "pageId": "main",
+                "passed": true,
+                "selector": "#dashSummary"
+              },
+              {
+                "action": "assert_text",
+                "actual": "6Total bookings6Total reserved hours2Total cancellations25.0%Cancellation rateMost booked room: Boardroom (3 bookings).Least booked room (with bookings): Meeting Room 1 (1 bookings).Never booked in range: Meeting Room 3, Meeting Room 4, Meeting Room 5, Meeting Room 6, Meeting Room 7, Meeting Room 8.Busiest day: Mon (3 bookings).Busiest hour: 09:00 (4 bookings).Allocation hint: Meeting Room 1 is at 1.7% utilisation while Boardroom is at 5.0% — consider reallocating.",
+                "expected": "Boardroom",
+                "ok": true,
+                "pageId": "main",
+                "passed": true,
+                "selector": "#dashSummary"
+              },
+              {
+                "action": "assert_count",
+                "actual": 5,
+                "expected": 5,
+                "ok": true,
+                "pageId": "main",
+                "passed": true,
+                "selector": "#dashCharts .chart-card"
+              },
+              {
+                "action": "assert_count",
+                "actual": 10,
+                "expected": 10,
+                "ok": true,
+                "pageId": "main",
+                "passed": true,
+                "selector": "#dashCharts .chart-card:nth-child(1) .bar"
+              },
+              {
+                "action": "assert_count",
+                "actual": 7,
+                "expected": 7,
+                "ok": true,
+                "pageId": "main",
+                "passed": true,
+                "selector": "#dashCharts .chart-card:nth-child(3) .bar"
+              },
+              {
+                "action": "assert_count",
+                "actual": 12,
+                "expected": 12,
+                "ok": true,
+                "pageId": "main",
+                "passed": true,
+                "selector": "#dashCharts .chart-card:nth-child(4) .bar"
+              },
+              {
+                "action": "assert_count",
+                "actual": 10,
+                "expected": 10,
+                "ok": true,
+                "pageId": "main",
+                "passed": true,
+                "selector": "#dashCharts .chart-card:nth-child(1) .bar-value"
+              },
+              {
+                "action": "assert_count",
+                "actual": 10,
+                "expected": 10,
+                "ok": true,
+                "pageId": "main",
+                "passed": true,
+                "selector": "#dashCharts .chart-card:nth-child(5) .bar-value"
+              },
+              {
+                "action": "assert_count",
+                "actual": 7,
+                "expected": 7,
+                "ok": true,
+                "pageId": "main",
+                "passed": true,
+                "selector": "#dashCharts .chart-card:nth-child(3) .bar-value"
+              },
+              {
+                "action": "assert_count",
+                "actual": 12,
+                "expected": 12,
+                "ok": true,
+                "pageId": "main",
+                "passed": true,
+                "selector": "#dashCharts .chart-card:nth-child(4) .bar-value"
+              },
+              {
+                "action": "assert_text",
+                "actual": "3",
+                "expected": "3",
+                "ok": true,
+                "pageId": "main",
+                "passed": true,
+                "selector": "#dashCharts .chart-card:nth-child(1) .bar-value >> nth=0"
+              },
+              {
+                "action": "assert_text",
+                "actual": "0",
+                "error": "Assertion failed",
+                "expected": "1",
+                "ok": false,
+                "pageId": "main",
+                "passed": false,
+                "selector": "#dashCharts .chart-card:nth-child(1) .bar-value >> nth=3"
+              }
+            ],
+            "testedFiles": [
+              {
+                "path": "app/index.html",
+                "sha256": "b1b1a94103c39df7f5b9bc65f0b4d85090c6c404b44bc61d7e6d54d8c339e0e5"
+              },
+              {
+                "path": "app/styles.css",
+                "sha256": "c73e2bae3c1aa2aa86261bf7420c55d4aa8321dabb0e0efab8785e483d95f85d"
+              },
+              {
+                "path": "app/app.js",
+                "sha256": "b365f7e2cdc2243b01dc6d96f97b3336105f8375de6b521084cc62c7eae99395"
+              },
+              {
+                "path": "app/dashboard.js",
+                "sha256": "a463d0872ac6d743894e0121c62a50bc347acc01f47de22bb95ec422a111f932"
+              }
+            ],
+            "version": "156.0.8078.4"
+          }
+        }
+      }
+    ]
+  },
+  "task": {
+    "id": "task-7672a01e10234ec7",
+    "agentId": "qa",
+    "revision": 0
+  },
+  "proposal": {
+    "type": "tool",
+    "name": "code.test",
+    "args": {
+      "checks": [
+        {
+          "action": "click",
+          "selector": "#tabDashboard"
+        },
+        {
+          "action": "fill",
+          "selector": "#dashFrom",
+          "value": "2026-11-02"
+        },
+        {
+          "action": "fill",
+          "selector": "#dashTo",
+          "value": "2026-11-06"
+        },
+        {
+          "action": "click",
+          "selector": "#dashRefresh"
+        },
+        {
+          "action": "assert_text",
+          "selector": "#dashSummary",
+          "text": "Total bookings"
+        },
+        {
+          "action": "assert_text",
+          "selector": "#dashSummary",
+          "text": "6"
+        },
+        {
+          "action": "assert_text",
+          "selector": "#dashSummary",
+          "text": "Total cancellations"
+        },
+        {
+          "action": "assert_text",
+          "selector": "#dashSummary",
+          "text": "2"
+        },
+        {
+          "action": "assert_text",
+          "selector": "#dashSummary",
+          "text": "25.0%"
+        },
+        {
+          "action": "assert_text",
+          "selector": "#dashSummary",
+          "text": "Boardroom"
+        },
+        {
+          "action": "assert_count",
+          "count": 5,
+          "selector": "#dashCharts .chart-card"
+        },
+        {
+          "action": "assert_count",
+          "count": 10,
+          "selector": "#dashCharts .chart-card:nth-child(1) .bar"
+        },
+        {
+          "action": "assert_count",
+          "count": 7,
+          "selector": "#dashCharts .chart-card:nth-child(3) .bar"
+        },
+        {
+          "action": "assert_count",
+          "count": 12,
+          "selector": "#dashCharts .chart-card:nth-child(4) .bar"
+        },
+        {
+          "action": "assert_count",
+          "count": 10,
+          "selector": "#dashCharts .chart-card:nth-child(1) .bar-value"
+        },
+        {
+          "action": "assert_count",
+          "count": 10,
+          "selector": "#dashCharts .chart-card:nth-child(5) .bar-value"
+        },
+        {
+          "action": "assert_count",
+          "count": 7,
+          "selector": "#dashCharts .chart-card:nth-child(3) .bar-value"
+        },
+        {
+          "action": "assert_count",
+          "count": 12,
+          "selector": "#dashCharts .chart-card:nth-child(4) .bar-value"
+        },
+        {
+          "action": "assert_text",
+          "selector": "#dashCharts .chart-card:nth-child(1) .bar-value >> nth=0",
+          "text": "3"
+        },
+        {
+          "action": "assert_text",
+          "selector": "#dashCharts .chart-card:nth-child(1) .bar-value >> nth=3",
+          "text": "1"
+        },
+        {
+          "action": "assert_text",
+          "selector": "#dashCharts .chart-card:nth-child(5) .bar-value >> nth=0",
+          "text": "1"
+        },
+        {
+          "action": "assert_text",
+          "selector": "#dashCharts .chart-card:nth-child(3) .bar-value >> nth=0",
+          "text": "3"
+        },
+        {
+          "action": "assert_text",
+          "selector": "#dashCharts .chart-card:nth-child(4) .bar-value >> nth=1",
+          "text": "3"
+        },
+        {
+          "action": "assert_text",
+          "selector": "#dashCharts .chart-card:nth-child(2) .bar-value >> nth=0",
+          "text": "3h"
+        },
+        {
+          "action": "assert_text",
+          "selector": "#dashCharts .chart-card:nth-child(2) .bar-value >> nth=3",
+          "text": "1h"
+        },
+        {
+          "action": "assert_text",
+          "exact": true,
+          "selector": "#dashCharts .chart-card:nth-child(1) .bar-value >> nth=3",
+          "text": "1"
+        }
+      ],
+      "language": "browser",
+      "path": "app/index.html",
+      "resources": {
+        "app.js": "app/app.js",
+        "dashboard.js": "app/dashboard.js",
+        "styles.css": "app/styles.css"
+      },
+      "storage": {
+        "mrb.bookings.v1": "[{\"id\":\"b1\",\"roomId\":\"boardroom\",\"date\":\"2026-11-02\",\"hour\":9,\"bookerName\":\"Ann\",\"createdAt\":\"2026-11-01T08:00:00.000Z\"},{\"id\":\"b2\",\"roomId\":\"boardroom\",\"date\":\"2026-11-02\",\"hour\":10,\"bookerName\":\"Bob\",\"createdAt\":\"2026-11-01T08:05:00.000Z\"},{\"id\":\"b3\",\"roomId\":\"boardroom\",\"date\":\"2026-11-03\",\"hour\":9,\"bookerName\":\"Ann\",\"createdAt\":\"2026-11-01T08:10:00.000Z\"},{\"id\":\"b4\",\"roomId\":\"meeting-1\",\"date\":\"2026-11-02\",\"hour\":9,\"bookerName\":\"Cara\",\"createdAt\":\"2026-11-01T08:15:00.000Z\"},{\"id\":\"b5\",\"roomId\":\"meeting-2\",\"date\":\"2026-11-04\",\"hour\":14,\"bookerName\":\"Dan\",\"createdAt\":\"2026-11-01T08:20:00.000Z\"},{\"id\":\"b6\",\"roomId\":\"huddle\",\"date\":\"2026-11-05\",\"hour\":9,\"bookerName\":\"Eve\",\"createdAt\":\"2026-11-01T08:25:00.000Z\"}]",
+        "mrb.cancellations.v1": "[{\"bookingId\":\"x1\",\"roomId\":\"boardroom\",\"date\":\"2026-11-02\",\"hour\":11,\"bookerName\":\"Ann\",\"cancelledBy\":\"Ann\",\"cancelledAt\":\"2026-11-01T09:00:00.000Z\"},{\"bookingId\":\"x2\",\"roomId\":\"meeting-1\",\"date\":\"2026-11-03\",\"hour\":9,\"bookerName\":\"Cara\",\"cancelledBy\":\"Cara\",\"cancelledAt\":\"2026-11-01T09:05:00.000Z\"}]"
+      },
+      "timeout": 20
+    }
+  }
+}

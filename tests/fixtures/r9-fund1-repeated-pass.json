@@ -1,0 +1,270 @@
+{
+  "provenance": {
+    "case": "R9 fund-1",
+    "source": "full-mid-test-2026-11-16-round9/results/fund-1.json",
+    "sha256": "6cd5208885f57ee8e52d22856605d1b9aafa3aea9939ecfca9a4f2a4713e3211",
+    "runId": "run-9bfe0ba38d1f4562",
+    "note": "Metadata and actions reconstructed from actual review_pass events; source bodies, model output and credentials omitted. Target dependencies omitted for isolated unchanged-target replay."
+  },
+  "run": {
+    "id": "run-9bfe0ba38d1f4562",
+    "mode": "task",
+    "status": "running",
+    "participants": [
+      "fund_manager",
+      "research",
+      "risk",
+      "marketing"
+    ],
+    "steps": [
+      {
+        "id": "task-bba8db29f16e4a9e",
+        "title": "Independent review of proposal and client materials",
+        "agentId": "risk",
+        "status": "running",
+        "revision": 0,
+        "outputs": [
+          "artifact-244db647058746fa9ba18d20bdf37bc3"
+        ],
+        "dependsOn": [
+          "task-1bc5a6b4fbd84b0a",
+          "task-c868c3e6a7be4342",
+          "task-246a8721b97f4089"
+        ],
+        "reviewOf": [
+          "task-1bc5a6b4fbd84b0a",
+          "task-246a8721b97f4089"
+        ]
+      },
+      {
+        "id": "task-1bc5a6b4fbd84b0a",
+        "title": "Draft allocation proposal and rationale",
+        "agentId": "fund_manager",
+        "status": "done",
+        "revision": 0,
+        "outputs": [
+          "artifact-4a9d0cdd8a014dbf88c73eaaf8675829"
+        ],
+        "dependsOn": []
+      },
+      {
+        "id": "task-246a8721b97f4089",
+        "title": "Draft client-friendly introduction",
+        "agentId": "marketing",
+        "status": "done",
+        "revision": 0,
+        "outputs": [
+          "artifact-cecbce871eb649cfa391be0aa37f5846",
+          "artifact-67119d414f08429cb4a089a1b06d6212"
+        ],
+        "dependsOn": []
+      }
+    ],
+    "artifacts": [
+      {
+        "id": "artifact-4a9d0cdd8a014dbf88c73eaaf8675829",
+        "runId": "run-9bfe0ba38d1f4562",
+        "taskId": "task-1bc5a6b4fbd84b0a",
+        "ownerAgentId": "fund_manager",
+        "name": "allocation_proposal.md",
+        "sha256": "c4c32b83cdc367386e914cf6ab441a160445369c71f72e2726761e30e45dac79"
+      },
+      {
+        "id": "artifact-cecbce871eb649cfa391be0aa37f5846",
+        "runId": "run-9bfe0ba38d1f4562",
+        "taskId": "task-246a8721b97f4089",
+        "ownerAgentId": "marketing",
+        "name": "client_introduction.md",
+        "sha256": "19611851f83168c5a3af54c6d27df17fc0434b5d30290a62821916409090c827"
+      },
+      {
+        "id": "artifact-67119d414f08429cb4a089a1b06d6212",
+        "runId": "run-9bfe0ba38d1f4562",
+        "taskId": "task-246a8721b97f4089",
+        "ownerAgentId": "marketing",
+        "name": "client_intro_social.md",
+        "sha256": "54505a799532953d7dff5a844ef43c527ad2a2dd1c55e8f13499146939e62b44"
+      }
+    ],
+    "events": [],
+    "calls": []
+  },
+  "reviewerTaskId": "task-bba8db29f16e4a9e",
+  "actions": [
+    {
+      "type": "review",
+      "taskId": "task-1bc5a6b4fbd84b0a",
+      "verdict": "pass",
+      "feedback": "Allocation proposal reviewed against readable evidence. Internal consistency verified: weights sum to 100% (40+15+10+5+15+5+10), HKD amounts sum to 1,000,000, USD conversion 1,000,000/7.80=128,205 correct, equity/bond/cash split 75/15/10 consistent across all documents. Risk categories (market/valuation, concentration/AI, currency, liquidity, interest-rate, behavioral, data-recency) identified and suitability stated as conditional on unverified assumptions. PASS with minor non-blocking qualifications: (1) '~22% corrections around midterm years' attributed to RBC is a precise unverified figure — qualify or re-verify; (2) '2026 EPS $340 (+24% YoY)' attributed to Goldman is precise but unread here — soften or re-verify. Neither invalidates the allocation logic. Note: research artifact body and both primary sources (Goldman, RBC) were NOT readable in this run, so market-outlook claims remain unverified leads, not confirmed facts. Full review: artifact-244db647058746fa9ba18d20bdf37bc3.",
+      "evidenceCallIds": []
+    },
+    {
+      "type": "review",
+      "taskId": "task-246a8721b97f4089",
+      "verdict": "pass",
+      "feedback": "Client materials (client_introduction.md, client_intro_social.md) reviewed against readable evidence. Plain-language explanation of allocation and risks is accurate and consistent with the proposal and risk assessment: 75% stocks / 15% bonds / 10% cash, HKD 1,000,000, seven buckets, drawdown stated as ~25-30% (consistent with risk §3.1's -26% estimate). Simulation/educational disclaimer present in both documents; the 7 unverified assumptions are listed and the client is asked to confirm them; downside risks (valuation, overlap, FX, bond, stale data, behavioral) are honestly presented. Companion social text includes a mandatory disclaimer. PASS with minor non-blocking qualifications: the '~21x forward earnings, near the top of the last 40 years' figure is unverified here (acceptable given the document's own caveats). Note: research artifact body and both primary sources (Goldman, RBC) were NOT readable in this run, so market-outlook claims remain unverified leads. Full review: artifact-244db647058746fa9ba18d20bdf37bc3.",
+      "evidenceCallIds": []
+    },
+    {
+      "type": "review",
+      "taskId": "task-1bc5a6b4fbd84b0a",
+      "verdict": "pass",
+      "feedback": "Allocation proposal reviewed against readable evidence. Allocation is internally consistent: weights 40+15+10+5+15+5+10 = 100%; HKD amounts sum to exactly 1,000,000; USD conversion 1,000,000/7.80 = 128,205 is correct and the FX rate is correctly labelled illustrative. Each holding is linked to an objective and to a cited research view; the 0% single-stock sleeve is correctly justified for a limited-experience investor. Risks and limitations (valuation, AI concentration, FX, drawdown, stale data, unverified fund facts) are disclosed. PASS with minor non-blocking qualifications: (1) the '~22% corrections around midterm years' attributed to RBC is a precise figure not re-verified here and should be qualified or re-checked; (2) '2026 EPS $340 (+24% YoY)' attributed to Goldman is precise but unverified here and should be softened or re-verified. Note: the research artifact body (artifact-ca51e8169ff247f6abd26a15e48e7aa0) and both primary sources (Goldman, RBC) were NOT readable in this run, so all market-outlook claims remain unverified leads, not confirmed facts. Full review: artifact-244db647058746fa9ba18d20bdf37bc3.",
+      "evidenceCallIds": []
+    },
+    {
+      "type": "review",
+      "taskId": "task-246a8721b97f4089",
+      "verdict": "pass",
+      "feedback": "Client materials reviewed against readable evidence. client_introduction.md and client_intro_social.md are plain-language, correctly disclose the simulated/educational nature and that it is not regulated advice, list the 7 unverified agent-proposed assumptions for the client to confirm, and honestly present the downside (30-40% market drop -> ~25-30% portfolio dip, VOO/VTI overlap, FX, bond risk, stale data, behavioral risk). Figures are consistent with the allocation proposal and risk assessment: 75% equity / 15% bond / 10% cash, HKD 1,000,000, illustrative FX 7.80. The social companion carries the required disclaimer. PASS with minor non-blocking qualifications: the '~21x forward earnings, near the top of the last 40 years' figure is unverified here (acceptable given the document's own caveats), and the drawdown figure is an illustrative linear estimate, not a backtest (correctly labelled). Note: the research artifact body and both primary sources (Goldman, RBC) were NOT readable in this run, so market-outlook claims remain unverified leads. Full review: artifact-244db647058746fa9ba18d20bdf37bc3.",
+      "evidenceCallIds": []
+    },
+    {
+      "type": "review",
+      "taskId": "task-1bc5a6b4fbd84b0a",
+      "verdict": "pass",
+      "feedback": "Allocation proposal reviewed against readable evidence. Internally consistent: weights sum to 100% (40+15+10+5+15+5+10), HKD amounts sum to 1,000,000, USD conversion 1,000,000/7.80=128,205 correct and labelled illustrative. Each holding is linked to a stated objective and to a cited source; the 0% single-stock sleeve is correctly justified for a limited-experience investor. Risks and limitations are disclosed (valuation, AI concentration, FX, drawdown, stale data, unverified fund facts). PASS with minor non-blocking qualifications: (1) the '~22% corrections around midterm years' attributed to RBC is a strong specific figure not re-verified here - qualify or re-check; (2) '2026 EPS $340 (+24% YoY)' attributed to Goldman is precise but not re-read - soften or re-verify. Neither blocks the proposal. Note: the research artifact body and both primary sources (Goldman, RBC) were NOT readable in this run, so market-outlook claims remain unverified leads. Full review: artifact-244db647058746fa9ba18d20bdf37bc3.",
+      "evidenceCallIds": []
+    },
+    {
+      "type": "review",
+      "taskId": "task-246a8721b97f4089",
+      "verdict": "pass",
+      "feedback": "Client materials reviewed against the readable proposal and risk assessment. client_introduction.md and client_intro_social.md are plain-language, correctly disclose the simulated/educational nature and the 'not regulated advice' status, list all 7 unverified assumptions for the client to confirm, and honestly present the downside (30-40% market drop -> ~25-30% portfolio dip, consistent with the risk assessment's ~26% estimate). Equity/bond/cash split (75/15/10) is consistent across both client files and the proposal. The behavioral risk (panic selling) is correctly flagged as the biggest risk. Minor non-blocking note: the '~21x forward earnings, near the top of the last 40 years' figure is unverified here but acceptable given the document's own caveats. No material defects; PASS. Full review: artifact-244db647058746fa9ba18d20bdf37bc3.",
+      "evidenceCallIds": []
+    },
+    {
+      "type": "review",
+      "taskId": "task-1bc5a6b4fbd84b0a",
+      "verdict": "pass",
+      "feedback": "Allocation proposal reviewed against readable evidence. Verified internally: weights sum to 100% (40+15+10+5+15+5+10), HKD amounts sum to 1,000,000, USD conversion 1,000,000/7.80=128,205 is correct and the rate is correctly labelled illustrative. Equity/bond/cash split (75/15/10) is consistent with the risk assessment and client materials. Each holding is linked to an objective and a cited source. The proposal correctly discloses that all 7 client assumptions are agent-proposed and unverified, that the two market sources (2025-12-02, 2026-05-28) are stale relative to 2026-11-16, and that fund-level facts (VTI/SPDW/SPEM/BND/XLV) are unverified. Minor non-blocking qualification: two precise numeric claims attributed to sources not re-read here ('~22% midterm corrections' and '2026 EPS $340 / +24% YoY') should be softened or re-verified before being presented as confirmed facts; they do not invalidate the allocation logic. No material defects; PASS. Full review: artifact-244db647058746fa9ba18d20bdf37bc3.",
+      "evidenceCallIds": []
+    },
+    {
+      "type": "review",
+      "taskId": "task-246a8721b97f4089",
+      "verdict": "pass",
+      "feedback": "Client materials (client_introduction.md, client_intro_social.md) reviewed against the proposal and risk assessment. Verified: the 7 assumptions table matches the proposal exactly; the allocation table (VOO 40/VTI 15/SPDW 10/SPEM 5/BND 15/XLV 5/cash 10) sums to 100% and HKD 1,000,000; the 75/15/10 stock/bond/cash split is stated consistently in both documents; the drawdown figure 'roughly 25-30%' is consistent with the risk assessment's ~26% estimate for a 35% equity decline. Plain-language explanations are accurate and non-misleading. The documents correctly and prominently disclose: simulated/educational only, not regulated advice; all assumptions agent-proposed and unverified; illustrative FX rate 7.80; stale market data; unverified fund facts; and the behavioral risk of panic selling. The social companion carries the required disclaimer. Minor non-blocking note: the '~21x forward earnings, near the top of the last 40 years' figure is unverified here but is acceptable given the document's own caveats. No material defects; PASS. Full review: artifact-244db647058746fa9ba18d20bdf37bc3.",
+      "evidenceCallIds": []
+    },
+    {
+      "type": "review",
+      "taskId": "task-1bc5a6b4fbd84b0a",
+      "verdict": "pass",
+      "feedback": "Allocation proposal (allocation_proposal.md) reviewed against the risk assessment and client materials. Verified against the read body: allocation sums to 100% (40+15+10+5+15+5+10) and HKD amounts sum to exactly 1,000,000; USD conversion 1,000,000/7.80 = 128,205 is correct and the rate is correctly labelled illustrative; the 75/15/10 equity/bond/cash split is internally consistent; each holding is linked to a stated objective and to a cited source; the 0% single-stock sleeve is correctly justified for a limited-experience investor; and the document explicitly discloses the simulation/educational nature, unverified agent-proposed assumptions, stale market data (2025-12-02 and 2026-05-28 vs as-of 2026-11-16), and unverified fund-level facts. Minor non-blocking qualifications: the '~22% corrections around midterm years' and '2026 EPS $340 (+24% YoY)' figures are precise but were not re-verified against the primary Goldman/RBC bodies in this run (the research artifact and both sources were not readable here); they should be treated as unverified leads and ideally softened or re-checked. These do not invalidate the allocation logic or the conditional-suitability conclusion. No material defects; PASS. Full review: artifact-244db647058746fa9ba18d20bdf37bc3.",
+      "evidenceCallIds": []
+    },
+    {
+      "type": "review",
+      "taskId": "task-246a8721b97f4089",
+      "verdict": "pass",
+      "feedback": "Client materials (client_introduction.md and client_intro_social.md) reviewed against the allocation proposal and risk assessment. Verified against the read bodies: the 7 assumptions table matches the proposal and risk assessment exactly; the allocation table (VOO 40%, VTI 15%, SPDW 10%, SPEM 5%, BND 15%, XLV 5%, cash 10%) and HKD amounts match the proposal and sum to 1,000,000; the 75/15/10 split is stated consistently in both the introduction and the social copy; the drawdown figure ('roughly 25-30%') is consistent with the risk assessment's ~26% estimate; the plain-language risk section honestly covers valuation, overlap/concentration, currency, bond, data-recency and behavioral risks; the simulation/educational disclaimer and the 'not regulated advice / not a recommendation' statement appear in both documents; and the social copy carries the required disclaimer. Minor non-blocking note: the 'about 21x forward earnings, near the top of the last 40 years' figure is unverified here (Goldman body not readable this run) but is acceptable given the document's own caveats. No material defects; PASS. Full review: artifact-244db647058746fa9ba18d20bdf37bc3.",
+      "evidenceCallIds": []
+    },
+    {
+      "type": "review",
+      "taskId": "task-1bc5a6b4fbd84b0a",
+      "verdict": "pass",
+      "feedback": "Allocation proposal reviewed against the read body (sha256 c4c32b83…dac79). Verified: allocation sums to 100% (40+15+10+5+15+5+10) and HKD amounts sum to 1,000,000; USD conversion 1,000,000/7.80 = 128,205 is correct and the rate is correctly labelled illustrative; each holding is linked to an objective and a cited source; the 0% single-stock sleeve is correctly justified for a limited-experience investor; the simulation/educational disclaimer and the unverified-assumptions warning are present; the data-recency gap (sources 2025-12-02 and 2026-05-28 vs as-of 2026-11-16) and unverified fund facts are explicitly disclosed. Minor non-blocking qualifications: (1) the '~22% corrections around midterm years' attributed to RBC is a strong specific figure not re-verified here — qualify or re-check; (2) the '2026 EPS $340 (+24% YoY)' Goldman figure is precise but not re-read — soften or re-verify. Neither defect invalidates the allocation logic or suitability conclusion. PASS. Full review: artifact-244db647058746fa9ba18d20bdf37bc3.",
+      "evidenceCallIds": []
+    },
+    {
+      "type": "review",
+      "taskId": "task-246a8721b97f4089",
+      "verdict": "pass",
+      "feedback": "Client materials reviewed against read bodies: client_introduction.md (sha256 19611851…90c827) and client_intro_social.md (sha256 54505a79…e62b44). Verified: plain-language explanation of the allocation (75% equity / 15% bond / 10% cash) is consistent with the proposal and risk assessment; the 7 assumed answers are listed and the client is told to check them; the simulation/educational disclaimer and 'not a recommendation to buy' statement are present in both documents; the downside is stated honestly (30–40% market drop → ~25–30% portfolio dip, consistent with the risk assessment's ~26% estimate); overlap of VOO/VTI, currency risk, bond risk, stale data, and behavioral risk are all disclosed; the 0% single-stock choice is explained. Minor non-blocking note: the '~21x forward earnings, near the top of the last 40 years' figure is unverified here but acceptable given the document's own caveats. No material defects; PASS. Full review: artifact-244db647058746fa9ba18d20bdf37bc3.",
+      "evidenceCallIds": []
+    },
+    {
+      "type": "review",
+      "taskId": "task-1bc5a6b4fbd84b0a",
+      "verdict": "pass",
+      "feedback": "Allocation proposal reviewed against read body (allocation_proposal.md, sha256 c4c32b83…dac79). Verified: weights sum to 100% (40+15+10+5+15+5+10); HKD amounts sum to 1,000,000; USD conversion 1,000,000/7.80 = 128,205 is correct and the rate is labelled illustrative; each holding is linked to a stated objective; risks are summarized and cross-referenced to the risk assessment; the 0% single-stock sleeve is explained; limitations (unverified assumptions, unverified fund facts, stale sources) are disclosed. Minor non-blocking qualifications: (1) the '~22% corrections around midterm years' attributed to RBC and (2) '2026 EPS $340 (+24% YoY)' attributed to Goldman are precise figures not re-verified in this run — they should be softened or re-checked, but the document already carries explicit 'unverified/directional' caveats, so this does not block. No material defects; PASS. Full review: artifact-244db647058746fa9ba18d20bdf37bc3.",
+      "evidenceCallIds": []
+    },
+    {
+      "type": "review",
+      "taskId": "task-246a8721b97f4089",
+      "verdict": "pass",
+      "feedback": "Client materials reviewed against read bodies (client_introduction.md sha256 19611851…90c827; client_intro_social.md sha256 54505a79…e62b44). Verified: plain-language explanation of the allocation (75% equity / 15% bond / 10% cash) matches the proposal; the 7 assumptions are listed and the reader is told the plan is only suitable if they are true; the simulation/educational disclaimer is present and prominent in both files; the downside is stated honestly (30–40% market drop → ~25–30% portfolio dip, consistent with the risk assessment's ~26% estimate); the VOO/VTI overlap, currency, bond, and behavioral risks are explained in everyday language; the 0% single-stock choice is explained; limitations (unverified assumptions, unverified fund facts, stale data, illustrative FX) are disclosed; the social companion carries a mandatory disclaimer. Minor non-blocking: the '~21x forward earnings, near the top of the last 40 years' figure is unverified in this run but is acceptable given the document's own caveats. No material defects; PASS. Full review: artifact-244db647058746fa9ba18d20bdf37bc3.",
+      "evidenceCallIds": []
+    },
+    {
+      "type": "review",
+      "taskId": "task-1bc5a6b4fbd84b0a",
+      "verdict": "pass",
+      "feedback": "Allocation proposal reviewed against read body (allocation_proposal.md sha256 c4c32b83…dac79). Verified: weights sum to 100% (40+15+10+5+15+5+10) and HKD amounts sum to 1,000,000; USD conversion 1,000,000/7.80 = 128,205 is correct and the rate is labelled illustrative; each holding is linked to an objective and to a cited source; risks are summarized and deferred to the risk assessment; the 0% single-stock sleeve is explained; limitations (unverified assumptions, unverified fund facts, stale data) are disclosed. Minor non-blocking precision issues: (a) the '~22% corrections around midterm years' attributed to RBC is a strong specific figure not re-verified in this run — qualify or re-check; (b) '2026 EPS $340 (+24% YoY)' attributed to Goldman is precise but not re-read — soften or re-verify. Neither invalidates the allocation logic. PASS with minor qualifications. Full review: artifact-244db647058746fa9ba18d20bdf37bc3.",
+      "evidenceCallIds": []
+    },
+    {
+      "type": "review",
+      "taskId": "task-246a8721b97f4089",
+      "verdict": "pass",
+      "feedback": "Client materials reviewed against read bodies (client_introduction.md sha256 19611851…90c827; client_intro_social.md sha256 54505a79…e62b44). Verified: plain-language explanation of the allocation and risks; the 7 assumptions are listed and the client is told to check them; the 75/15/10 equity/bond/cash split matches the proposal; the drawdown figure (25–30%) is consistent with the risk assessment's ~26% estimate; simulation/educational disclaimer present in both files; companion social text includes a required disclaimer. Minor non-blocking issue: the '~21x forward earnings, near the top of the last 40 years' figure is unverified in this run but is acceptable given the document's own caveats. PASS. Full review: artifact-244db647058746fa9ba18d20bdf37bc3.",
+      "evidenceCallIds": []
+    },
+    {
+      "type": "review",
+      "taskId": "task-1bc5a6b4fbd84b0a",
+      "verdict": "pass",
+      "feedback": "Allocation proposal reviewed against read body (allocation_proposal.md sha256 c4c32b83…dac79). Verified: allocation sums to 100% (40+15+10+5+15+5+10) and HKD amounts sum to 1,000,000; USD conversion 1,000,000/7.80 = 128,205 is correct and the rate is labelled illustrative; each holding is linked to an objective and to a cited source; risks and limitations (data recency, unverified fund facts, unverified assumptions) are disclosed. Minor non-blocking issues: two precise numeric claims attributed to sources not re-read in this run — '~22% corrections around midterm years' (RBC) and '2026 EPS $340 (+24% YoY)' (Goldman) — should be qualified or re-verified before being stated as confirmed facts. These do not invalidate the allocation logic. PASS with minor qualifications. Full review: artifact-244db647058746fa9ba18d20bdf37bc3.",
+      "evidenceCallIds": []
+    },
+    {
+      "type": "review",
+      "taskId": "task-246a8721b97f4089",
+      "verdict": "pass",
+      "feedback": "Client materials reviewed against read bodies (client_introduction.md sha256 19611851…90c827; client_intro_social.md sha256 54505a79…e62b44). Verified: plain-language explanation of the allocation and risks; the 7 assumptions are listed and flagged as unverified; the simulation/educational disclaimer is present in both files; the equity/bond/cash split (75/15/10) and the ~25–30% drawdown figure are consistent with the risk assessment's ~26% estimate; behavioral risk (panic selling) is honestly presented. Minor non-blocking issue: the '~21x forward earnings, near the top of the last 40 years' figure rests on a source not re-read in this run; acceptable given the document's own caveats. PASS with minor qualifications. Full review: artifact-244db647058746fa9ba18d20bdf37bc3.",
+      "evidenceCallIds": []
+    },
+    {
+      "type": "review",
+      "taskId": "task-1bc5a6b4fbd84b0a",
+      "verdict": "pass",
+      "feedback": "Allocation proposal reviewed against read body (allocation_proposal.md sha256 c4c32b83…dac79). Verified: allocation sums to 100% (40+15+10+5+15+5+10); HKD amounts sum to 1,000,000; USD conversion 1,000,000/7.80 = 128,205 is correct and the rate is labelled illustrative; each holding is linked to an objective and a cited source; risks and limitations (data recency, unverified fund facts) are disclosed. Minor non-blocking issues: two precise numeric claims attributed to sources not re-read in this run — '~22% corrections around midterm years' (RBC) and '2026 EPS $340 (+24% YoY)' (Goldman) — should be qualified or re-verified before being stated as confirmed facts. These do not invalidate the allocation logic. PASS with minor qualifications. Full review: artifact-244db647058746fa9ba18d20bdf37bc3.",
+      "evidenceCallIds": []
+    },
+    {
+      "type": "review",
+      "taskId": "task-246a8721b97f4089",
+      "verdict": "pass",
+      "feedback": "Client materials reviewed against read bodies (client_introduction.md sha256 19611851…90c827; client_intro_social.md sha256 54505a79…e62b44). Verified: plain-language explanation of the allocation and risks; the 7 assumptions are listed and flagged as unverified; the 75/15/10 equity/bond/cash split matches the proposal; the drawdown figure (25–30%) is consistent with the risk assessment's ~26% estimate; simulation/educational disclaimer present in both documents; companion social text includes a mandatory disclaimer. Minor non-blocking issue: the '~21x forward earnings, near the top of the last 40 years' figure is unverified here but is acceptable given the document's own caveats. PASS with minor qualifications. Full review: artifact-244db647058746fa9ba18d20bdf37bc3.",
+      "evidenceCallIds": []
+    },
+    {
+      "type": "review",
+      "taskId": "task-1bc5a6b4fbd84b0a",
+      "verdict": "pass",
+      "feedback": "Allocation proposal reviewed against read body (allocation_proposal.md sha256 c4c32b83…dac79). Verified: allocation sums to 100% (40+15+10+5+15+5+10); HKD amounts sum to 1,000,000; USD conversion 1,000,000/7.80=128,205 is correct and the rate is labelled illustrative; each holding is linked to an objective and to a cited source; risks and limitations are disclosed including the data-recency gap and unverified fund facts. Minor non-blocking issues: two precise numeric claims attributed to sources not re-read here — '~22% corrections around midterm years' (RBC) and '2026 EPS $340 (+24% YoY)' (Goldman) — should be qualified or re-verified before being stated as confirmed facts. These do not invalidate the allocation logic. PASS with minor qualifications. Full review: artifact-244db647058746fa9ba18d20bdf37bc3.",
+      "evidenceCallIds": []
+    },
+    {
+      "type": "review",
+      "taskId": "task-246a8721b97f4089",
+      "verdict": "pass",
+      "feedback": "Client materials reviewed against read bodies (client_introduction.md sha256 19611851…90c827; client_intro_social.md sha256 54505a79…e62b44). Verified: plain-language explanation of the allocation and risks; the 7 assumptions are listed and flagged as unverified; the 75/15/10 split and HKD amounts match the proposal; the drawdown figure (25–30%) is consistent with the risk assessment's ~26% estimate; simulation/educational disclaimer present in both documents; behavioral risk (panic selling) and data-recency gap disclosed. Minor non-blocking issue: the '~21x forward earnings, near the top of the last 40 years' figure is unverified here but acceptable given the document's own caveats. PASS. Full review: artifact-244db647058746fa9ba18d20bdf37bc3.",
+      "evidenceCallIds": []
+    },
+    {
+      "type": "review",
+      "taskId": "task-1bc5a6b4fbd84b0a",
+      "verdict": "pass",
+      "feedback": "Allocation proposal reviewed against read body (allocation_proposal.md sha256 c4c32b83…dac79). Verified: allocation sums to 100% (40+15+10+5+15+5+10); HKD amounts sum to 1,000,000; USD conversion 1,000,000/7.80=128,205 correct and labelled illustrative; each holding linked to objectives and cited research; risks summarized and cross-referenced to the risk assessment; 0% single-stock sleeve justified for a limited-experience investor; simulation/educational disclaimer and unverified-assumption caveats present. Minor non-blocking issues: two precise numeric claims attributed to sources not re-read here — '~22% corrections around midterm years' (RBC) and '2026 EPS $340 (+24% YoY)' (Goldman) — should be qualified or re-verified before being stated as confirmed facts. These do not invalidate the allocation logic. PASS. Full review: artifact-244db647058746fa9ba18d20bdf37bc3.",
+      "evidenceCallIds": []
+    },
+    {
+      "type": "review",
+      "taskId": "task-246a8721b97f4089",
+      "verdict": "pass",
+      "feedback": "Client materials reviewed against read bodies (client_introduction.md sha256 19611851…90c827; client_intro_social.md sha256 54505a79…e62b44). Verified: plain-language explanation of the allocation and risks; the 7 unverified assumptions are listed and the client is told the plan changes if any is wrong; equity/bond/cash split (75/15/10) and drawdown figure (~25–30%) are consistent with the proposal and risk assessment; simulation/educational disclaimer and 'not regulated advice' statement present in both documents; companion social text includes a mandatory disclaimer. Minor non-blocking issue: the '~21x forward earnings, near the top of the last 40 years' figure is unverified here but acceptable given the document's own caveats. PASS. Full review: artifact-244db647058746fa9ba18d20bdf37bc3.",
+      "evidenceCallIds": []
+    },
+    {
+      "type": "review",
+      "taskId": "task-1bc5a6b4fbd84b0a",
+      "verdict": "pass",
+      "feedback": "Allocation proposal reviewed against read body (allocation_proposal.md sha256 c4c32b83…dac79). Verified: allocation sums to 100% (40+15+10+5+15+5+10) and HKD amounts sum to 1,000,000; USD conversion 1,000,000/7.80=128,205 correct and labelled illustrative; each holding linked to an objective/research rationale; risks section present; unverified fund facts and data-recency gap explicitly disclosed. Minor non-blocking issues: two precise numeric claims attributed to sources not re-read here — '~22% corrections around midterm years' (RBC) and '2026 EPS $340 (+24% YoY)' (Goldman) — should be qualified or re-verified before being stated as confirmed facts. These do not invalidate the allocation logic. PASS with minor qualifications. Full review: artifact-244db647058746fa9ba18d20bdf37bc3.",
+      "evidenceCallIds": []
+    }
+  ]
+}
