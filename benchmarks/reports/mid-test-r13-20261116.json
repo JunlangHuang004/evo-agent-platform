@@ -1,0 +1,1837 @@
+{
+  "recordedAtUTC": "2026-11-16T14:35:18.991795+00:00",
+  "round": 13,
+  "sourceCommit": "26d7df02065b30a444506dd7447fb2e6729a3c65",
+  "protocol": {
+    "caseOrder": [
+      "software-1",
+      "software-2",
+      "newsroom-1",
+      "newsroom-2",
+      "fund-1",
+      "fund-2"
+    ],
+    "strictSequential": true,
+    "originalPromptsAndFourRoles": true,
+    "freshInitialTeamStatesAndMemory": true,
+    "task2ContinuesTask1": true,
+    "wallMinutesPerCase": 45,
+    "totalModelCallsLimit": null,
+    "totalTurnsLimit": null,
+    "totalTokenLimit": null,
+    "actionOutputTokens": 6000,
+    "planningOutputTokens": 3000,
+    "watchdogSeconds": 90,
+    "requestedModel": "t2_hkgai-v3_fp8_1m_e7",
+    "reportedModelsObserved": {
+      "t2_hkgai-v3_fp8_1m_e10": 526
+    },
+    "manualProductEdits": false,
+    "analysisAfterAllSixSettled": true,
+    "userClarifications": "Prior requester answers relayed only when asked. Newsroom-2 scope first relayed as operator assumptions, then explicitly confirmed by requester; not retroactively labeled original authorization. Specific generated-file permissions individually recorded."
+  },
+  "regression": {
+    "passed": 951,
+    "failed": 0,
+    "skipped": 0,
+    "testSeconds": 330.946,
+    "dockerBrowserAndAgentTestsEnabled": true,
+    "sourceManifestSha256": "0710fb568bb9a36a6bb29fe1e8c007658bde0d43bb35ff5f154d1d647f15dd68"
+  },
+  "integrity": {
+    "allSixSettled": true,
+    "allSourceFilesMatch": true,
+    "sourceFileCount": 237,
+    "allFrozenControlsMatch": true,
+    "manualProductEdits": false
+  },
+  "totals": {
+    "modelCalls": 556,
+    "reportedTokens": 11069803,
+    "unknownUsageCalls": 30,
+    "deliveryRecords": 6,
+    "candidateDeliveryRecords": 3,
+    "formalDeliveryRecords": 3,
+    "duplicateSameVersionReviewPassEvents": 0
+  },
+  "workflowStatuses": {
+    "partial": 4,
+    "done": 2
+  },
+  "cases": [
+    {
+      "case": "software-1",
+      "runId": "run-cf6557078ed64b81",
+      "previousRunId": null,
+      "workflowStatus": "partial",
+      "terminalExportSha256": "6c4b534ec12a3877ea98b379482b2a8d8fabbadc6be2f807f8e3756ac7fb979a",
+      "modelCalls": 159,
+      "reportedTokens": 3112805,
+      "unknownUsageCalls": 6,
+      "wallElapsedMs": 2691793,
+      "browserCalls": 135,
+      "browserActualExecuted": 135,
+      "browserSuccessfulCalls": 108,
+      "acceptanceGaps": [
+        "Implement booking app with candidate bundle：最新代码 revision / 产物尚无匹配的审核角色独立验收。"
+      ],
+      "recoveryEvents": {
+        "candidate_delivery_packaged": 1,
+        "dependency_review_wait": 1,
+        "partial_review_admitted": 1
+      },
+      "wallMinutes": 44.863,
+      "newArtifacts": 5,
+      "inheritedArtifacts": 0,
+      "bundles": [
+        {
+          "id": "delivery-7fb30374dcb44d18aa7e343f850bfcd6",
+          "status": "candidate",
+          "entrypoint": "app/index.html",
+          "path": "evidence/product-snapshots/software-1/delivery-7fb30374dcb44d18aa7e343f850bfcd6.zip",
+          "sha256": "57125f8ee312b3a2fb95095a7ac668f272225d1c91f9f9907e6b4d32a23f9b1c",
+          "bytes": 9250,
+          "CRCVerified": true,
+          "allPublishedBytesMatch": true,
+          "fileCount": 4,
+          "semanticQuality": "unassessed"
+        }
+      ],
+      "runtimeAudit": {
+        "case": "software-1",
+        "eventCounts": {
+          "learning_trial_offered": 1,
+          "learning_trial_assessed": 1
+        },
+        "confirmedMemoryHits": 0,
+        "learningAssessments": {
+          "unassessed": 1
+        },
+        "adoptionProven": 0,
+        "watchdogEvents": [],
+        "taskStates": [
+          {
+            "taskId": "task-44a01f4a83954e47",
+            "agent": "lead",
+            "status": "done",
+            "evidenceCount": 0,
+            "saturated": false
+          },
+          {
+            "taskId": "task-cb7a1b7f7f8f4289",
+            "agent": "lead",
+            "status": "done",
+            "evidenceCount": 2,
+            "saturated": false
+          },
+          {
+            "taskId": "task-0573ca4ae8294c1d",
+            "agent": "dev",
+            "status": "partial",
+            "evidenceCount": 75,
+            "saturated": false
+          },
+          {
+            "taskId": "task-e6da76abab1949f4",
+            "agent": "qa",
+            "status": "partial",
+            "evidenceCount": 1,
+            "saturated": false
+          },
+          {
+            "taskId": "task-8cf74c6a6f2b4dbe",
+            "agent": "release",
+            "status": "skipped",
+            "evidenceCount": 2,
+            "saturated": false
+          },
+          {
+            "taskId": "task-341b832179504448",
+            "agent": "lead",
+            "status": "partial",
+            "evidenceCount": 4,
+            "saturated": false
+          }
+        ],
+        "waits": {
+          "failureCodes": {
+            "timeout": 6
+          },
+          "failedRequestSeconds": 399.707,
+          "approvalWaitSeconds": 110.444,
+          "approvalCount": 1
+        }
+      }
+    },
+    {
+      "case": "software-2",
+      "runId": "run-6bada620fee94702",
+      "previousRunId": "run-cf6557078ed64b81",
+      "workflowStatus": "partial",
+      "terminalExportSha256": "b517fc2cdd51828504ac5d2a012042ed71c862edcffc1ab7af6c4c7fd210c975",
+      "modelCalls": 57,
+      "reportedTokens": 1403312,
+      "unknownUsageCalls": 3,
+      "wallElapsedMs": 1214014,
+      "browserCalls": 11,
+      "browserActualExecuted": 11,
+      "browserSuccessfulCalls": 1,
+      "acceptanceGaps": [
+        "Implement dashboard in booking app：最新代码 revision / 产物尚无匹配的审核角色独立验收。"
+      ],
+      "recoveryEvents": {
+        "candidate_delivery_packaged": 1,
+        "browser_failure_recovery": 3
+      },
+      "wallMinutes": 20.234,
+      "newArtifacts": 6,
+      "inheritedArtifacts": 5,
+      "bundles": [
+        {
+          "id": "delivery-61e8a05d61084e61a49b48cd3588890a",
+          "status": "candidate",
+          "entrypoint": "app/index.html",
+          "path": "evidence/product-snapshots/software-2/delivery-61e8a05d61084e61a49b48cd3588890a.zip",
+          "sha256": "64d2c310237bacd521a93b2d1c673b2e370a39ea11579dad518ab2ce5c1016e8",
+          "bytes": 14305,
+          "CRCVerified": true,
+          "allPublishedBytesMatch": true,
+          "fileCount": 5,
+          "semanticQuality": "unassessed"
+        }
+      ],
+      "runtimeAudit": {
+        "case": "software-2",
+        "eventCounts": {
+          "learning_trial_offered": 2,
+          "browser_failure_recovery": 3,
+          "learning_trial_assessed": 2
+        },
+        "confirmedMemoryHits": 0,
+        "learningAssessments": {
+          "unassessed": 2
+        },
+        "adoptionProven": 0,
+        "watchdogEvents": [],
+        "taskStates": [
+          {
+            "taskId": "task-220483ed8db64dc8",
+            "agent": "lead",
+            "status": "done",
+            "evidenceCount": 0,
+            "saturated": false
+          },
+          {
+            "taskId": "task-e3f45449dc2b4368",
+            "agent": "lead",
+            "status": "done",
+            "evidenceCount": 5,
+            "saturated": false
+          },
+          {
+            "taskId": "task-93a34facbcdf43f8",
+            "agent": "dev",
+            "status": "done",
+            "evidenceCount": 36,
+            "saturated": false
+          },
+          {
+            "taskId": "task-9d381da130b94bbc",
+            "agent": "qa",
+            "status": "failed",
+            "evidenceCount": 16,
+            "saturated": false
+          },
+          {
+            "taskId": "task-2155dd8b89f54741",
+            "agent": "release",
+            "status": "skipped",
+            "evidenceCount": 1,
+            "saturated": false
+          },
+          {
+            "taskId": "task-76d9c65d076f4062",
+            "agent": "lead",
+            "status": "partial",
+            "evidenceCount": 4,
+            "saturated": false
+          }
+        ],
+        "waits": {
+          "failureCodes": {
+            "timeout": 1,
+            "provider_http": 2
+          },
+          "failedRequestSeconds": 204.596,
+          "approvalWaitSeconds": 316.355,
+          "approvalCount": 5
+        }
+      }
+    },
+    {
+      "case": "newsroom-1",
+      "runId": "run-3c8e1d741be741ef",
+      "previousRunId": null,
+      "workflowStatus": "done",
+      "terminalExportSha256": "a4048eeea4a7a03b6061470e0f240783394430d96231ed0896f8c175ac4cd0b2",
+      "modelCalls": 68,
+      "reportedTokens": 958508,
+      "unknownUsageCalls": 6,
+      "wallElapsedMs": 1201652,
+      "browserCalls": 0,
+      "browserActualExecuted": 0,
+      "browserSuccessfulCalls": 0,
+      "acceptanceGaps": [],
+      "recoveryEvents": {
+        "review_pass": 2,
+        "delivery_packaged": 1
+      },
+      "wallMinutes": 20.028,
+      "newArtifacts": 8,
+      "inheritedArtifacts": 0,
+      "bundles": [
+        {
+          "id": "delivery-6ccd017a20104e288a026f355c0f05b8",
+          "status": "packaged",
+          "entrypoint": "package/README.md",
+          "path": "evidence/product-snapshots/newsroom-1/delivery-6ccd017a20104e288a026f355c0f05b8.zip",
+          "sha256": "533b10e3c80819f12ec655f8f8415e83decb7303fb13ea129e9c27af0840f75e",
+          "bytes": 6583,
+          "CRCVerified": true,
+          "allPublishedBytesMatch": true,
+          "fileCount": 3,
+          "semanticQuality": "unassessed"
+        }
+      ],
+      "runtimeAudit": {
+        "case": "newsroom-1",
+        "eventCounts": {
+          "review_pass": 2,
+          "learning_trial_offered": 2,
+          "learning_trial_assessed": 2
+        },
+        "confirmedMemoryHits": 0,
+        "learningAssessments": {
+          "unassessed": 2
+        },
+        "adoptionProven": 0,
+        "watchdogEvents": [],
+        "taskStates": [
+          {
+            "taskId": "task-6beb0b80134c4088",
+            "agent": "chief_editor",
+            "status": "done",
+            "evidenceCount": 0,
+            "saturated": false
+          },
+          {
+            "taskId": "task-3547f81b0e2d4789",
+            "agent": "chief_editor",
+            "status": "done",
+            "evidenceCount": 1,
+            "saturated": false
+          },
+          {
+            "taskId": "task-7a4a2814e6a54168",
+            "agent": "reporter",
+            "status": "done",
+            "evidenceCount": 9,
+            "saturated": false
+          },
+          {
+            "taskId": "task-7d60eaf52dc84b2e",
+            "agent": "editor",
+            "status": "done",
+            "evidenceCount": 7,
+            "saturated": false
+          },
+          {
+            "taskId": "task-3efdc8e76f034b60",
+            "agent": "fact_checker",
+            "status": "done",
+            "evidenceCount": 13,
+            "saturated": false
+          },
+          {
+            "taskId": "task-94b3fdfc05cb4b85",
+            "agent": "fact_checker",
+            "status": "done",
+            "evidenceCount": 10,
+            "saturated": false
+          },
+          {
+            "taskId": "task-414673d38d3940d2",
+            "agent": "editor",
+            "status": "done",
+            "evidenceCount": 12,
+            "saturated": false
+          },
+          {
+            "taskId": "task-1423c8f90a32405a",
+            "agent": "chief_editor",
+            "status": "done",
+            "evidenceCount": 6,
+            "saturated": false
+          }
+        ],
+        "waits": {
+          "failureCodes": {
+            "timeout": 6
+          },
+          "failedRequestSeconds": 395.331,
+          "approvalWaitSeconds": 293.247,
+          "approvalCount": 4
+        }
+      }
+    },
+    {
+      "case": "newsroom-2",
+      "runId": "run-17c7817fc6184120",
+      "previousRunId": "run-3c8e1d741be741ef",
+      "workflowStatus": "partial",
+      "terminalExportSha256": "abc35e818338ab0fe45425a7e49265eb674bcbb3aef7515002c4558925be3bc3",
+      "modelCalls": 77,
+      "reportedTokens": 1627581,
+      "unknownUsageCalls": 1,
+      "wallElapsedMs": 1592015,
+      "browserCalls": 0,
+      "browserActualExecuted": 0,
+      "browserSuccessfulCalls": 0,
+      "acceptanceGaps": [],
+      "recoveryEvents": {
+        "review_rework": 1,
+        "review_pass": 1
+      },
+      "wallMinutes": 26.534,
+      "newArtifacts": 11,
+      "inheritedArtifacts": 8,
+      "bundles": [],
+      "runtimeAudit": {
+        "case": "newsroom-2",
+        "eventCounts": {
+          "learning_trial_offered": 6,
+          "review_pass": 1,
+          "learning_trial_assessed": 4
+        },
+        "confirmedMemoryHits": 0,
+        "learningAssessments": {
+          "unassessed": 4
+        },
+        "adoptionProven": 0,
+        "watchdogEvents": [],
+        "taskStates": [
+          {
+            "taskId": "task-705a2319f6b5475d",
+            "agent": "chief_editor",
+            "status": "done",
+            "evidenceCount": 0,
+            "saturated": false
+          },
+          {
+            "taskId": "task-6c22e9f3e8364ce6",
+            "agent": "chief_editor",
+            "status": "done",
+            "evidenceCount": 4,
+            "saturated": false
+          },
+          {
+            "taskId": "task-78d151042ddf4472",
+            "agent": "reporter",
+            "status": "done",
+            "evidenceCount": 21,
+            "saturated": false
+          },
+          {
+            "taskId": "task-492197ac97994fdf",
+            "agent": "editor",
+            "status": "done",
+            "evidenceCount": 8,
+            "saturated": false
+          },
+          {
+            "taskId": "task-2d5d221edac24f38",
+            "agent": "fact_checker",
+            "status": "partial",
+            "evidenceCount": 22,
+            "saturated": false
+          },
+          {
+            "taskId": "task-5281acd2e8364290",
+            "agent": "fact_checker",
+            "status": "skipped",
+            "evidenceCount": 2,
+            "saturated": false
+          },
+          {
+            "taskId": "task-7bca7f859ebf41c2",
+            "agent": "editor",
+            "status": "skipped",
+            "evidenceCount": 3,
+            "saturated": false
+          },
+          {
+            "taskId": "task-25f13110b01d491d",
+            "agent": "chief_editor",
+            "status": "partial",
+            "evidenceCount": 9,
+            "saturated": false
+          }
+        ],
+        "waits": {
+          "failureCodes": {
+            "provider_http": 1
+          },
+          "failedRequestSeconds": 67.022,
+          "approvalWaitSeconds": 768.15,
+          "approvalCount": 7
+        }
+      }
+    },
+    {
+      "case": "fund-1",
+      "runId": "run-2c7f6132fdf94b60",
+      "previousRunId": null,
+      "workflowStatus": "done",
+      "terminalExportSha256": "df52720f0add5e144d18b53fa060deb93d9d5eb243371f3a3effaa35fd8d8df4",
+      "modelCalls": 101,
+      "reportedTokens": 2064142,
+      "unknownUsageCalls": 2,
+      "wallElapsedMs": 1844177,
+      "browserCalls": 0,
+      "browserActualExecuted": 0,
+      "browserSuccessfulCalls": 0,
+      "acceptanceGaps": [],
+      "recoveryEvents": {
+        "review_rework": 2,
+        "review_pass": 3,
+        "delivery_packaged": 1
+      },
+      "wallMinutes": 30.736,
+      "newArtifacts": 10,
+      "inheritedArtifacts": 0,
+      "bundles": [
+        {
+          "id": "delivery-da31274879a14d0aabd78c9713a1d0d6",
+          "status": "packaged",
+          "entrypoint": "README.md",
+          "path": "evidence/product-snapshots/fund-1/delivery-da31274879a14d0aabd78c9713a1d0d6.zip",
+          "sha256": "f9d6836dbf2db0f6754768a4b53dae60a23746b2d892c806687ddc3a79ff1e9f",
+          "bytes": 18558,
+          "CRCVerified": true,
+          "allPublishedBytesMatch": true,
+          "fileCount": 5,
+          "semanticQuality": "unassessed"
+        }
+      ],
+      "runtimeAudit": {
+        "case": "fund-1",
+        "eventCounts": {
+          "learning_trial_offered": 4,
+          "review_pass": 3,
+          "learning_trial_assessed": 3
+        },
+        "confirmedMemoryHits": 0,
+        "learningAssessments": {
+          "unassessed": 3
+        },
+        "adoptionProven": 0,
+        "watchdogEvents": [],
+        "taskStates": [
+          {
+            "taskId": "task-0f071101d8fc4c7f",
+            "agent": "fund_manager",
+            "status": "done",
+            "evidenceCount": 0,
+            "saturated": false
+          },
+          {
+            "taskId": "task-339792eb424b429a",
+            "agent": "fund_manager",
+            "status": "done",
+            "evidenceCount": 2,
+            "saturated": false
+          },
+          {
+            "taskId": "task-f0b99d7ea7ec40ca",
+            "agent": "research",
+            "status": "done",
+            "evidenceCount": 25,
+            "saturated": false
+          },
+          {
+            "taskId": "task-d48ce46bda3347d1",
+            "agent": "fund_manager",
+            "status": "done",
+            "evidenceCount": 13,
+            "saturated": false
+          },
+          {
+            "taskId": "task-68e8d14114a54bfb",
+            "agent": "marketing",
+            "status": "done",
+            "evidenceCount": 7,
+            "saturated": false
+          },
+          {
+            "taskId": "task-2101931635eb47ef",
+            "agent": "risk",
+            "status": "done",
+            "evidenceCount": 15,
+            "saturated": false
+          },
+          {
+            "taskId": "task-4d1b2fc86ea74fd7",
+            "agent": "marketing",
+            "status": "done",
+            "evidenceCount": 9,
+            "saturated": false
+          },
+          {
+            "taskId": "task-e807a46b0ac44936",
+            "agent": "fund_manager",
+            "status": "done",
+            "evidenceCount": 9,
+            "saturated": false
+          }
+        ],
+        "waits": {
+          "failureCodes": {
+            "timeout": 2
+          },
+          "failedRequestSeconds": 130.862,
+          "approvalWaitSeconds": 690.343,
+          "approvalCount": 11
+        }
+      }
+    },
+    {
+      "case": "fund-2",
+      "runId": "run-882f79916b924837",
+      "previousRunId": "run-2c7f6132fdf94b60",
+      "workflowStatus": "partial",
+      "terminalExportSha256": "f3fe1f7208858e7e1a7210fc8300436b5790fc998d36a2b09307887bc5b66539",
+      "modelCalls": 94,
+      "reportedTokens": 1903455,
+      "unknownUsageCalls": 12,
+      "wallElapsedMs": 2510292,
+      "browserCalls": 1,
+      "browserActualExecuted": 1,
+      "browserSuccessfulCalls": 1,
+      "acceptanceGaps": [
+        "Final packaging and delivery：最新代码 revision / 产物尚无匹配的审核角色独立验收。"
+      ],
+      "recoveryEvents": {
+        "candidate_delivery_packaged": 1,
+        "review_pass": 1,
+        "delivery_packaged": 1
+      },
+      "wallMinutes": 41.838,
+      "newArtifacts": 13,
+      "inheritedArtifacts": 10,
+      "bundles": [
+        {
+          "id": "delivery-b6e62dff2a5e4ab4ae93a41cf6f74172",
+          "status": "candidate",
+          "entrypoint": "index.html",
+          "path": "evidence/product-snapshots/fund-2/delivery-b6e62dff2a5e4ab4ae93a41cf6f74172.zip",
+          "sha256": "04f19ca9e11bc3a9f61534987d1c01bebf989f6cb44f67b94c130566b931915c",
+          "bytes": 12404,
+          "CRCVerified": true,
+          "allPublishedBytesMatch": true,
+          "fileCount": 4,
+          "semanticQuality": "unassessed"
+        },
+        {
+          "id": "delivery-0b5a178597e14ccf9de26b202fa81462",
+          "status": "packaged",
+          "entrypoint": "index.html",
+          "path": "evidence/product-snapshots/fund-2/delivery-0b5a178597e14ccf9de26b202fa81462.zip",
+          "sha256": "8045bff05f21e13d385970d73f687be0cd99f9b4d6c4e9a2a79bd36eacec50e1",
+          "bytes": 15716,
+          "CRCVerified": true,
+          "allPublishedBytesMatch": true,
+          "fileCount": 5,
+          "semanticQuality": "unassessed"
+        }
+      ],
+      "runtimeAudit": {
+        "case": "fund-2",
+        "eventCounts": {
+          "learning_trial_offered": 9,
+          "progress_watchdog_observed": 2,
+          "progress_watchdog_delivered": 1,
+          "review_pass": 1,
+          "learning_trial_assessed": 9
+        },
+        "confirmedMemoryHits": 0,
+        "learningAssessments": {
+          "unassessed": 9
+        },
+        "adoptionProven": 0,
+        "watchdogEvents": [
+          {
+            "actor": "marketing",
+            "agentId": "marketing",
+            "id": "evt-6f1e3639e4694788",
+            "message": "定时检查发现多次活动没有新增证据；仅排队诊断，等待安全边界。",
+            "payload": {
+              "acceptanceCreated": false,
+              "actionExecuted": false,
+              "agentId": "marketing",
+              "diagnosisOnly": true,
+              "evidenceSignature": "acb72ff363d924e2108691c16528ec64ea2526453eaedadc1780c96debbb5ceb",
+              "instruction": "Recent settled activity added no new content or observed result. Inspect the existing actual failure/source receipts, correct an evidenced cause, use the existing review/rework path, or report the remaining gap honestly. Do not repeat unchanged work, invent success, extend the deadline, bypass approval, or replay an unknown effect. This observation does not stop or complete the task.",
+              "lastProgressAt": 1794837978307,
+              "noticeId": "watchdog-e42d54978d19fbac2da5bb45",
+              "observedAt": 1794838158403,
+              "revision": 0,
+              "runId": "run-882f79916b924837",
+              "settledWithoutNewEvidence": 3,
+              "taskId": "task-ee8a58b7c1694d89",
+              "unchangedMs": 180096
+            },
+            "time": "2026-11-16T14:09:18Z",
+            "type": "progress_watchdog_observed"
+          },
+          {
+            "actor": "marketing",
+            "agentId": "marketing",
+            "id": "evt-1cefce460322440f",
+            "message": "在下一次正常模型请求前递交一次进展诊断；未新增模型调用或改变时限。",
+            "payload": {
+              "acceptanceCreated": false,
+              "actionExecuted": false,
+              "agentId": "marketing",
+              "diagnosisOnly": true,
+              "evidenceSignature": "acb72ff363d924e2108691c16528ec64ea2526453eaedadc1780c96debbb5ceb",
+              "instruction": "Recent settled activity added no new content or observed result. Inspect the existing actual failure/source receipts, correct an evidenced cause, use the existing review/rework path, or report the remaining gap honestly. Do not repeat unchanged work, invent success, extend the deadline, bypass approval, or replay an unknown effect. This observation does not stop or complete the task.",
+              "lastProgressAt": 1794837978307,
+              "noticeId": "watchdog-e42d54978d19fbac2da5bb45",
+              "observedAt": 1794838158403,
+              "revision": 0,
+              "runId": "run-882f79916b924837",
+              "settledWithoutNewEvidence": 3,
+              "taskId": "task-ee8a58b7c1694d89",
+              "unchangedMs": 180096
+            },
+            "time": "2026-11-16T14:09:41Z",
+            "type": "progress_watchdog_delivered"
+          },
+          {
+            "actor": "risk",
+            "agentId": "risk",
+            "id": "evt-c680482018e041e7",
+            "message": "定时检查发现多次活动没有新增证据；仅排队诊断，等待安全边界。",
+            "payload": {
+              "acceptanceCreated": false,
+              "actionExecuted": false,
+              "agentId": "risk",
+              "diagnosisOnly": true,
+              "evidenceSignature": "e5c654c3a656c111426fb3ed772150b52bf8f0a41f406c660ea26d711e135e34",
+              "instruction": "Recent settled activity added no new content or observed result. Inspect the existing actual failure/source receipts, correct an evidenced cause, use the existing review/rework path, or report the remaining gap honestly. Do not repeat unchanged work, invent success, extend the deadline, bypass approval, or replay an unknown effect. This observation does not stop or complete the task.",
+              "lastProgressAt": 1794838788653,
+              "noticeId": "watchdog-806e2369138c8d3f07defbff",
+              "observedAt": 1794838970080,
+              "revision": 0,
+              "runId": "run-882f79916b924837",
+              "settledWithoutNewEvidence": 5,
+              "taskId": "task-159ee5b867c24b05",
+              "unchangedMs": 181427
+            },
+            "time": "2026-11-16T14:22:50Z",
+            "type": "progress_watchdog_observed"
+          }
+        ],
+        "taskStates": [
+          {
+            "taskId": "task-d1d915fc3be3471c",
+            "agent": "fund_manager",
+            "status": "done",
+            "evidenceCount": 0,
+            "saturated": false
+          },
+          {
+            "taskId": "task-b37869417fba47ee",
+            "agent": "fund_manager",
+            "status": "done",
+            "evidenceCount": 2,
+            "saturated": false
+          },
+          {
+            "taskId": "task-bc59c557ceb2479c",
+            "agent": "research",
+            "status": "done",
+            "evidenceCount": 30,
+            "saturated": false
+          },
+          {
+            "taskId": "task-29a8a4b69432424a",
+            "agent": "risk",
+            "status": "done",
+            "evidenceCount": 8,
+            "saturated": false
+          },
+          {
+            "taskId": "task-ee8a58b7c1694d89",
+            "agent": "marketing",
+            "status": "done",
+            "evidenceCount": 17,
+            "saturated": false
+          },
+          {
+            "taskId": "task-159ee5b867c24b05",
+            "agent": "risk",
+            "status": "done",
+            "evidenceCount": 17,
+            "saturated": false
+          },
+          {
+            "taskId": "task-4088887df87245b6",
+            "agent": "marketing",
+            "status": "done",
+            "evidenceCount": 10,
+            "saturated": false
+          },
+          {
+            "taskId": "task-30e303126cf643f2",
+            "agent": "fund_manager",
+            "status": "done",
+            "evidenceCount": 6,
+            "saturated": false
+          }
+        ],
+        "waits": {
+          "failureCodes": {
+            "timeout": 9,
+            "provider_http": 3,
+            "output_truncated": 1
+          },
+          "failedRequestSeconds": 842.115,
+          "approvalWaitSeconds": 609.562,
+          "approvalCount": 11
+        }
+      }
+    }
+  ],
+  "memoryAndDelegation": {
+    "confirmedMemoryHits": 0,
+    "learningTrialOfferedEvents": 24,
+    "learningTrialAssessmentEvents": 21,
+    "assessmentStates": {
+      "unassessed": 21
+    },
+    "adoptionProvenEvents": 0,
+    "taskDelegatedEvents": 0,
+    "learningBenefitDemonstrated": false
+  },
+  "watchdog": {
+    "observedEvents": 2,
+    "deliveredEvents": 1,
+    "casesWithNotices": [
+      "fund-2"
+    ],
+    "extraModelCalls": 0,
+    "semanticProgressGuaranteed": false,
+    "note": "New assertion observations/read windows can count as evidence without improving the product. A queued notice need not be delivered if later evidence invalidates it or task finishes."
+  },
+  "limitations": [
+    "One round is not a repeatability estimate or official course grade.",
+    "Original task form, workflow status, formal packaging, and independent product quality are separate.",
+    "R12 ran scenarios in parallel; R13 follows original strict sequential order. Different generated plans, source availability, request failures, and human wait times prevent causal attribution.",
+    "30 calls have unknown usage; reported tokens are not complete total usage.",
+    "Independent QA is bounded and does not replace platform acceptance.",
+    "Frozen metrics collector inherited round=12 metadata. Run IDs, paths, source freeze and exports identify R13; original output preserved and canonical report corrected."
+  ],
+  "stableSixTaskDeliveryEstablished": false,
+  "nextPriorities": [
+    "Bind tests and rework to current published bytes and differences.",
+    "Stop tests without meaningful added coverage and reserve independent review time.",
+    "Review final packaging changes once while reusing unchanged evidence.",
+    "Prevent storage-read failure and stale-tab writes from overwriting data.",
+    "Verify primary sources and numerical concepts; demonstrate memory learning, delegation, and app Git push."
+  ],
+  "independentQA": {
+    "software": {
+      "scope": "Independent bounded offline Docker Chromium QA of unchanged downloaded candidate ZIP bytes; no platform acceptance inferred",
+      "cases": {
+        "software-1": {
+          "runId": "run-cf6557078ed64b81",
+          "runStatus": "partial",
+          "candidateCount": 1,
+          "formalCount": 0,
+          "targetForm": "Offline browser SPA; booking grid",
+          "zipSha256": "57125f8ee312b3a2fb95095a7ac668f272225d1c91f9f9907e6b4d32a23f9b1c",
+          "artifactFiles": [
+            {
+              "artifactId": "artifact-c4382f0abd6b477487a104d10e736def",
+              "path": "app/index.html",
+              "sha256": "8a64c8dc172bd640d1a6a511e06cf09008ff26adfd1b1249ed57a6a404f027fb"
+            },
+            {
+              "artifactId": "artifact-4a702b4b422d4c4991f8595e5994dac8",
+              "path": "app/app.js",
+              "sha256": "ae47cec0ae009d7a62c54d29c03a20f82e6dfd29caec8bff86bcf725dcc47d9b"
+            },
+            {
+              "artifactId": "artifact-b1350d380c30471681f23b6d4283c666",
+              "path": "app/styles.css",
+              "sha256": "79bdbc5cb6201f39e282f31e0ef8b89b1b3a494d6b6397ac129c09d45f26c97e"
+            },
+            {
+              "artifactId": "artifact-d3164aec827541cd9c99b864876480c6",
+              "path": "app/README.md",
+              "sha256": "7588ad582c338621ad74602a4c9b24df90c92c18fad004a69bd6142b2142ba71"
+            }
+          ],
+          "allSnapshotHashesUnchanged": true,
+          "byScope": {
+            "conflict": {
+              "passed": 0,
+              "failed": 1
+            },
+            "core": {
+              "passed": 5,
+              "failed": 0
+            },
+            "package": {
+              "passed": 1,
+              "failed": 0
+            },
+            "runtime": {
+              "passed": 1,
+              "failed": 0
+            },
+            "storage-fault": {
+              "passed": 1,
+              "failed": 1
+            }
+          },
+          "defects": [
+            {
+              "name": "preopened tabs cannot overwrite first",
+              "scope": "conflict",
+              "passed": false,
+              "actual": [
+                {
+                  "id": "bk-mwuo9u80-o2lihy",
+                  "roomId": "room-1",
+                  "date": "2026-11-25",
+                  "slot": 2,
+                  "booker": "Second",
+                  "createdAt": "2026-11-24T12:30:00.000Z"
+                }
+              ],
+              "expected": [
+                {
+                  "id": "bk-mwuo9u80-1nso0p",
+                  "roomId": "room-1",
+                  "date": "2026-11-25",
+                  "slot": 2,
+                  "booker": "First",
+                  "createdAt": "2026-11-24T12:30:00.000Z"
+                }
+              ]
+            },
+            {
+              "name": "read failure must preserve unread records",
+              "scope": "storage-fault",
+              "passed": false,
+              "actual": [
+                {
+                  "id": "bk-mwuo9u80-b3b09x",
+                  "roomId": "room-2",
+                  "date": "2026-11-25",
+                  "slot": 3,
+                  "booker": "Overwrite",
+                  "createdAt": "2026-11-24T12:30:00.000Z"
+                }
+              ],
+              "expected": [
+                {
+                  "id": "bk-mwuo9u80-i2yb7c",
+                  "roomId": "room-1",
+                  "date": "2026-11-25",
+                  "slot": 2,
+                  "booker": "Existing",
+                  "createdAt": "2026-11-24T12:30:00.000Z"
+                }
+              ]
+            }
+          ],
+          "usable": "10 rooms/hourly booking; query, wrong-name refusal, correct-name cancellation, persistence after reload and date reselect; direct-file offline use.",
+          "callAudit": {
+            "browserCalls": 135,
+            "success": 108,
+            "agents": {
+              "dev": 135
+            },
+            "exactUniqueRequests": 108,
+            "sourceMatches": 135,
+            "candidateAtMinutes": 4.4793
+          },
+          "whyPartial": "Developer kept testing unchanged published code;135 actual tests,108 successful,27 repeated exact request occurrences beyond108 unique requests. QA did not execute any browser tests. Developer and QA ended partial at stage handoff; release skipped.",
+          "reviewCoverage": "No formal delivery or independent agent pass established; operator QA not substituted for platform review."
+        },
+        "software-2": {
+          "runId": "run-6bada620fee94702",
+          "runStatus": "partial",
+          "candidateCount": 1,
+          "formalCount": 0,
+          "targetForm": "Offline browser SPA; booking and interactive dashboard tabs",
+          "zipSha256": "64d2c310237bacd521a93b2d1c673b2e370a39ea11579dad518ab2ce5c1016e8",
+          "artifactFiles": [
+            {
+              "artifactId": "artifact-2fa7eaf2a2a342aa82310b888ae09e76",
+              "path": "app/index.html",
+              "sha256": "cfbada1d2f9a9976925859ba5cf981cf576757d9204d40d181eebab5bf29e93a"
+            },
+            {
+              "artifactId": "artifact-c1ee8f257dba44d5b5abe2cdc2a54872",
+              "path": "app/app.js",
+              "sha256": "fe95549e1a01726cf09ffe11bc6b5a5bb5dd8e488c542a4f3b7f8e184f8005f7"
+            },
+            {
+              "artifactId": "artifact-52e974b187cb42b8b9c2418f4f55e131",
+              "path": "app/dashboard.js",
+              "sha256": "dc5e177626647d2d53cbc78a677abe76c16aafe013e0277a96b8f5e3c83bfdda"
+            },
+            {
+              "artifactId": "artifact-e06b430f6397423197f8a34b72de4299",
+              "path": "app/styles.css",
+              "sha256": "77557400b63ef1591a425ddb69f4a2888c0fa75cde0319120659f0c1ec3c31eb"
+            },
+            {
+              "artifactId": "artifact-fc707199c2c54c11b13c6aab875534e6",
+              "path": "app/README.md",
+              "sha256": "a8dcebbc801b128fe767fdd7a678fe62d46ef455b1b2490354be97f14ed447e0"
+            }
+          ],
+          "allSnapshotHashesUnchanged": true,
+          "byScope": {
+            "compatibility": {
+              "passed": 1,
+              "failed": 0
+            },
+            "conflict": {
+              "passed": 0,
+              "failed": 1
+            },
+            "core": {
+              "passed": 5,
+              "failed": 0
+            },
+            "dashboard": {
+              "passed": 9,
+              "failed": 0
+            },
+            "package": {
+              "passed": 2,
+              "failed": 0
+            },
+            "runtime": {
+              "passed": 1,
+              "failed": 0
+            },
+            "storage-fault": {
+              "passed": 1,
+              "failed": 2
+            }
+          },
+          "defects": [
+            {
+              "name": "preopened tabs cannot overwrite first",
+              "scope": "conflict",
+              "passed": false,
+              "actual": [
+                {
+                  "id": "bk-mwuo9u80-h3a4il",
+                  "roomId": "room-1",
+                  "date": "2026-11-25",
+                  "slot": 2,
+                  "booker": "Second",
+                  "createdAt": "2026-11-24T12:30:00.000Z"
+                }
+              ],
+              "expected": [
+                {
+                  "id": "bk-mwuo9u80-0itw7a",
+                  "roomId": "room-1",
+                  "date": "2026-11-25",
+                  "slot": 2,
+                  "booker": "First",
+                  "createdAt": "2026-11-24T12:30:00.000Z"
+                }
+              ]
+            },
+            {
+              "name": "read failure must preserve unread records",
+              "scope": "storage-fault",
+              "passed": false,
+              "actual": [
+                {
+                  "id": "bk-mwuo9u80-roh4cr",
+                  "roomId": "room-2",
+                  "date": "2026-11-25",
+                  "slot": 3,
+                  "booker": "Overwrite",
+                  "createdAt": "2026-11-24T12:30:00.000Z"
+                }
+              ],
+              "expected": [
+                {
+                  "id": "bk-mwuo9u80-xediqo",
+                  "roomId": "room-1",
+                  "date": "2026-11-25",
+                  "slot": 2,
+                  "booker": "Existing",
+                  "createdAt": "2026-11-24T12:30:00.000Z"
+                }
+              ]
+            },
+            {
+              "name": "read fault not zero usage",
+              "scope": "storage-fault",
+              "passed": false,
+              "actual": false,
+              "expected": true
+            }
+          ],
+          "usable": "10 rooms/hourly booking; query, wrong-name refusal, correct-name cancellation, persistence after reload and date reselect; direct-file offline use. Actual known-fixture counts, hours, room/day/hour distribution, cancellations and25% rate, zero-use rooms, date filtering, invalid/empty ranges passed.",
+          "callAudit": {
+            "browserCalls": 11,
+            "success": 1,
+            "agents": {
+              "dev": 5,
+              "qa": 6
+            },
+            "exactUniqueRequests": 8,
+            "sourceMatches": 2,
+            "candidateAtMinutes": 12.408833333333334
+          },
+          "whyPartial": "Developer done; QA six actual tests all used mismatching private source(s), including malformed dashboard.js with Unexpected token. Repeated failed proposal stopped QA, release skipped. Candidate exact dashboard bytes work in independent tests.",
+          "reviewCoverage": "No formal delivery or independent agent pass established; operator QA not substituted for platform review."
+        }
+      },
+      "remaining": [
+        "No complete production-grade multiuser/authentication guarantee (single-browser demo scope).",
+        "No exhaustive browser/OS/accessibility/room-management tests.",
+        "Storage read errors and two-tab overwrites require correction before dependable use."
+      ],
+      "comparisonR12": [
+        "Core booking and real interactive dashboard remain usable in observed nominal scope.",
+        "Read-failure data loss and dashboard false-zero behavior remain.",
+        "Two-preopened-tab overwrite is a regression versus R12 observed conflict check.",
+        "Historical cancellation disclaimer now remains explicit rather than disappearing.",
+        "S1 candidate arrived at4.479min versus R12 about43.218min, but formal completion still blocked; not a causal controlled comparison."
+      ],
+      "preferences": "Dashboard defaults today through +13days, with custom inclusive dates and 14-day reset. This differs from earlier preferred last30days/7-30-90 presets; original mid-test hard requirement is selectable range. No claim the user reconfirmed these new defaults."
+    },
+    "newsroom": {
+      "round": "R13",
+      "scope": "Bounded independent QA after all six cases naturally ended; no generated product/source edits, live model calls, rerun or push.",
+      "method": "Read actual exported artifact bytes and frozen primary-page bodies; independently compare ZIP CRC, manifest and published SHA. N2 sources checked at abstract-page level, not full-paper replication; no extra broad literature search. Workflow status and content quality assessed separately.",
+      "provenanceFile": "provenance.json",
+      "provenanceSha256": "ff8838ba5fe00b657744890dd0f200f28d1c2103c1bcfb0799e4a4126bba3492",
+      "newsroom-1": {
+        "runId": "run-3c8e1d741be741ef",
+        "workflowStatus": "done",
+        "newArtifacts": 8,
+        "inheritedArtifacts": 0,
+        "minutes": 20.027533,
+        "objectiveProduct": "Markdown news article + multi-channel/social copy + README, one formal ZIP. No HTML website or external publication claimed; original task permits text-format reporting.",
+        "article": {
+          "artifactId": "artifact-498acccf59bf4af1ac1a5e6a449ef744",
+          "sha256": "e546a7fc1bdd8a15f47e369eccebd5e0dd09ecd72d78e018593ff1f691c8b98a",
+          "wordCountBeforeSourcesWhitespace": 578,
+          "wordCountIncludingSourcesWhitespace": 648,
+          "wordCountNote": "Includes title/byline/headings; substantive prose is shorter. Below user’s approximately 800-word preference; no arbitrary exact tolerance asserted."
+        },
+        "social": {
+          "artifactId": "artifact-f66703d675d9421f871e993f3e742599",
+          "sha256": "b6d6e4859c63d9d6fcd5b75a4cd97b631b9b521522500b5511cf04133aa4c862",
+          "forms": [
+            "web teaser",
+            "newsletter",
+            "X/Twitter",
+            "LinkedIn",
+            "Instagram/Facebook",
+            "WhatsApp/Telegram"
+          ],
+          "missingArticlePlaceholder": false
+        },
+        "contentVerdict": "Usable, substantially sourced neutral campus story; not fully satisfies requested length. Major improvement from R12’s absence of an article.",
+        "supportedFacts": [
+          {
+            "claim": "Submissions opened 2 Nov 2026; Feb 28 deadline; Mar 15 notification; Pulsant theme; free entry; main >3 min/student >1 min; May 22–23 2027 tentative. Opening is 14 days before report date.",
+            "url": "https://aiff-dev.hkust.edu.hk/",
+            "callId": "call-26dacbde1c604f18",
+            "sha256": "610fd9d5ffa8de88b575542b7ba9354e64502690fa3b53cb426b3e4c21c84541"
+          },
+          {
+            "claim": "1,300+ entries/nearly 80 countries are previous 2026 edition, not future edition; correctly attributed.",
+            "url": "https://hkust.edu.hk/news/hkust-2nd-ai-film-festival-concludes-successfully-showcasing-global-excellence-ai-creativity",
+            "callId": "call-f0bff36b05cf474c",
+            "sha256": "2fcc610d19a1c9d694b30ec0bccde0062b2f104f94b76da559ef1777412dc217"
+          },
+          {
+            "claim": "Related hackathon expressly identifies Clear Water Bay; workshop starts Oct 24, hackathon Feb 27–28, screening May tentative.",
+            "url": "https://aifilmhackathon.hkust.edu.hk/",
+            "callId": "call-ffa2d37c7115418b",
+            "sha256": "68479cf1a869f2a2ff74361ce8f8f2042baed8fe2679503b5d924af7f7a66023"
+          }
+        ],
+        "remainingIssues": [
+          "About-800-word request not met: only 578 whitespace words before Sources.",
+          "Hackathon is presented as a practical route for interested students without saying the fetched page’s registration deadline was 9 Oct, already past on 16 Nov; useful context should distinguish existing programme from an open opportunity.",
+          "2027 festival page has HKUST Hong Kong and unconfirmed venue details; the campus link is supported by the related programme, but the article should not imply a confirmed 2027 venue.",
+          "Original source lists basic submission conditions (AI workflow explanation, subtitles, no resubmissions); omitted in article. This is a practical completeness improvement, not a new mandatory rubric."
+        ],
+        "reviewCoverage": {
+          "draftTaskId": "task-7d60eaf52dc84b2e",
+          "factCheckTaskId": "task-3efdc8e76f034b60",
+          "factCheckEventId": "evt-23de1073f49e49b6",
+          "primaryBodiesActuallyRead": 3,
+          "secondEditorialReviewEventId": "evt-d8de92df538c4ad3",
+          "independentReviewer": "fact_checker",
+          "kind": "editorial_assessment",
+          "verified": false,
+          "finalArticleExactReviewedSha": false,
+          "finalSocialExactReviewedSha": true,
+          "finalDifference": "Only article text change is narrowing on the pages reviewed to on the festival’s pages reviewed, as explicitly recommended by reviewers. New README also has no exact independent review. Formal package is not evidence of full final-byte editorial reassessment."
+        },
+        "zip": [
+          {
+            "file": "evidence/product-snapshots/newsroom-1/delivery-6ccd017a20104e288a026f355c0f05b8.zip",
+            "sha256": "533b10e3c80819f12ec655f8f8415e83decb7303fb13ea129e9c27af0840f75e",
+            "crcError": null,
+            "files": [
+              {
+                "path": "package/full_report.md",
+                "artifactId": "artifact-498acccf59bf4af1ac1a5e6a449ef744",
+                "sha256": "e546a7fc1bdd8a15f47e369eccebd5e0dd09ecd72d78e018593ff1f691c8b98a",
+                "matchesPublishedAndManifest": true,
+                "matchesActualArtifactBytes": true
+              },
+              {
+                "path": "package/channel_companion.md",
+                "artifactId": "artifact-f66703d675d9421f871e993f3e742599",
+                "sha256": "b6d6e4859c63d9d6fcd5b75a4cd97b631b9b521522500b5511cf04133aa4c862",
+                "matchesPublishedAndManifest": true,
+                "matchesActualArtifactBytes": true
+              },
+              {
+                "path": "package/README.md",
+                "artifactId": "artifact-5aa507c71af4450dbd47caafbef72f55",
+                "sha256": "f03aea35718c9c366e81e058ba616250bb1f9856bd4772a7df1f5d3f6b1c2afa",
+                "matchesPublishedAndManifest": true,
+                "matchesActualArtifactBytes": true
+              }
+            ]
+          }
+        ]
+      },
+      "newsroom-2": {
+        "runId": "run-17c7817fc6184120",
+        "workflowStatus": "partial",
+        "newArtifacts": 11,
+        "inheritedArtifacts": 8,
+        "minutes": 26.533583,
+        "objectiveProduct": "New complete Markdown fact-check article and multi-channel companion, revised once; no new ZIP or publication package. Eight inherited N1 files are not new N2 output.",
+        "article": {
+          "artifactId": "artifact-59c127a254234db5adcd44faa6c0e8df",
+          "sha256": "3c7b8df85a364076a9d0ea71931a112902e99d4edfa7572334f1a08a90e5cf9a",
+          "wordCountBeforeSourcesWhitespace": 1193,
+          "wordCountIncludingSourcesWhitespace": 1339,
+          "wordCountNote": "No 800-word requirement for N2; length is not marked a failure."
+        },
+        "social": {
+          "artifactId": "artifact-d35a3ca16bc74cce8935e90c01c49ec1",
+          "sha256": "1d90c01b9321c114da13ffb86eae53f5e6de5c77ba62b74953abb095e61ed51e"
+        },
+        "userScopeEvidence": "requester-relays/newsroom-2/user-confirmation.json confirms global framing, concrete tools/versions/study dates, older background allowed, evidence-led conclusion; confirmation came after same assumptions were relayed and is not retroactive evidence of an earlier answer.",
+        "contentVerdict": "Complete and improved evidence-date disclosure, includes positive detection evidence, but categorical generalisations and missing actual detector versions prevent treating it as fully publication-ready independent fact-check.",
+        "primarySupport": [
+          {
+            "claim": "Weber-Wulff tested 12 public + 2 commercial tools and reports poor reliability/obfuscation; explicitly historical 2023 evidence.",
+            "callId": "call-9a641c849a8d4b93",
+            "url": "https://arxiv.org/abs/2306.15666v1"
+          },
+          {
+            "claim": "Park abstract states 135,389 edited manuscript pairs and FPR range 0.0%–100.0% across 13 detectors, with style as confound; not evidence every detector has 100% error. Revised text adds per-tool/per-corpus qualification.",
+            "callId": "call-dd98824162d34382",
+            "url": "https://arxiv.org/abs/2608.26710v1"
+          },
+          {
+            "claim": "Liang abstract supports non-native-writing bias and bypass risk for studied 2023 detectors.",
+            "callId": "call-addb57afa5474801",
+            "url": "https://arxiv.org/abs/2304.02819v3"
+          },
+          {
+            "claim": "Bitton abstract genuinely reports unanimous ensemble precision 0.9988 and FPR 0.0004; article includes this opposing evidence with dataset qualification.",
+            "callId": "call-177d2083f020419c",
+            "url": "https://arxiv.org/abs/2503.01659v1"
+          },
+          {
+            "claim": "Li watermark abstract supports secret-key statistical detection with controllable false positives.",
+            "callId": "call-b3aa9cf2a8aa4549",
+            "url": "https://arxiv.org/abs/2404.01245v1"
+          }
+        ],
+        "remainingIssues": [
+          "Lead and recommendations say detectors are not evidence of authorship and at best a weak signal, which overgeneralises limited, mixed studies. Safer supported conclusion: insufficient as sole or conclusive evidence for an individual student; tools and settings differ.",
+          "Article admits no institutional policies or actual assignment tests, yet claims all three subquestions point the same way and makes categorical educational claims. Missing evidence should leave those questions partly open.",
+          "Only Turnitin/PlagiarismCheck named through 2023 study; paper version identifiers are present, but actual detector/model versions are absent despite confirmed scope.",
+          "Watermark paragraph asserts essentially all student assignments are unwatermarked without supporting prevalence evidence in the fetched abstract.",
+          "Social headline AI Detectors Can’t Reliably Tell If a Student Cheated conflates AI authorship with misconduct, which depends on course rules.",
+          "Positive ensemble and watermark evidence is included, an improvement over one-sided treatment, but dismissed as best-case without full-paper analysis of coverage/abstention; abstract-only scope limits the synthesis."
+        ],
+        "reviewCoverage": {
+          "taskId": "task-2d5d221edac24f38",
+          "primaryWebFetchesByReviewer": 0,
+          "sourceBodyFileReadsByReviewer": 0,
+          "newArticleReadCallId": "call-73c27b3b9a9247a6",
+          "newArticleReadSha256": "3c7b8df85a364076a9d0ea71931a112902e99d4edfa7572334f1a08a90e5cf9a",
+          "newCompanionRead": false,
+          "passOnCurrentArticleRevision": false,
+          "onlyPassEventId": "evt-32cca6f716ef4097",
+          "onlyPassTarget": "task-78d151042ddf4472",
+          "onlyPassKind": "editorial_assessment",
+          "verified": false,
+          "note": "Reviewer openly disclosed reliance on reporter brief. It also read three inherited N1 documents irrelevant to detector checking; not source-body verification."
+        },
+        "failureChain": [
+          {
+            "event": "Initial legitimate rework",
+            "eventId": "evt-5f058597770243c5",
+            "time": "2026-11-16T13:02:50Z",
+            "targetRevision": 0,
+            "detail": "Two wording fixes requested."
+          },
+          {
+            "event": "Producer fixed and handed off new revision",
+            "eventId": "evt-263736dfd95141f2",
+            "time": "2026-11-16T13:08:00Z",
+            "targetRevision": 1,
+            "detail": "Both fixes are present in actual current article; revised companion also adds per-corpus qualification; both artifacts explicitly granted to reviewer."
+          },
+          {
+            "event": "Reviewer read new article but replayed old findings",
+            "modelCallId": "call-8ecfbe47bfc44c9e",
+            "transcriptId": "dialogue-7125f275e52048cf",
+            "time": "2026-11-16T13:13:08Z",
+            "detail": "Proposal explicitly names old artifact IDs and already-corrected phrases; includes new article read among evidence but did not reassess result. Previous proposal was additionally nested in args and needed protocol correction."
+          },
+          {
+            "event": "Second rework rejected by existing cap",
+            "transcriptId": "dialogue-2b84ff34d8124ff2",
+            "detail": "Real protocol error: subtask reached rework limit. This did not reject a pass; model chose repeated rework."
+          },
+          {
+            "event": "Reviewer ended partial; dependent edit review and packaging skipped",
+            "detail": "No current-revision review recorded. Final synthesis partial correctly notes gap, though its opening reviewed/current label is inconsistent with that admission. About 18.47 minutes of original wall budget remained."
+          }
+        ],
+        "zipFailureDiagnosis": "No actual package_delivery proposal and no publish-with-delivery proposal; packaging task never ran. This is stale review/rework recovery and dependency gating, not ZIP tool failure. Correct fix is current-version reassessment and bounded honest closure, not automatically raising rework cap or manufacturing acceptance.",
+        "comparisonWithR12": "R12 had article+HTML+candidate ZIP but missing packaging acceptance; R13 has revised Markdown article and no ZIP because review replayed stale findings. R13 accurately discloses lack of primary review and includes dated positive studies; no overall stable-delivery improvement can be claimed."
+      },
+      "limitations": [
+        "Single round, not a success-rate estimate or causal attribution to watchdog.",
+        "No fresh platform model runs or external publication; no PDF/full-paper study replication.",
+        "No HTML browser test needed: new news products are Markdown/TXT, not generated interactive pages. ZIP validation is byte integrity, not semantic acceptance."
+      ]
+    },
+    "fund": {
+      "round": 13,
+      "scope": "Independent QA of frozen actual products, not a new platform acceptance",
+      "productHandEdited": false,
+      "newPlatformModelCalls": 0,
+      "limits": [
+        "No fresh market fetch; source claims checked against actual stored web.fetch receipts, not independently certified current truth.",
+        "No full investment suitability determination; requester authorized clearly labelled simulated assumptions and supplied no 30% loss ceiling.",
+        "Browser checks bounded to actual downloaded F2 package: desktop1280x800 and extra mobile390x844; no print/export or every-device claim."
+      ],
+      "cases": {
+        "fund-1": {
+          "runId": "run-2c7f6132fdf94b60",
+          "workflowStatus": "done",
+          "exportSha256": "df52720f0add5e144d18b53fa060deb93d9d5eb243371f3a3effaa35fd8d8df4",
+          "acceptanceGaps": [],
+          "activeMinutes": 17.992,
+          "modelCalls": 101,
+          "newArtifactCount": 10,
+          "inheritedArtifactCount": 0,
+          "deliveries": [
+            {
+              "id": "delivery-da31274879a14d0aabd78c9713a1d0d6",
+              "status": "packaged",
+              "zipSha256": "f9d6836dbf2db0f6754768a4b53dae60a23746b2d892c806687ddc3a79ff1e9f",
+              "entrypoint": "README.md",
+              "files": [
+                {
+                  "path": "README.md",
+                  "artifactId": "artifact-cfe2dd8001be4f4facd404ddd9a7777c",
+                  "sha256": "abc6c8e7407ed4d2e962b8ed0a596b93fcbc954e258ef967a000f51d9216d889",
+                  "matchesExportContent": true
+                },
+                {
+                  "path": "PACKAGE_CONTENTS.md",
+                  "artifactId": "artifact-2d09f60605624e5d92d17b2c739a3129",
+                  "sha256": "d2af0fb2b74679487c7c18d8f120301231c299f40997b71193bfb06dad7e7f73",
+                  "matchesExportContent": true
+                },
+                {
+                  "path": "client_intro.md",
+                  "artifactId": "artifact-e62c68d77fd1444c871741abeaaa71d3",
+                  "sha256": "15296ae7222a9fd38e5764d8e3723a397a7883e5bf685f96893f1d31feaa9d65",
+                  "matchesExportContent": true
+                },
+                {
+                  "path": "allocation.md",
+                  "artifactId": "artifact-352978d5cae744e09acb43cc46e9e4e6",
+                  "sha256": "cd1de1cb39e81bc12e4ef6495e0c762a0a24c0eb5f80ca9a138fb9bc1d1daa9b",
+                  "matchesExportContent": true
+                },
+                {
+                  "path": "us_market_allocation_evidence.md",
+                  "artifactId": "artifact-da5f412d9df140b89aee05a49c21a226",
+                  "sha256": "967955fe6fdad542e0d0e6699b991b927e3bcc815fbbd3078335c7355d29a212",
+                  "matchesExportContent": true
+                }
+              ]
+            }
+          ],
+          "eventCounts": {
+            "repeated_action_warning": 1,
+            "review_rework": 2,
+            "rework_handoff": 2,
+            "review_pass": 3
+          },
+          "reviewBindings": [
+            {
+              "taskId": "task-f0b99d7ea7ec40ca",
+              "title": "Research US market and allocation evidence",
+              "validation": {
+                "verdict": "pass",
+                "assessed": true,
+                "verified": false,
+                "reviewerTaskId": "task-2101931635eb47ef",
+                "reviewerRevision": 0,
+                "targetRevision": 0,
+                "artifactHashes": {
+                  "artifact-da5f412d9df140b89aee05a49c21a226": "967955fe6fdad542e0d0e6699b991b927e3bcc815fbbd3078335c7355d29a212"
+                },
+                "evidenceCallIds": [
+                  "call-6482738f9efd4abe"
+                ]
+              }
+            },
+            {
+              "taskId": "task-d48ce46bda3347d1",
+              "title": "Draft simulated allocation and rationale",
+              "validation": {
+                "verdict": "pass",
+                "assessed": true,
+                "verified": false,
+                "reviewerTaskId": "task-2101931635eb47ef",
+                "reviewerRevision": 0,
+                "targetRevision": 1,
+                "artifactHashes": {
+                  "artifact-352978d5cae744e09acb43cc46e9e4e6": "cd1de1cb39e81bc12e4ef6495e0c762a0a24c0eb5f80ca9a138fb9bc1d1daa9b"
+                },
+                "evidenceCallIds": [
+                  "call-10d82e18e7b44753"
+                ]
+              }
+            },
+            {
+              "taskId": "task-68e8d14114a54bfb",
+              "title": "Draft client-friendly introduction",
+              "validation": {
+                "verdict": "pass",
+                "assessed": true,
+                "verified": false,
+                "reviewerTaskId": "task-2101931635eb47ef",
+                "reviewerRevision": 0,
+                "targetRevision": 1,
+                "artifactHashes": {
+                  "artifact-e62c68d77fd1444c871741abeaaa71d3": "15296ae7222a9fd38e5764d8e3723a397a7883e5bf685f96893f1d31feaa9d65"
+                },
+                "evidenceCallIds": [
+                  "call-941284c1967d4da4"
+                ]
+              }
+            }
+          ],
+          "actualBrowserCalls": [],
+          "fetchCounts": {
+            "failed": 2,
+            "success": 6
+          },
+          "productForm": "Five-file Markdown proposal package; no executable product required",
+          "arithmetic": {
+            "allocation.md": {
+              "rows": [
+                {
+                  "label": "Core — broad US market",
+                  "weight": 80,
+                  "hkd": 800000
+                },
+                {
+                  "label": "Satellite — US large-cap growth/tech tilt",
+                  "weight": 5,
+                  "hkd": 50000
+                },
+                {
+                  "label": "Satellite — US small/mid-cap",
+                  "weight": 5,
+                  "hkd": 50000
+                },
+                {
+                  "label": "Satellite — international developed (ex-US)",
+                  "weight": 5,
+                  "hkd": 50000
+                },
+                {
+                  "label": "Cash / short-duration buffer",
+                  "weight": 5,
+                  "hkd": 50000
+                }
+              ],
+              "totalWeight": 100,
+              "totalHKD": 1000000,
+              "rowAmountsMatch": true
+            },
+            "client_intro.md": {
+              "rows": [
+                {
+                  "label": "**The core (broad US market)**",
+                  "weight": 80,
+                  "hkd": 800000
+                },
+                {
+                  "label": "**Big growth/tech companies**",
+                  "weight": 5,
+                  "hkd": 50000
+                },
+                {
+                  "label": "**Smaller US companies**",
+                  "weight": 5,
+                  "hkd": 50000
+                },
+                {
+                  "label": "**Developed markets outside the US**",
+                  "weight": 5,
+                  "hkd": 50000
+                },
+                {
+                  "label": "**Cash / short-term bonds**",
+                  "weight": 5,
+                  "hkd": 50000
+                }
+              ],
+              "totalWeight": 100,
+              "totalHKD": 1000000,
+              "rowAmountsMatch": true
+            },
+            "README.md": {
+              "rows": [
+                {
+                  "label": "Core — broad US market",
+                  "weight": 80,
+                  "hkd": 800000
+                },
+                {
+                  "label": "Satellite — large-cap growth/tech",
+                  "weight": 5,
+                  "hkd": 50000
+                },
+                {
+                  "label": "Satellite — US small/mid-cap",
+                  "weight": 5,
+                  "hkd": 50000
+                },
+                {
+                  "label": "Satellite — developed markets ex-US",
+                  "weight": 5,
+                  "hkd": 50000
+                },
+                {
+                  "label": "Cash / short-duration buffer",
+                  "weight": 5,
+                  "hkd": 50000
+                }
+              ],
+              "totalWeight": 100,
+              "totalHKD": 1000000,
+              "rowAmountsMatch": true
+            }
+          },
+          "allocationConsistency": true,
+          "quality": "Usable simulated proposal with arithmetic and core/satellite constraints satisfied; material explanatory claims still need correction",
+          "findings": [
+            {
+              "severity": "material",
+              "finding": "Cash/short-duration yield rationale incorrectly uses a 10-year Treasury quote as the short-term cash rate.",
+              "evidence": [
+                "allocation.md §5 says cash buffer earns ~5% risk-free, citing 10Y5.13%; client_intro.md calls the same quote short-term rates.",
+                "Actual call-90aed57dd0924f8d lines217/221 explicitly describe US10-year yield5.13%, not short-term cash/T-bill yield."
+              ]
+            },
+            {
+              "severity": "unsupported_assurance",
+              "finding": "Client introduction and README claim no single company exceeds5%; no holdings look-through was demonstrated for the80% broad-market core plus5%tech tilt. This is unverified, not proof of an actual cap breach.",
+              "evidence": [
+                "allocation.md §1/§3 prefer ETFs and no individual-stock positions>5%; client_intro.md and README strengthen this to any company exposure."
+              ]
+            },
+            {
+              "severity": "wording",
+              "finding": "Calling an80% equity core a safe backbone can understate market risk, although the document clearly discloses40–50% drawdowns and conditional suitability elsewhere."
+            },
+            {
+              "severity": "minor",
+              "finding": "Allocation §4 retains satellite cap10% while target weights are5% each. A cap and target can coexist; the package discloses this wording lag, so it is not arithmetic failure."
+            }
+          ],
+          "riskAssessment": {
+            "authorizedAssumptions": true,
+            "knownUserDrawdownCeiling": null,
+            "equityPercent": 95,
+            "cashShortDurationPercent": 5,
+            "coreConstraint": "80 within70–90",
+            "satelliteConstraint": "15 within<=30",
+            "conditionalSuitabilityDisclosed": true,
+            "notEstablished": [
+              "Actual risk tolerance",
+              "Underlying company exposure",
+              "Broker/access/tax suitability",
+              "Cash/T-bill yield"
+            ],
+            "comparisonR12": "R12 was80% equity+10%bonds+10%cash; R13 returns to95% equity+5%cash. Fewer satellite sleeves does not prove lower aggregate risk. R12 self-imposed40%ETF cap is absent this run; do not import it."
+          },
+          "reviewAssessment": "Research/allocation revision1/intro revision1 have exact artifact-hash editorial pass bindings, all verified=false; this honestly does not certify underlying source truth. Final three content files match reviewed bytes; new package documentation has no independent semantic certification."
+        },
+        "fund-2": {
+          "runId": "run-882f79916b924837",
+          "workflowStatus": "partial",
+          "exportSha256": "f3fe1f7208858e7e1a7210fc8300436b5790fc998d36a2b09307887bc5b66539",
+          "acceptanceGaps": [
+            "Final packaging and delivery：最新代码 revision / 产物尚无匹配的审核角色独立验收。"
+          ],
+          "activeMinutes": 29.068,
+          "modelCalls": 94,
+          "newArtifactCount": 13,
+          "inheritedArtifactCount": 10,
+          "deliveries": [
+            {
+              "id": "delivery-b6e62dff2a5e4ab4ae93a41cf6f74172",
+              "status": "candidate",
+              "zipSha256": "04f19ca9e11bc3a9f61534987d1c01bebf989f6cb44f67b94c130566b931915c",
+              "entrypoint": "index.html",
+              "files": [
+                {
+                  "path": "index.html",
+                  "artifactId": "artifact-59f2513cdcc74647af1d9850a1a09202",
+                  "sha256": "521ede7f791e715ab40a1c50f56839f6a442d0828fefc80e116a0f8ae9fb4ba2",
+                  "matchesExportContent": true
+                },
+                {
+                  "path": "styles.css",
+                  "artifactId": "artifact-0debc291aa64488faafbacc020e49f45",
+                  "sha256": "73e50ad2c8433537cf0d1da8f443251f96e0b1e48d6cc80ea4089be53946d111",
+                  "matchesExportContent": true
+                },
+                {
+                  "path": "slides.js",
+                  "artifactId": "artifact-d52adb39bbef4f84a509b9ca1b6008b4",
+                  "sha256": "4ec8a86d393ed411e3926c56a742840edbb640de6a42ecd8e67ac1adf8573451",
+                  "matchesExportContent": true
+                },
+                {
+                  "path": "README.md",
+                  "artifactId": "artifact-36ea1017daf04ad9a9ff766dcab42c5a",
+                  "sha256": "853c7d02de893605fd808c2e220d9e143f901a0897afc017556d0b671e067685",
+                  "matchesExportContent": true
+                }
+              ]
+            },
+            {
+              "id": "delivery-0b5a178597e14ccf9de26b202fa81462",
+              "status": "packaged",
+              "zipSha256": "8045bff05f21e13d385970d73f687be0cd99f9b4d6c4e9a2a79bd36eacec50e1",
+              "entrypoint": "index.html",
+              "files": [
+                {
+                  "path": "index.html",
+                  "artifactId": "artifact-bd7d312528ac44ff9a117f18c4a6d4de",
+                  "sha256": "521ede7f791e715ab40a1c50f56839f6a442d0828fefc80e116a0f8ae9fb4ba2",
+                  "matchesExportContent": true
+                },
+                {
+                  "path": "styles.css",
+                  "artifactId": "artifact-1ebe2180cb70443c9d62249e3f05838e",
+                  "sha256": "73e50ad2c8433537cf0d1da8f443251f96e0b1e48d6cc80ea4089be53946d111",
+                  "matchesExportContent": true
+                },
+                {
+                  "path": "slides.js",
+                  "artifactId": "artifact-2944e328ffeb43b0ad9083103f9cdb61",
+                  "sha256": "4ec8a86d393ed411e3926c56a742840edbb640de6a42ecd8e67ac1adf8573451",
+                  "matchesExportContent": true
+                },
+                {
+                  "path": "README.md",
+                  "artifactId": "artifact-3bdc6ea6a5e9437faffd2752e1c929e8",
+                  "sha256": "853c7d02de893605fd808c2e220d9e143f901a0897afc017556d0b671e067685",
+                  "matchesExportContent": true
+                },
+                {
+                  "path": "DELIVERY_NOTES.md",
+                  "artifactId": "artifact-05d8bdfceb0e4986b21e6a0db296b76b",
+                  "sha256": "53c4aa6c149dbd043edc98ae968d3a036540758403bd9436a32d7eadc1cfb216",
+                  "matchesExportContent": true
+                }
+              ]
+            }
+          ],
+          "eventCounts": {
+            "progress_watchdog_observed": 2,
+            "progress_watchdog_delivered": 1,
+            "repeated_action_warning": 2,
+            "review_pass": 1
+          },
+          "reviewBindings": [
+            {
+              "taskId": "task-ee8a58b7c1694d89",
+              "title": "Draft HTML slide deck",
+              "validation": {
+                "verdict": "pass",
+                "assessed": true,
+                "verified": true,
+                "reviewerTaskId": "task-159ee5b867c24b05",
+                "reviewerRevision": 0,
+                "targetRevision": 0,
+                "artifactHashes": {
+                  "artifact-0debc291aa64488faafbacc020e49f45": "73e50ad2c8433537cf0d1da8f443251f96e0b1e48d6cc80ea4089be53946d111",
+                  "artifact-36ea1017daf04ad9a9ff766dcab42c5a": "853c7d02de893605fd808c2e220d9e143f901a0897afc017556d0b671e067685",
+                  "artifact-59f2513cdcc74647af1d9850a1a09202": "521ede7f791e715ab40a1c50f56839f6a442d0828fefc80e116a0f8ae9fb4ba2",
+                  "artifact-d52adb39bbef4f84a509b9ca1b6008b4": "4ec8a86d393ed411e3926c56a742840edbb640de6a42ecd8e67ac1adf8573451"
+                },
+                "evidenceCallIds": [
+                  "call-88ac569caac749e6"
+                ]
+              }
+            }
+          ],
+          "actualBrowserCalls": [
+            {
+              "callId": "call-88ac569caac749e6",
+              "status": "success",
+              "assertionCount": 10,
+              "assertionsPassed": 10,
+              "testedFiles": [
+                {
+                  "path": "imports/artifact-59f2513cdcc74647af1d9850a1a09202/index.html",
+                  "sha256": "521ede7f791e715ab40a1c50f56839f6a442d0828fefc80e116a0f8ae9fb4ba2"
+                },
+                {
+                  "path": "imports/artifact-0debc291aa64488faafbacc020e49f45/styles.css",
+                  "sha256": "73e50ad2c8433537cf0d1da8f443251f96e0b1e48d6cc80ea4089be53946d111"
+                },
+                {
+                  "path": "imports/artifact-d52adb39bbef4f84a509b9ca1b6008b4/slides.js",
+                  "sha256": "4ec8a86d393ed411e3926c56a742840edbb640de6a42ecd8e67ac1adf8573451"
+                }
+              ]
+            }
+          ],
+          "fetchCounts": {
+            "failed": 8,
+            "success": 5
+          },
+          "productForm": "Actual offline HTML/CSS/JS15-slide deck, candidate and formal ZIP both exist",
+          "quality": "Usable desktop presentation; mobile appendix requires horizontal scrolling; content is a bounded evidence-based briefing with an unresolved valuation gap",
+          "independentBrowser": {
+            "summary": "fund-2/browser/summary.json",
+            "summarySha256": "c4cfb5003fe84abd5eaa7c0761ff254c52f6b7941d7522aca3c70388ffd282fc",
+            "byScope": {
+              "core": {
+                "passed": 31,
+                "failed": 0
+              },
+              "desktop_layout": {
+                "passed": 15,
+                "failed": 0
+              },
+              "extra_mobile": {
+                "passed": 16,
+                "failed": 0
+              },
+              "extra_mobile_layout": {
+                "passed": 14,
+                "failed": 1
+              }
+            },
+            "snapshotHashesStillMatch": true,
+            "harnessFatal": null,
+            "pageErrors": [],
+            "externalRequests": [],
+            "extraDeepLink": {
+              "hash": "#7",
+              "counter": "1 / 15",
+              "required": false
+            },
+            "sourceLinks": 0
+          },
+          "findings": [
+            {
+              "severity": "extra_mobile_layout",
+              "finding": "At390x844, appendix slide15 source table exceeds slide width (right edge ~556px vs slide378px); initial view clips date column/URLs. Parent slide overflow:auto permits horizontal scrolling. Other14 mobile slide layouts pass the bounded check."
+            },
+            {
+              "severity": "enhancement",
+              "finding": "No clickable source links; fresh#7 opens slide1. Deep links were not an original requirement; preserve as extra missing capability."
+            },
+            {
+              "severity": "evidence_limit",
+              "finding": "Valuation multiples absent, equipment/materials/EDA unquantified, policy changes not current quantified; deck discloses all three. Investment implications remain thematic, not a complete priced investment case."
+            },
+            {
+              "severity": "source_vintage",
+              "finding": "Deloitte outlook actually dated2026-02-05; IDC2026-04-29; SIA sales2026-11-03. Comparing975bn/1.29tn/>1.5tn as a range mixes publication vintages, which should be made more explicit rather than read as simultaneous disagreement."
+            },
+            {
+              "severity": "citation_precision",
+              "finding": "SIA sales receipt states September146.8%YoY and Q3+24.1%QoQ; the separate Semiconductor Digest receipt explicitly supports Q3+146.8% and memory405.7%. The overall evidence supports the deck, but slide2 should cite both sources for those mixed metrics."
+            },
+            {
+              "severity": "handoff_wording",
+              "finding": "Final synthesis advertises Backspace for previous slide, while actual JS supports ArrowLeft/PageUp and README describes those actual controls. Product navigation itself passed."
+            }
+          ],
+          "reviewAssessment": {
+            "producerRevision": 0,
+            "actualBrowserCallId": "call-88ac569caac749e6",
+            "actualAssertions": "10/10 passed",
+            "reviewedRuntimeBytesMatchFormalZIP": true,
+            "reviewedPaths": [
+              "index.html",
+              "styles.css",
+              "slides.js",
+              "README.md"
+            ],
+            "newUnreviewedPackagePath": "DELIVERY_NOTES.md",
+            "partialReason": "All tasks done and formal package exists, but final packaging task has no matching independent acceptance for its latest outputs. Run acceptanceGaps explicitly records this; a packaged ZIP is not global acceptance.",
+            "noInfiniteBrowserLoop": true,
+            "comparisonR12": "R12 had16slides,70functionalchecks and5/48 layout failures across desktop+two mobiles. R13 bounded scope31core+15desktop pass and1/15 mobilelayout failure, less obstructed controls; scopes differ, not a numeric quality ranking. R12 done→R13partial is a final acceptance-binding gap despite usable reviewed runtime bytes."
+          }
+        }
+      }
+    }
+  },
+  "scopeStop": {
+    "reason": "Reserve remaining weekly allowance for report and upload before user ceiling of 50 percent used.",
+    "observedWeeklyUsedPercentAtReporting": 48,
+    "additionalLiveRunsStarted": false
+  }
+}
