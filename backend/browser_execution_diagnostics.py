@@ -175,7 +175,7 @@ def _execution(run, task, call):
             or report['assertionCount'] != len(assertions)
             or report['assertionsPassed'] != sum(a.get('passed') is True for a in assertions)):
         return None
-    executed_assertions = []
+    executed_assertions, exception_assertions = [], set()
     for index, observed in enumerate(steps):
         expected = args['checks'][index]
         if (observed.get('action') != expected['action']
@@ -206,9 +206,22 @@ def _execution(run, task, call):
                 executed_assertions.append(observed)
             elif observed['ok']:
                 return None
+            else:
+                # The runner records a locator/read exception before an
+                # assertion comparison finishes: steps has no passed value,
+                # while the catch-path assertion receipt adds passed=False.
+                # Bind that exact pair; never invent an actual value or turn
+                # an incomplete comparison into a normal assertion mismatch.
+                if success or not isinstance(observed.get('error'), str) or not observed['error']:
+                    return None
+                exception_assertions.add(len(executed_assertions))
+                executed_assertions.append({**observed, 'passed': False})
     if (len(executed_assertions) != len(assertions)
             or any(any(a.get(k) != s.get(k) for k in _ASSERT_FIELDS)
-                   for a, s in zip(assertions, executed_assertions))):
+                   for a, s in zip(assertions, executed_assertions))
+            or any(assertions[i].get('error') != executed_assertions[i]['error']
+                   or ('actual' in assertions[i]) != ('actual' in executed_assertions[i])
+                   for i in exception_assertions)):
         return None
     if steps[-1]['ok'] and len(steps) != len(args['checks']):
         return None
@@ -229,7 +242,8 @@ def _execution(run, task, call):
             or observation.get('pageId') != steps[-1].get('pageId', 'main')):
         return None
     kind = None
-    if not success and not any(a.get('passed') is False for a in assertions):
+    failed_assertions = [i for i, a in enumerate(assertions) if a.get('passed') is False]
+    if not success and (not failed_assertions or set(failed_assertions) == exception_assertions):
         if not steps[-1]['ok']:
             if not isinstance(steps[-1].get('error'), str) or not steps[-1]['error']:
                 return None
@@ -293,10 +307,20 @@ def _view(run, task, call, value):
         if 'selector' in step:
             result['failedStep'].update(selector=step['selector'][:400],
                                        selectorTruncated=len(step['selector']) > 400)
+        if step['action'].startswith('assert_') and 'passed' not in step:
+            result['failedStep']['comparisonCompleted'] = False
+            result['failedStep']['actualRecorded'] = 'actual' in step
+            for key in ('expected', 'actual'):
+                if key in step:
+                    observed_value = step[key]
+                    result['failedStep'][key] = observed_value[:300] if isinstance(observed_value, str) else copy.deepcopy(observed_value)
+                    if isinstance(observed_value, str) and len(observed_value) > 300:
+                        result['failedStep'][key + 'Truncated'] = True
         result['failureObservation'] = failure_observation_view(report.get('failureObservation'))
         result['recommendations'] = [
             'The recorded step did not complete. Inspect its actual match count, visible state and the already authorized source before blaming product logic.',
             'For a locator error, check DOM structure, uniqueness, date/view and readiness; use a source-supported selector or setup, then rerun normally. Zero matches alone do not prove why it failed.',
+            'An assertion interrupted before comparison has no established expected/actual mismatch. Check dynamic IDs, timestamps and post-reload view/setup against observed state; do not alter the expected value merely to force a pass.',
             'Use observed served files to check coverage only. Resource mappings do not load scripts. If the cause remains unclear, publish usable work with limitations or request precise rework; do not rewrite expected results.']
     if len(_key(result)) > 5500:
         result.pop('assetObservation')

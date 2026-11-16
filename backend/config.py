@@ -77,6 +77,8 @@ class Config:
         # their existing meaning and the run deadline is never replenished.
         self.model_generation_retries=max(0,min(3,int(values.get('MODEL_GENERATION_RETRIES','2'))))
         self.approval_ttl = max(30, min(86400, int(values.get('APPROVAL_TTL_SECONDS', '900'))))
+        # Deterministic observation cadence only; never extends run/model limits.
+        self.progress_watchdog_seconds = max(60, min(120, int(values.get('PROGRESS_WATCHDOG_SECONDS', '90'))))
         self.max_context_chars = max(4000, min(80000, int(values.get('MAX_CONTEXT_CHARS', '28000'))))
         self.initial_context_chars=self.max_context_chars
         self.execution_profile='bounded'

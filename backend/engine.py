@@ -19,10 +19,11 @@ from .generation_retry import generation_retry_allowed,generation_retry_decision
 from .generation_cooldown import new_cooldown,cooldown_binding
 from .readonly_recovery import readonly_failure_feedback
 from .necessary_source import necessary_source_admission
-from .browser_failure_recovery import browser_failure_feedback,browser_failure_trend
+from .browser_failure_recovery import browser_failure_trend
 from .browser_execution_diagnostics import current_browser_execution_diagnostic
 from .browser_diagnostic_recovery import browser_diagnostic_recovery,current_browser_diagnostic_checkpoint
 from .browser_stagnation import browser_stagnation_feedback
+from .progress_watchdog import watchdog_tick, current_watchdog_notice
 from .handoff_priority import handoff_priority,priority_tail,PREFIX as HANDOFF_PRIORITY_PREFIX
 from .sandbox import read_text
 from .delivery import create_delivery, _snapshot as _delivery_snapshot, _current_source as _current_delivery_source
@@ -153,6 +154,7 @@ class Platform:
         self.runners = {}
         self.task_workers = {}
         self.deadline_workers = {}
+        self.progress_workers = {}
         self._monotonic_deadlines = {}
         self.closing = False
         self._capabilities = self.tools.capabilities()
@@ -564,6 +566,66 @@ class Platform:
         self.runners[run_id] = worker
         worker.start()
         self._start_deadline_watcher(channel,self._current(channel,run_id))
+        self._start_progress_watcher(channel,self._current(channel,run_id))
+
+    def _start_progress_watcher(self,channel,run):
+        previous=self.progress_workers.get(run['id'])
+        if self.closing or run['status'] in TERMINAL or (previous and previous.is_alive()):return
+        watcher=threading.Thread(target=self._watch_progress,args=(channel,run['id']),
+                                 name='progress:'+run['id'],daemon=True)
+        self.progress_workers[run['id']]=watcher
+        self.workers.add(watcher)
+        watcher.start()
+
+    def _poll_progress(self,run,now_ms):
+        """Called under the host lock; no model or tool operation is dispatched."""
+        result=watchdog_tick(run,run.get('progressWatchdog'),now_ms,
+                             getattr(self.config,'progress_watchdog_seconds',90))
+        if result['due']:
+            run['progressWatchdog']=result['state']
+            for notice in result['notices']:
+                self._event(run,'progress_watchdog_observed',notice['agentId'],
+                            '定时检查发现多次活动没有新增证据；仅排队诊断，等待安全边界。',notice)
+            self._persist()
+        return result
+
+    def _watch_progress(self,channel,run_id):
+        try:
+            with self.changed:
+                while not self.closing:
+                    try:run=self._current(channel,run_id)
+                    except Stopped:return
+                    if run['status'] in TERMINAL or run['status']=='interrupted':return
+                    now=clock_ms()
+                    result=self._poll_progress(run,now)
+                    if result['terminal']:return
+                    next_at=result['state'].get('nextCheckAt',now+90000)
+                    self.changed.wait(max(.05,min(120,(next_at-now)/1000)))
+        except Exception as exc:
+            # An observer failure cannot certify, cancel or replay task work.
+            with self.changed:
+                try:run=self._current(channel,run_id)
+                except Stopped:return
+                self._event(run,'progress_watchdog_error',None,'进展检查异常；原任务继续执行。',
+                            {'message':self.config.scrub(str(exc))[:500]})
+                self._persist()
+        finally:
+            with self.changed:
+                self.workers.discard(threading.current_thread())
+                if self.progress_workers.get(run_id) is threading.current_thread():
+                    self.progress_workers.pop(run_id,None)
+                self.changed.notify_all()
+
+    def _deliver_progress_notice(self,run,task):
+        notice=current_watchdog_notice(run,task,run.get('progressWatchdog'),clock_ms())
+        if notice is None:return
+        clean=self.config.scrub(notice)
+        task['_messages'].append({'role':'user','content':'定时进展诊断：'+json.dumps(clean,ensure_ascii=False,separators=(',',':'))})
+        task['_watchdogDeliveredNoticeId']=notice['noticeId']
+        self._transcript(run,'system',json.dumps(clean,ensure_ascii=False),task['agentId'],
+                         kind='progress_watchdog_notice',taskId=task['id'])
+        self._event(run,'progress_watchdog_delivered',task['agentId'],
+                    '在下一次正常模型请求前递交一次进展诊断；未新增模型调用或改变时限。',clean)
 
     def _start_deadline_watcher(self,channel,run):
         run_id=run['id'];previous_deadline=self.deadline_workers.get(run_id)
@@ -1942,6 +2004,7 @@ class Platform:
                 task['_mailCursor']=len(run.get('messages',[]))
                 task['turns']+=1
                 self._progress_receipt(run,task)
+                self._deliver_progress_notice(run,task)
                 final_only=task['progress']['executionPhase']=='final_only'
                 # This protected constraint is binding-specific, not permanent
                 # history. A changed target or real delivery work may invalidate it.
@@ -2099,8 +2162,10 @@ class Platform:
                     self._persist()
                 continue
             recovery=readonly_failure_feedback(run,task,action) if not final_only else None
+            # Every recovery that continues this loop must have a bounded
+            # escalation. The legacy observation-only feedback could repeat
+            # forever without executing a tool or reaching the generic stop.
             browser_recovery=(browser_stagnation_feedback(run,task,action)
-                              or browser_failure_feedback(run,task,action)
                               or browser_diagnostic_recovery(run,task,action,self.agents)) if not final_only else None
             current_duplicate=(action.get('type')=='review' and action.get('verdict')=='pass'
                 and self._current_review_receipt(run,task,self._task(run,action.get('taskId'))) is not None
@@ -2432,8 +2497,7 @@ class Platform:
                 # is decision feedback, not a replay, publication or extra turn.
                 if (task['_actions'][-2:]==[key]*2 and not repairing_contract
                         and not result.get('duplicateReview')
-                        and readonly_failure_feedback(run,task,action) is None
-                        and browser_failure_feedback(run,task,action) is None):
+                        and readonly_failure_feedback(run,task,action) is None):
                     warning={'runId':run_id,'taskId':task['id'],'revision':task.get('revision',0),
                              'proposalSha256':key,'consecutiveIdenticalProposals':2,
                              'thirdProposalStopsIfExistingGuardsPermit':True,

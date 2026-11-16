@@ -69,10 +69,16 @@ class BrowserFixtureTools(Files):
         if name!='code.test':return super().execute(agent,run,name,args,approved,deadline)
         body=super().execute(agent,run,'file.read',{'path':args['path']},approved,deadline);sha=body['sha256']
         good=args['checks'][0]['text']=='Real heading';entry={'path':args['path'],'sha256':sha}
+        assertion={'action':'assert_text','selector':'h1','pageId':'main',
+                   'expected':args['checks'][0]['text'],'actual':'Real heading','passed':good}
+        step={**assertion,'ok':good}
+        if not good:step['error']='Assertion failed'
         report={'engine':'chromium','executed':True,'ok':good,'entry':entry,'testedFiles':[entry],
-                'sourceManifest':[entry],'assertions':[{'action':'assert_text','selector':'h1',
-                 'expected':args['checks'][0]['text'],'actual':'Real heading','passed':good}]}
-        return {'ok':good,'runtime':'browser','exitCode':0 if good else 1,'browser':report,
+                'sourceManifest':[entry],'assertions':[assertion],'steps':[step],
+                'assertionCount':1,'assertionsPassed':int(good),'pageErrors':[],
+                'blockedRequests':[],'httpErrors':[]}
+        return {'ok':good,'runtime':'browser','exitCode':0 if good else 1,'browser':report,'test':True,
+                'isolation':{'runId':run,'ownerAgentId':agent},
                 'error':None if good else 'Browser step failed: Assertion failed'}
 
 

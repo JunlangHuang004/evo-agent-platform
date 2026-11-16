@@ -1,0 +1,1253 @@
+{
+  "provenance": {
+    "exportSha256": "16c9ee5048cbcbf9adebd17e133fdaa666a834436100e4777df52a731e35d52d",
+    "runId": "run-1579143f9486496e",
+    "actualCallIds": [
+      "call-50e759cd61654b84",
+      "call-5ec967337c99407a"
+    ],
+    "projection": "Two real settled call receipts; stdout duplicate omitted; terminal status projected to running only to exercise pre-proposal recovery. No assertions/results/source hashes edited."
+  },
+  "run": {
+    "id": "run-1579143f9486496e",
+    "status": "running",
+    "calls": [
+      {
+        "agentId": "dev",
+        "args": {
+          "checks": [
+            {
+              "action": "assert_count",
+              "count": 10,
+              "selector": "#gridBody tr"
+            },
+            {
+              "action": "assert_count",
+              "count": 13,
+              "selector": "#gridHead th"
+            },
+            {
+              "action": "fill",
+              "selector": "#dateInput",
+              "value": "2026-11-17"
+            },
+            {
+              "action": "assert_value",
+              "selector": "#dateInput",
+              "value": "2026-11-17"
+            },
+            {
+              "action": "click",
+              "selector": "#gridBody tr:nth-child(1) td:nth-child(2) button.slot"
+            },
+            {
+              "action": "assert_visible",
+              "selector": "#bookDialog"
+            },
+            {
+              "action": "fill",
+              "selector": "#bookerName",
+              "value": "Alice"
+            },
+            {
+              "action": "click",
+              "selector": "#bookConfirmBtn"
+            },
+            {
+              "action": "assert_text",
+              "exact": true,
+              "selector": "#gridBody tr:nth-child(1) td:nth-child(2) .booker",
+              "text": "Alice"
+            },
+            {
+              "action": "assert_text",
+              "selector": "#feedback",
+              "text": "Booked Alice for 08:00."
+            },
+            {
+              "action": "click",
+              "selector": "#gridBody tr:nth-child(1) td:nth-child(2) button.cancel"
+            },
+            {
+              "action": "assert_visible",
+              "selector": "#cancelDialog"
+            },
+            {
+              "action": "fill",
+              "selector": "#cancelName",
+              "value": "Bob"
+            },
+            {
+              "action": "click",
+              "selector": "#cancelConfirmBtn"
+            },
+            {
+              "action": "assert_text",
+              "selector": "#feedback",
+              "text": "Only Alice can cancel this booking."
+            },
+            {
+              "action": "fill",
+              "selector": "#cancelName",
+              "value": "alice"
+            },
+            {
+              "action": "click",
+              "selector": "#cancelConfirmBtn"
+            },
+            {
+              "action": "assert_text",
+              "exact": true,
+              "selector": "#gridBody tr:nth-child(1) td:nth-child(2) button.slot",
+              "text": "Free"
+            },
+            {
+              "action": "assert_text",
+              "selector": "#feedback",
+              "text": "Booking cancelled. The slot is free again."
+            },
+            {
+              "action": "click",
+              "selector": "#gridBody tr:nth-child(1) td:nth-child(2) button.slot"
+            },
+            {
+              "action": "fill",
+              "selector": "#bookerName",
+              "value": "Alice"
+            },
+            {
+              "action": "click",
+              "selector": "#bookConfirmBtn"
+            },
+            {
+              "action": "assert_text",
+              "exact": true,
+              "selector": "#gridBody tr:nth-child(1) td:nth-child(2) .booker",
+              "text": "Alice"
+            },
+            {
+              "action": "reload"
+            },
+            {
+              "action": "assert_text",
+              "exact": true,
+              "selector": "#gridBody tr:nth-child(1) td:nth-child(2) .booker",
+              "text": "Alice"
+            }
+          ],
+          "language": "browser",
+          "path": "app/index.html",
+          "resources": {
+            "app.js": "app/app.js",
+            "styles.css": "app/styles.css"
+          },
+          "timeout": 20
+        },
+        "attempt": 1,
+        "durationMs": 5603,
+        "id": "call-50e759cd61654b84",
+        "result": {
+          "browser": {
+            "assertionCount": 12,
+            "assertions": [
+              {
+                "action": "assert_count",
+                "actual": 10,
+                "expected": 10,
+                "pageId": "main",
+                "passed": true,
+                "selector": "#gridBody tr"
+              },
+              {
+                "action": "assert_count",
+                "actual": 13,
+                "expected": 13,
+                "pageId": "main",
+                "passed": true,
+                "selector": "#gridHead th"
+              },
+              {
+                "action": "assert_value",
+                "actual": "2026-11-17",
+                "expected": "2026-11-17",
+                "pageId": "main",
+                "passed": true,
+                "selector": "#dateInput"
+              },
+              {
+                "action": "assert_visible",
+                "actual": true,
+                "expected": true,
+                "pageId": "main",
+                "passed": true,
+                "selector": "#bookDialog"
+              },
+              {
+                "action": "assert_text",
+                "actual": "Alice",
+                "expected": "Alice",
+                "pageId": "main",
+                "passed": true,
+                "selector": "#gridBody tr:nth-child(1) td:nth-child(2) .booker"
+              },
+              {
+                "action": "assert_text",
+                "actual": "Booked Alice for 08:00.",
+                "expected": "Booked Alice for 08:00.",
+                "pageId": "main",
+                "passed": true,
+                "selector": "#feedback"
+              },
+              {
+                "action": "assert_visible",
+                "actual": true,
+                "expected": true,
+                "pageId": "main",
+                "passed": true,
+                "selector": "#cancelDialog"
+              },
+              {
+                "action": "assert_text",
+                "actual": "Only Alice can cancel this booking.",
+                "expected": "Only Alice can cancel this booking.",
+                "pageId": "main",
+                "passed": true,
+                "selector": "#feedback"
+              },
+              {
+                "action": "assert_text",
+                "actual": "Free",
+                "expected": "Free",
+                "pageId": "main",
+                "passed": true,
+                "selector": "#gridBody tr:nth-child(1) td:nth-child(2) button.slot"
+              },
+              {
+                "action": "assert_text",
+                "actual": "Booking cancelled. The slot is free again.",
+                "expected": "Booking cancelled. The slot is free again.",
+                "pageId": "main",
+                "passed": true,
+                "selector": "#feedback"
+              },
+              {
+                "action": "assert_text",
+                "actual": "Alice",
+                "expected": "Alice",
+                "pageId": "main",
+                "passed": true,
+                "selector": "#gridBody tr:nth-child(1) td:nth-child(2) .booker"
+              },
+              {
+                "action": "assert_text",
+                "error": "locator.textContent: Timeout 2500ms exceeded.\nCall log:\n  - waiting for locator('#gridBody tr:nth-child(1) td:nth-child(2) .booker')\n",
+                "expected": "Alice",
+                "pageId": "main",
+                "passed": false,
+                "selector": "#gridBody tr:nth-child(1) td:nth-child(2) .booker"
+              }
+            ],
+            "assertionsPassed": 11,
+            "blockedRequests": [],
+            "chromiumSandbox": false,
+            "console": [],
+            "dialogCoverageComplete": true,
+            "dialogResponses": [],
+            "engine": "chromium",
+            "entry": {
+              "path": "app/index.html",
+              "sha256": "352304841c6a2422814d5350a58f6b42c7498f293698187936eccfc7626dc738"
+            },
+            "error": "Browser step failed: locator.textContent: Timeout 2500ms exceeded.\nCall log:\n  - waiting for locator('#gridBody tr:nth-child(1) td:nth-child(2) .booker')\n",
+            "executed": true,
+            "failureObservation": {
+              "formValues": [
+                {
+                  "id": "dateInput",
+                  "name": "",
+                  "type": "date",
+                  "value": "2026-11-16"
+                }
+              ],
+              "formValuesOmitted": 0,
+              "interpretation": "Untrusted observed state only; does not determine whether the test or product is wrong.",
+              "matchCount": 0,
+              "messagesOmitted": 0,
+              "pageId": "main",
+              "runtimeUTC": "2026-11-16T09:25:23.086Z",
+              "source": "actual failing-page DOM in this test",
+              "stepIndex": 24,
+              "textLimitCharacters": 120,
+              "timezone": "UTC",
+              "valuesAreBoundedPreviews": true,
+              "visibleMessages": []
+            },
+            "faultCoverageComplete": true,
+            "faults": [],
+            "httpErrors": [],
+            "ok": false,
+            "pageErrors": [],
+            "pages": [
+              {
+                "entryPath": "app/index.html",
+                "pageId": "main"
+              }
+            ],
+            "readFaultCoverageComplete": true,
+            "readFaults": [],
+            "reportPath": "browser-evidence/browser-0b91c3532ead47e7addbeadfdb1a7065/report.json",
+            "screenshot": {
+              "bytes": 69613,
+              "path": "browser-evidence/browser-0b91c3532ead47e7addbeadfdb1a7065/screenshot.png",
+              "sha256": "1a7d35d514b8a744d4c621a04b0ae1aaf4de6b27bac4bee8d006948b8d05ee6f"
+            },
+            "screenshotCaptured": true,
+            "screenshotPageId": "main",
+            "sourceManifest": [
+              {
+                "path": "app/index.html",
+                "sha256": "352304841c6a2422814d5350a58f6b42c7498f293698187936eccfc7626dc738"
+              },
+              {
+                "path": "app/styles.css",
+                "sha256": "942d4ca7902e08d27fdd5f770726ddca53cdaa64c0dc63df4a02ae709deb4055"
+              },
+              {
+                "path": "app/app.js",
+                "sha256": "e00d5d9b8181dfae3555389c5c28834139c3506d720b8f8526208caba700acb2"
+              }
+            ],
+            "steps": [
+              {
+                "action": "assert_count",
+                "actual": 10,
+                "expected": 10,
+                "ok": true,
+                "pageId": "main",
+                "passed": true,
+                "selector": "#gridBody tr"
+              },
+              {
+                "action": "assert_count",
+                "actual": 13,
+                "expected": 13,
+                "ok": true,
+                "pageId": "main",
+                "passed": true,
+                "selector": "#gridHead th"
+              },
+              {
+                "action": "fill",
+                "ok": true,
+                "pageId": "main",
+                "selector": "#dateInput"
+              },
+              {
+                "action": "assert_value",
+                "actual": "2026-11-17",
+                "expected": "2026-11-17",
+                "ok": true,
+                "pageId": "main",
+                "passed": true,
+                "selector": "#dateInput"
+              },
+              {
+                "action": "click",
+                "ok": true,
+                "pageId": "main",
+                "selector": "#gridBody tr:nth-child(1) td:nth-child(2) button.slot"
+              },
+              {
+                "action": "assert_visible",
+                "actual": true,
+                "expected": true,
+                "ok": true,
+                "pageId": "main",
+                "passed": true,
+                "selector": "#bookDialog"
+              },
+              {
+                "action": "fill",
+                "ok": true,
+                "pageId": "main",
+                "selector": "#bookerName"
+              },
+              {
+                "action": "click",
+                "ok": true,
+                "pageId": "main",
+                "selector": "#bookConfirmBtn"
+              },
+              {
+                "action": "assert_text",
+                "actual": "Alice",
+                "expected": "Alice",
+                "ok": true,
+                "pageId": "main",
+                "passed": true,
+                "selector": "#gridBody tr:nth-child(1) td:nth-child(2) .booker"
+              },
+              {
+                "action": "assert_text",
+                "actual": "Booked Alice for 08:00.",
+                "expected": "Booked Alice for 08:00.",
+                "ok": true,
+                "pageId": "main",
+                "passed": true,
+                "selector": "#feedback"
+              },
+              {
+                "action": "click",
+                "ok": true,
+                "pageId": "main",
+                "selector": "#gridBody tr:nth-child(1) td:nth-child(2) button.cancel"
+              },
+              {
+                "action": "assert_visible",
+                "actual": true,
+                "expected": true,
+                "ok": true,
+                "pageId": "main",
+                "passed": true,
+                "selector": "#cancelDialog"
+              },
+              {
+                "action": "fill",
+                "ok": true,
+                "pageId": "main",
+                "selector": "#cancelName"
+              },
+              {
+                "action": "click",
+                "ok": true,
+                "pageId": "main",
+                "selector": "#cancelConfirmBtn"
+              },
+              {
+                "action": "assert_text",
+                "actual": "Only Alice can cancel this booking.",
+                "expected": "Only Alice can cancel this booking.",
+                "ok": true,
+                "pageId": "main",
+                "passed": true,
+                "selector": "#feedback"
+              },
+              {
+                "action": "fill",
+                "ok": true,
+                "pageId": "main",
+                "selector": "#cancelName"
+              },
+              {
+                "action": "click",
+                "ok": true,
+                "pageId": "main",
+                "selector": "#cancelConfirmBtn"
+              },
+              {
+                "action": "assert_text",
+                "actual": "Free",
+                "expected": "Free",
+                "ok": true,
+                "pageId": "main",
+                "passed": true,
+                "selector": "#gridBody tr:nth-child(1) td:nth-child(2) button.slot"
+              },
+              {
+                "action": "assert_text",
+                "actual": "Booking cancelled. The slot is free again.",
+                "expected": "Booking cancelled. The slot is free again.",
+                "ok": true,
+                "pageId": "main",
+                "passed": true,
+                "selector": "#feedback"
+              },
+              {
+                "action": "click",
+                "ok": true,
+                "pageId": "main",
+                "selector": "#gridBody tr:nth-child(1) td:nth-child(2) button.slot"
+              },
+              {
+                "action": "fill",
+                "ok": true,
+                "pageId": "main",
+                "selector": "#bookerName"
+              },
+              {
+                "action": "click",
+                "ok": true,
+                "pageId": "main",
+                "selector": "#bookConfirmBtn"
+              },
+              {
+                "action": "assert_text",
+                "actual": "Alice",
+                "expected": "Alice",
+                "ok": true,
+                "pageId": "main",
+                "passed": true,
+                "selector": "#gridBody tr:nth-child(1) td:nth-child(2) .booker"
+              },
+              {
+                "action": "reload",
+                "ok": true,
+                "pageId": "main"
+              },
+              {
+                "action": "assert_text",
+                "error": "locator.textContent: Timeout 2500ms exceeded.\nCall log:\n  - waiting for locator('#gridBody tr:nth-child(1) td:nth-child(2) .booker')\n",
+                "expected": "Alice",
+                "ok": false,
+                "pageId": "main",
+                "selector": "#gridBody tr:nth-child(1) td:nth-child(2) .booker"
+              }
+            ],
+            "testedFiles": [
+              {
+                "path": "app/index.html",
+                "sha256": "352304841c6a2422814d5350a58f6b42c7498f293698187936eccfc7626dc738"
+              },
+              {
+                "path": "app/styles.css",
+                "sha256": "942d4ca7902e08d27fdd5f770726ddca53cdaa64c0dc63df4a02ae709deb4055"
+              },
+              {
+                "path": "app/app.js",
+                "sha256": "e00d5d9b8181dfae3555389c5c28834139c3506d720b8f8526208caba700acb2"
+              }
+            ],
+            "version": "156.0.8078.4"
+          },
+          "durationMs": 4265,
+          "error": "Browser step failed: locator.textContent: Timeout 2500ms exceeded.\nCall log:\n  - waiting for locator('#gridBody tr:nth-child(1) td:nth-child(2) .booker')\n",
+          "exitCode": 1,
+          "isolation": {
+            "containerId": "evo-92119e8eb90e42699bc71fe72317f866",
+            "hostFallback": false,
+            "imports": "explicit_read_only",
+            "namespaceId": "ns-03182f63f7dca74e5aef",
+            "network": "none",
+            "ownerAgentId": "dev",
+            "resourceScope": "per_invocation",
+            "runId": "run-1579143f9486496e",
+            "workspace": "private_per_agent_run"
+          },
+          "ok": false,
+          "outputLimitExceeded": false,
+          "runtime": "browser",
+          "sandboxId": "evo-92119e8eb90e42699bc71fe72317f866",
+          "test": true,
+          "timedOut": false
+        },
+        "revision": 0,
+        "sandboxId": "dev/run-1579143f9486496e",
+        "status": "failed",
+        "taskId": "task-bab13e0863184dbd",
+        "tool": "code.test"
+      },
+      {
+        "agentId": "dev",
+        "args": {
+          "checks": [
+            {
+              "action": "assert_count",
+              "count": 10,
+              "selector": "#gridBody tr"
+            },
+            {
+              "action": "assert_count",
+              "count": 13,
+              "selector": "#gridHead th"
+            },
+            {
+              "action": "fill",
+              "selector": "#dateInput",
+              "value": "2026-11-17"
+            },
+            {
+              "action": "assert_value",
+              "selector": "#dateInput",
+              "value": "2026-11-17"
+            },
+            {
+              "action": "click",
+              "selector": "#gridBody tr:nth-child(1) td:nth-child(2) button.slot"
+            },
+            {
+              "action": "assert_visible",
+              "selector": "#bookDialog"
+            },
+            {
+              "action": "fill",
+              "selector": "#bookerName",
+              "value": "Alice"
+            },
+            {
+              "action": "click",
+              "selector": "#bookConfirmBtn"
+            },
+            {
+              "action": "assert_text",
+              "exact": true,
+              "selector": "#gridBody tr:nth-child(1) td:nth-child(2) .booker",
+              "text": "Alice"
+            },
+            {
+              "action": "assert_text",
+              "selector": "#feedback",
+              "text": "Booked Alice for 08:00."
+            },
+            {
+              "action": "click",
+              "selector": "#gridBody tr:nth-child(1) td:nth-child(2) button.cancel"
+            },
+            {
+              "action": "assert_visible",
+              "selector": "#cancelDialog"
+            },
+            {
+              "action": "fill",
+              "selector": "#cancelName",
+              "value": "Bob"
+            },
+            {
+              "action": "click",
+              "selector": "#cancelConfirmBtn"
+            },
+            {
+              "action": "assert_text",
+              "selector": "#feedback",
+              "text": "Only Alice can cancel this booking."
+            },
+            {
+              "action": "fill",
+              "selector": "#cancelName",
+              "value": "alice"
+            },
+            {
+              "action": "click",
+              "selector": "#cancelConfirmBtn"
+            },
+            {
+              "action": "assert_text",
+              "exact": true,
+              "selector": "#gridBody tr:nth-child(1) td:nth-child(2) button.slot",
+              "text": "Free"
+            },
+            {
+              "action": "assert_text",
+              "selector": "#feedback",
+              "text": "Booking cancelled. The slot is free again."
+            },
+            {
+              "action": "click",
+              "selector": "#gridBody tr:nth-child(1) td:nth-child(2) button.slot"
+            },
+            {
+              "action": "fill",
+              "selector": "#bookerName",
+              "value": "Alice"
+            },
+            {
+              "action": "click",
+              "selector": "#bookConfirmBtn"
+            },
+            {
+              "action": "assert_text",
+              "exact": true,
+              "selector": "#gridBody tr:nth-child(1) td:nth-child(2) .booker",
+              "text": "Alice"
+            },
+            {
+              "action": "reload"
+            },
+            {
+              "action": "assert_text",
+              "exact": true,
+              "selector": "#gridBody tr:nth-child(1) td:nth-child(2) .booker",
+              "text": "Alice"
+            }
+          ],
+          "language": "browser",
+          "path": "app/index.html",
+          "resources": {
+            "app.js": "app/app.js",
+            "styles.css": "app/styles.css"
+          },
+          "timeout": 20
+        },
+        "attempt": 1,
+        "durationMs": 6359,
+        "id": "call-5ec967337c99407a",
+        "result": {
+          "browser": {
+            "assertionCount": 12,
+            "assertions": [
+              {
+                "action": "assert_count",
+                "actual": 10,
+                "expected": 10,
+                "pageId": "main",
+                "passed": true,
+                "selector": "#gridBody tr"
+              },
+              {
+                "action": "assert_count",
+                "actual": 13,
+                "expected": 13,
+                "pageId": "main",
+                "passed": true,
+                "selector": "#gridHead th"
+              },
+              {
+                "action": "assert_value",
+                "actual": "2026-11-17",
+                "expected": "2026-11-17",
+                "pageId": "main",
+                "passed": true,
+                "selector": "#dateInput"
+              },
+              {
+                "action": "assert_visible",
+                "actual": true,
+                "expected": true,
+                "pageId": "main",
+                "passed": true,
+                "selector": "#bookDialog"
+              },
+              {
+                "action": "assert_text",
+                "actual": "Alice",
+                "expected": "Alice",
+                "pageId": "main",
+                "passed": true,
+                "selector": "#gridBody tr:nth-child(1) td:nth-child(2) .booker"
+              },
+              {
+                "action": "assert_text",
+                "actual": "Booked Alice for 08:00.",
+                "expected": "Booked Alice for 08:00.",
+                "pageId": "main",
+                "passed": true,
+                "selector": "#feedback"
+              },
+              {
+                "action": "assert_visible",
+                "actual": true,
+                "expected": true,
+                "pageId": "main",
+                "passed": true,
+                "selector": "#cancelDialog"
+              },
+              {
+                "action": "assert_text",
+                "actual": "Only Alice can cancel this booking.",
+                "expected": "Only Alice can cancel this booking.",
+                "pageId": "main",
+                "passed": true,
+                "selector": "#feedback"
+              },
+              {
+                "action": "assert_text",
+                "actual": "Free",
+                "expected": "Free",
+                "pageId": "main",
+                "passed": true,
+                "selector": "#gridBody tr:nth-child(1) td:nth-child(2) button.slot"
+              },
+              {
+                "action": "assert_text",
+                "actual": "Booking cancelled. The slot is free again.",
+                "expected": "Booking cancelled. The slot is free again.",
+                "pageId": "main",
+                "passed": true,
+                "selector": "#feedback"
+              },
+              {
+                "action": "assert_text",
+                "actual": "Alice",
+                "expected": "Alice",
+                "pageId": "main",
+                "passed": true,
+                "selector": "#gridBody tr:nth-child(1) td:nth-child(2) .booker"
+              },
+              {
+                "action": "assert_text",
+                "error": "locator.textContent: Timeout 2500ms exceeded.\nCall log:\n  - waiting for locator('#gridBody tr:nth-child(1) td:nth-child(2) .booker')\n",
+                "expected": "Alice",
+                "pageId": "main",
+                "passed": false,
+                "selector": "#gridBody tr:nth-child(1) td:nth-child(2) .booker"
+              }
+            ],
+            "assertionsPassed": 11,
+            "blockedRequests": [],
+            "chromiumSandbox": false,
+            "console": [],
+            "dialogCoverageComplete": true,
+            "dialogResponses": [],
+            "engine": "chromium",
+            "entry": {
+              "path": "app/index.html",
+              "sha256": "352304841c6a2422814d5350a58f6b42c7498f293698187936eccfc7626dc738"
+            },
+            "error": "Browser step failed: locator.textContent: Timeout 2500ms exceeded.\nCall log:\n  - waiting for locator('#gridBody tr:nth-child(1) td:nth-child(2) .booker')\n",
+            "executed": true,
+            "failureObservation": {
+              "formValues": [
+                {
+                  "id": "dateInput",
+                  "name": "",
+                  "type": "date",
+                  "value": "2026-11-16"
+                }
+              ],
+              "formValuesOmitted": 0,
+              "interpretation": "Untrusted observed state only; does not determine whether the test or product is wrong.",
+              "matchCount": 0,
+              "messagesOmitted": 0,
+              "pageId": "main",
+              "runtimeUTC": "2026-11-16T09:28:04.684Z",
+              "source": "actual failing-page DOM in this test",
+              "stepIndex": 24,
+              "textLimitCharacters": 120,
+              "timezone": "UTC",
+              "valuesAreBoundedPreviews": true,
+              "visibleMessages": []
+            },
+            "faultCoverageComplete": true,
+            "faults": [],
+            "httpErrors": [],
+            "ok": false,
+            "pageErrors": [],
+            "pages": [
+              {
+                "entryPath": "app/index.html",
+                "pageId": "main"
+              }
+            ],
+            "readFaultCoverageComplete": true,
+            "readFaults": [],
+            "reportPath": "browser-evidence/browser-f748bdc8921e4bf080ecfc4d9f44c42f/report.json",
+            "screenshot": {
+              "bytes": 69594,
+              "path": "browser-evidence/browser-f748bdc8921e4bf080ecfc4d9f44c42f/screenshot.png",
+              "sha256": "4c36262a1aca2310366387f1f39d4e50224ae652c3d489a64fab6692a703769f"
+            },
+            "screenshotCaptured": true,
+            "screenshotPageId": "main",
+            "sourceManifest": [
+              {
+                "path": "app/index.html",
+                "sha256": "352304841c6a2422814d5350a58f6b42c7498f293698187936eccfc7626dc738"
+              },
+              {
+                "path": "app/styles.css",
+                "sha256": "942d4ca7902e08d27fdd5f770726ddca53cdaa64c0dc63df4a02ae709deb4055"
+              },
+              {
+                "path": "app/app.js",
+                "sha256": "e00d5d9b8181dfae3555389c5c28834139c3506d720b8f8526208caba700acb2"
+              }
+            ],
+            "steps": [
+              {
+                "action": "assert_count",
+                "actual": 10,
+                "expected": 10,
+                "ok": true,
+                "pageId": "main",
+                "passed": true,
+                "selector": "#gridBody tr"
+              },
+              {
+                "action": "assert_count",
+                "actual": 13,
+                "expected": 13,
+                "ok": true,
+                "pageId": "main",
+                "passed": true,
+                "selector": "#gridHead th"
+              },
+              {
+                "action": "fill",
+                "ok": true,
+                "pageId": "main",
+                "selector": "#dateInput"
+              },
+              {
+                "action": "assert_value",
+                "actual": "2026-11-17",
+                "expected": "2026-11-17",
+                "ok": true,
+                "pageId": "main",
+                "passed": true,
+                "selector": "#dateInput"
+              },
+              {
+                "action": "click",
+                "ok": true,
+                "pageId": "main",
+                "selector": "#gridBody tr:nth-child(1) td:nth-child(2) button.slot"
+              },
+              {
+                "action": "assert_visible",
+                "actual": true,
+                "expected": true,
+                "ok": true,
+                "pageId": "main",
+                "passed": true,
+                "selector": "#bookDialog"
+              },
+              {
+                "action": "fill",
+                "ok": true,
+                "pageId": "main",
+                "selector": "#bookerName"
+              },
+              {
+                "action": "click",
+                "ok": true,
+                "pageId": "main",
+                "selector": "#bookConfirmBtn"
+              },
+              {
+                "action": "assert_text",
+                "actual": "Alice",
+                "expected": "Alice",
+                "ok": true,
+                "pageId": "main",
+                "passed": true,
+                "selector": "#gridBody tr:nth-child(1) td:nth-child(2) .booker"
+              },
+              {
+                "action": "assert_text",
+                "actual": "Booked Alice for 08:00.",
+                "expected": "Booked Alice for 08:00.",
+                "ok": true,
+                "pageId": "main",
+                "passed": true,
+                "selector": "#feedback"
+              },
+              {
+                "action": "click",
+                "ok": true,
+                "pageId": "main",
+                "selector": "#gridBody tr:nth-child(1) td:nth-child(2) button.cancel"
+              },
+              {
+                "action": "assert_visible",
+                "actual": true,
+                "expected": true,
+                "ok": true,
+                "pageId": "main",
+                "passed": true,
+                "selector": "#cancelDialog"
+              },
+              {
+                "action": "fill",
+                "ok": true,
+                "pageId": "main",
+                "selector": "#cancelName"
+              },
+              {
+                "action": "click",
+                "ok": true,
+                "pageId": "main",
+                "selector": "#cancelConfirmBtn"
+              },
+              {
+                "action": "assert_text",
+                "actual": "Only Alice can cancel this booking.",
+                "expected": "Only Alice can cancel this booking.",
+                "ok": true,
+                "pageId": "main",
+                "passed": true,
+                "selector": "#feedback"
+              },
+              {
+                "action": "fill",
+                "ok": true,
+                "pageId": "main",
+                "selector": "#cancelName"
+              },
+              {
+                "action": "click",
+                "ok": true,
+                "pageId": "main",
+                "selector": "#cancelConfirmBtn"
+              },
+              {
+                "action": "assert_text",
+                "actual": "Free",
+                "expected": "Free",
+                "ok": true,
+                "pageId": "main",
+                "passed": true,
+                "selector": "#gridBody tr:nth-child(1) td:nth-child(2) button.slot"
+              },
+              {
+                "action": "assert_text",
+                "actual": "Booking cancelled. The slot is free again.",
+                "expected": "Booking cancelled. The slot is free again.",
+                "ok": true,
+                "pageId": "main",
+                "passed": true,
+                "selector": "#feedback"
+              },
+              {
+                "action": "click",
+                "ok": true,
+                "pageId": "main",
+                "selector": "#gridBody tr:nth-child(1) td:nth-child(2) button.slot"
+              },
+              {
+                "action": "fill",
+                "ok": true,
+                "pageId": "main",
+                "selector": "#bookerName"
+              },
+              {
+                "action": "click",
+                "ok": true,
+                "pageId": "main",
+                "selector": "#bookConfirmBtn"
+              },
+              {
+                "action": "assert_text",
+                "actual": "Alice",
+                "expected": "Alice",
+                "ok": true,
+                "pageId": "main",
+                "passed": true,
+                "selector": "#gridBody tr:nth-child(1) td:nth-child(2) .booker"
+              },
+              {
+                "action": "reload",
+                "ok": true,
+                "pageId": "main"
+              },
+              {
+                "action": "assert_text",
+                "error": "locator.textContent: Timeout 2500ms exceeded.\nCall log:\n  - waiting for locator('#gridBody tr:nth-child(1) td:nth-child(2) .booker')\n",
+                "expected": "Alice",
+                "ok": false,
+                "pageId": "main",
+                "selector": "#gridBody tr:nth-child(1) td:nth-child(2) .booker"
+              }
+            ],
+            "testedFiles": [
+              {
+                "path": "app/index.html",
+                "sha256": "352304841c6a2422814d5350a58f6b42c7498f293698187936eccfc7626dc738"
+              },
+              {
+                "path": "app/styles.css",
+                "sha256": "942d4ca7902e08d27fdd5f770726ddca53cdaa64c0dc63df4a02ae709deb4055"
+              },
+              {
+                "path": "app/app.js",
+                "sha256": "e00d5d9b8181dfae3555389c5c28834139c3506d720b8f8526208caba700acb2"
+              }
+            ],
+            "version": "156.0.8078.4"
+          },
+          "durationMs": 4609,
+          "error": "Browser step failed: locator.textContent: Timeout 2500ms exceeded.\nCall log:\n  - waiting for locator('#gridBody tr:nth-child(1) td:nth-child(2) .booker')\n",
+          "exitCode": 1,
+          "isolation": {
+            "containerId": "evo-2c0d44ef6a54465f934214092e661d3e",
+            "hostFallback": false,
+            "imports": "explicit_read_only",
+            "namespaceId": "ns-03182f63f7dca74e5aef",
+            "network": "none",
+            "ownerAgentId": "dev",
+            "resourceScope": "per_invocation",
+            "runId": "run-1579143f9486496e",
+            "workspace": "private_per_agent_run"
+          },
+          "ok": false,
+          "outputLimitExceeded": false,
+          "runtime": "browser",
+          "sandboxId": "evo-2c0d44ef6a54465f934214092e661d3e",
+          "test": true,
+          "timedOut": false
+        },
+        "revision": 0,
+        "sandboxId": "dev/run-1579143f9486496e",
+        "status": "failed",
+        "taskId": "task-bab13e0863184dbd",
+        "tool": "code.test"
+      }
+    ],
+    "steps": [
+      {
+        "id": "task-bab13e0863184dbd",
+        "agentId": "dev",
+        "revision": 0,
+        "status": "running",
+        "outputs": [
+          "artifact-3a461b571b404d50a3b137131a2dd067",
+          "artifact-36e9de8e7baa4d3384da773ce14912aa",
+          "artifact-b4c6a5acdcf645d8b57520c6d0cf5944",
+          "artifact-efe17706c29542d6ba2e818cb0413f38"
+        ],
+        "dependsOn": [
+          "task-be2e3a3fb98c4445"
+        ]
+      }
+    ],
+    "artifacts": [],
+    "events": [],
+    "transcript": []
+  },
+  "task": {
+    "id": "task-bab13e0863184dbd",
+    "agentId": "dev",
+    "revision": 0,
+    "status": "running",
+    "outputs": [
+      "artifact-3a461b571b404d50a3b137131a2dd067",
+      "artifact-36e9de8e7baa4d3384da773ce14912aa",
+      "artifact-b4c6a5acdcf645d8b57520c6d0cf5944",
+      "artifact-efe17706c29542d6ba2e818cb0413f38"
+    ],
+    "dependsOn": [
+      "task-be2e3a3fb98c4445"
+    ]
+  },
+  "action": {
+    "type": "tool",
+    "name": "code.test",
+    "args": {
+      "checks": [
+        {
+          "action": "assert_count",
+          "count": 10,
+          "selector": "#gridBody tr"
+        },
+        {
+          "action": "assert_count",
+          "count": 13,
+          "selector": "#gridHead th"
+        },
+        {
+          "action": "fill",
+          "selector": "#dateInput",
+          "value": "2026-11-17"
+        },
+        {
+          "action": "assert_value",
+          "selector": "#dateInput",
+          "value": "2026-11-17"
+        },
+        {
+          "action": "click",
+          "selector": "#gridBody tr:nth-child(1) td:nth-child(2) button.slot"
+        },
+        {
+          "action": "assert_visible",
+          "selector": "#bookDialog"
+        },
+        {
+          "action": "fill",
+          "selector": "#bookerName",
+          "value": "Alice"
+        },
+        {
+          "action": "click",
+          "selector": "#bookConfirmBtn"
+        },
+        {
+          "action": "assert_text",
+          "exact": true,
+          "selector": "#gridBody tr:nth-child(1) td:nth-child(2) .booker",
+          "text": "Alice"
+        },
+        {
+          "action": "assert_text",
+          "selector": "#feedback",
+          "text": "Booked Alice for 08:00."
+        },
+        {
+          "action": "click",
+          "selector": "#gridBody tr:nth-child(1) td:nth-child(2) button.cancel"
+        },
+        {
+          "action": "assert_visible",
+          "selector": "#cancelDialog"
+        },
+        {
+          "action": "fill",
+          "selector": "#cancelName",
+          "value": "Bob"
+        },
+        {
+          "action": "click",
+          "selector": "#cancelConfirmBtn"
+        },
+        {
+          "action": "assert_text",
+          "selector": "#feedback",
+          "text": "Only Alice can cancel this booking."
+        },
+        {
+          "action": "fill",
+          "selector": "#cancelName",
+          "value": "alice"
+        },
+        {
+          "action": "click",
+          "selector": "#cancelConfirmBtn"
+        },
+        {
+          "action": "assert_text",
+          "exact": true,
+          "selector": "#gridBody tr:nth-child(1) td:nth-child(2) button.slot",
+          "text": "Free"
+        },
+        {
+          "action": "assert_text",
+          "selector": "#feedback",
+          "text": "Booking cancelled. The slot is free again."
+        },
+        {
+          "action": "click",
+          "selector": "#gridBody tr:nth-child(1) td:nth-child(2) button.slot"
+        },
+        {
+          "action": "fill",
+          "selector": "#bookerName",
+          "value": "Alice"
+        },
+        {
+          "action": "click",
+          "selector": "#bookConfirmBtn"
+        },
+        {
+          "action": "assert_text",
+          "exact": true,
+          "selector": "#gridBody tr:nth-child(1) td:nth-child(2) .booker",
+          "text": "Alice"
+        },
+        {
+          "action": "reload"
+        },
+        {
+          "action": "assert_text",
+          "exact": true,
+          "selector": "#gridBody tr:nth-child(1) td:nth-child(2) .booker",
+          "text": "Alice"
+        }
+      ],
+      "language": "browser",
+      "path": "app/index.html",
+      "resources": {
+        "app.js": "app/app.js",
+        "styles.css": "app/styles.css"
+      },
+      "timeout": 20
+    }
+  }
+}

@@ -1,0 +1,77 @@
+{
+  "date": "2026-11-16",
+  "scope": "R13 local implementation and regression; not a new six-task live score",
+  "regression": {
+    "tests": 951,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "seconds": 330.946,
+    "dockerBrowserEnabled": true,
+    "dockerAgentSandboxEnabled": true,
+    "exitCode": 0,
+    "durationSeconds": 331.574,
+    "sourceUnchanged": true,
+    "sourceBeforeSha256": "0710fb568bb9a36a6bb29fe1e8c007658bde0d43bb35ff5f154d1d647f15dd68",
+    "sourceAfterSha256": "0710fb568bb9a36a6bb29fe1e8c007658bde0d43bb35ff5f154d1d647f15dd68",
+    "logSha256": "68c686d72e7088ea867cdb88586b435bf6cfae07b24ccb6781cf7d022cf1ef1b"
+  },
+  "watchdog": {
+    "defaultSeconds": 90,
+    "allowedSeconds": [
+      60,
+      120
+    ],
+    "newModelCallsPerPoll": 0,
+    "automaticAcceptance": false,
+    "automaticToolRetry": false,
+    "automaticDeadlineExtension": false,
+    "pureTests": 12,
+    "schedulerTests": 4,
+    "historicalReplay": {
+      "sourceSha256": "16c9ee5048cbcbf9adebd17e133fdaa666a834436100e4777df52a731e35d52d",
+      "runId": "run-1579143f9486496e",
+      "actualRepeatedFeedbacks": 79,
+      "pollIntervalSeconds": 90,
+      "queuedExactlyOnce": true,
+      "budgetUnchanged": true
+    },
+    "firstNoticeAfterSeconds": 180,
+    "scopeLimit": "New evidence is an observation, not semantic quality. The timer gives a single advisory at a safe boundary; bounded failure guards remain responsible for loop termination."
+  },
+  "assertionExceptionRecovery": {
+    "newTests": 9,
+    "realBrowserSchedulerTests": 2,
+    "legacyFallbackRemovedFromContinueChain": true,
+    "unsupportedReportsUseGenericRepeatStop": true,
+    "historicalReplay": {
+      "sourceExportSha256": "16c9ee5048cbcbf9adebd17e133fdaa666a834436100e4777df52a731e35d52d",
+      "runId": "run-1579143f9486496e",
+      "actualCallId": "call-5ec967337c99407a",
+      "chronologicalCutoffUTC": "2026-11-16T09:28:05Z",
+      "diagnosticKind": "step_execution_error",
+      "actualFailureCount": 2,
+      "actualFailedCallIds": [
+        "call-50e759cd61654b84",
+        "call-5ec967337c99407a"
+      ],
+      "recordedOldRecoveriesBeforeCutoff": 4,
+      "futureProposalSimulation": true,
+      "futureRequireFinal": [
+        false,
+        false,
+        true
+      ],
+      "newExecutedTests": 0,
+      "terminalHistoricalFailureNotReusable": true,
+      "terminalBoundaryReason": "Later real successful tests and owner file.write invalidate the earlier failed episode. Terminal replay correctly returns None.",
+      "rewrittenProducts": false
+    }
+  },
+  "evidenceBoundaries": [
+    "Real Docker tests use scripted model decisions, not proof a live model will adopt the advice.",
+    "R12 products and runs were not rewritten.",
+    "No new six-task live result existed when this implementation report was written.",
+    "Subsequent documentation edits do not change the tested runtime code."
+  ]
+}
