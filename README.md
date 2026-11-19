@@ -61,6 +61,8 @@ python3 benchmarks/mid_test_live.py --live \
   --data-dir .runtime/mid-test-live --output .runtime/mid-test-exports
 ```
 
+Add `--time-only --deadline 1800` to select the platform wall-deadline profile for each task without total call, turn, or token caps. The run report records the effective profile and limits.
+
 Use `benchmarks/mid_test_acceptance.py --help` to score frozen exports with evaluator-owned evidence. Process completion, product integrity, and independent product verdicts are recorded separately. Failed, timed-out, and unassessed cases remain in the scoring denominators. The [acceptance guide](benchmarks/ACCEPTANCE.md) also documents the replaceable CSV suite and SQLite evaluation storage.
 
 ## Architecture and tools

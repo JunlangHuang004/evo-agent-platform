@@ -42,10 +42,17 @@ RUN_BROWSER_DOCKER_TESTS=1 RUN_AGENT_SANDBOX_DOCKER_TESTS=1 \
 
 The new version tests cover a modified private script, byte-identical copies, old-artifact rejection, obsolete tool evidence, current package documentation, changed instructions, changed runtime, duplicate acceptance, and a real Chromium source-review-to-package-review path. Existing regression tests cover dependency repair, checkpoints, ACLs, memory, evaluation, tools, and context compression. Tests use scripted models and temporary state.
 
-The original attached pack was parsed successfully as six ordered cases and 24 evaluator checks. This environment has no configured course model key, so the six real-model cases were not rerun. Historical R13 results retain their original source version and verdicts.
+The original attached pack was parsed successfully as six ordered cases and 24 evaluator checks. The initial regression was completed before a course key was configured, so it did not include a six-case model run. Historical R13 results retain their original source version and verdicts.
 
 ## Verification recorded on 19 November 2026
 
 The full regression command with both Docker flags enabled ran 960 tests in 205.378 seconds. It passed 959 tests and skipped the Node UI smoke because Node was absent from the shell PATH. The UI smoke then passed separately using the bundled Node runtime. The eight version/package tests also passed with the real-browser flag enabled, including reloading the saved final-package evidence from SQLite. Subsequent focused prompt/context checks passed. Compilation and `git diff --check` passed.
 
-These checks use scripted model responses, actual immutable artifact storage, and real isolated Chromium/Python where enabled. They establish the repaired workflow behavior. The configured course model key is absent, so a new six-task model-driven success rate and generated-product quality comparison remain unmeasured.
+These checks use scripted model responses, actual immutable artifact storage, and real isolated Chromium/Python where enabled. They establish the repaired workflow behavior. A new six-task model-driven success rate and generated-product quality comparison remain unmeasured.
+
+
+## Course API connection follow-up
+
+After configuring the course endpoint and requested e7 model locally, the model-list request returned HTTP 200 and listed the configured model. Five generation smoke requests returned HTTP 502, including standard and compatible transports, plain and JSON responses, the production output budget, and a direct connection bypassing the local proxy. The raw gateway response identified `bad_response_status_code`. These observations do not identify the underlying service failure or establish a task success rate.
+
+The local `.env` remains ignored by Git. No credential is included in source, reports, or examples. The bulk runner now accepts `--time-only --deadline 1800` and records its effective call, token, and turn limits. Its bounded default remains available. The harness and time-only regression group passed all 22 tests.

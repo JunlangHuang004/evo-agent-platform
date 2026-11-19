@@ -218,6 +218,7 @@ def main():
     parser.add_argument('--config-root', type=Path, required=True)
     parser.add_argument('--data-dir', type=Path, required=True)
     parser.add_argument('--output', type=Path, required=True)
+    parser.add_argument('--time-only', action='store_true', help='Use the platform wall-deadline profile without total call, turn or token caps.')
     parser.add_argument('--scenario', choices=['all', 'software', 'newsroom', 'fund'], default='all')
     parser.add_argument('--port', type=int, default=8081)
     parser.add_argument('--deadline', type=int, default=600)
@@ -261,6 +262,9 @@ def main():
     config.max_run_seconds = args.deadline
     config.max_run_tokens = 200000
     config.max_retries = args.max_retries
+    if args.time_only:
+        config.apply_time_only_profile()
+        config.max_run_seconds = args.deadline
     config.approval_ttl = max(900, args.human_wait + 60)
     # No remote publishing is authorized by a benchmark runner on its own.
     config.git_remote = config.git_token = ''
@@ -273,9 +277,11 @@ def main():
               'settings': {'deadlinePerTask': args.deadline, 'humanWait': args.human_wait,
                            'transportMode': getattr(config, 'transport_mode', 'standard'),
                            'requestedThinkingMode': getattr(config, 'thinking_mode', 'default'),
-                           'modelTimeout': args.model_timeout, 'maxModelCallsPerTask': args.max_calls,
+                           'modelTimeout': args.model_timeout, 'executionProfile': getattr(config, 'execution_profile', 'bounded'),
+                           'maxModelCallsPerTask': config.max_model_calls,
+                           'maxRunTokens': config.max_run_tokens,
                            'maxCompletionTokens': args.completion_tokens, 'planningMaxTokens': args.planning_tokens,
-                           'maxAgentTurns': 16, 'maxRetries': args.max_retries},
+                           'maxAgentTurns': config.max_agent_turns, 'maxRetries': args.max_retries},
               'sourceFilesSha256': {str(path.relative_to(config.root)): hashlib.sha256(path.read_bytes()).hexdigest()
                                     for path in sorted([*(config.root / 'backend').glob('*.py'), Path(__file__).resolve()])},
               'cases': [], 'qualityVerdict': 'unassessed'}

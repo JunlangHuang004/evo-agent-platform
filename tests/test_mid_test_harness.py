@@ -159,6 +159,30 @@ class MidTestHarnessTests(unittest.TestCase):
                 self.assertEqual(result['runId'], 'run-owned')
                 self.assertEqual(result['observationStatus'], 'observed')
 
+    def test_cli_time_only_profile_uses_effective_limits_and_requested_deadline(self):
+        for time_only in (False, True):
+            with self.subTest(time_only=time_only), tempfile.TemporaryDirectory() as temp:
+                root = Path(temp)
+                server = mock.Mock()
+                hub = mock.Mock()
+                argv = ['mid_test_live.py', '--live', '--suite-root', str(root / 'suite'),
+                        '--config-root', str(root), '--data-dir', str(root / 'state'),
+                        '--output', str(root / 'output'), '--deadline', '123']
+                if time_only:
+                    argv.append('--time-only')
+                with mock.patch('sys.argv', argv), mock.patch.object(mid_test_live, 'load_suite', return_value=[]), \
+                        mock.patch('backend.server.TeamHub', return_value=hub) as factory, \
+                        mock.patch('backend.server.make_handler', return_value=object()), \
+                        mock.patch.object(mid_test_live, 'ThreadingHTTPServer', return_value=server), \
+                        mock.patch('builtins.print'):
+                    self.assertEqual(mid_test_live.main(), 0)
+                config = factory.call_args.args[0]
+                self.assertEqual(config.max_run_seconds, 123)
+                self.assertEqual(config.execution_profile, 'time_only' if time_only else 'bounded')
+                self.assertEqual(config.max_model_calls, None if time_only else 48)
+                self.assertEqual(config.max_agent_turns, None if time_only else 16)
+                self.assertEqual(config.max_run_tokens, None if time_only else 200000)
+
     def test_main_does_not_post_task_two_over_even_a_finished_replacement_user_run(self):
         app = ObservedApp(replace_on_snapshot=True)
         suite = [{'team':'software', 'roles':{'a':'Role A','b':'Role B'},
