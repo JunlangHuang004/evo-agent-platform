@@ -182,7 +182,7 @@ class ContextIndexTests(unittest.TestCase):
         self.assertIn('"type":"final","status":"partial"',prompt)
         plan=planning_prompt([{'id':key,**value} for key,value in AGENTS.items()],10)
         self.assertIn('combine clarification and design in one lead-owned task',plan)
-        self.assertIn('usually use five real tasks',plan)
+        self.assertIn('independent final-package review',plan)
 
 
 if __name__=='__main__':unittest.main()

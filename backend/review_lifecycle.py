@@ -7,6 +7,7 @@ import copy
 import re
 
 from .runtime import fingerprint
+from .review_versions import target_artifacts
 
 
 def current_pass_receipt(run, reviewer, target, agents, dependency_validation, valid_code_review):
@@ -25,13 +26,13 @@ def current_pass_receipt(run, reviewer, target, agents, dependency_validation, v
             or validation['targetRevision']!=target['revision']
             or not isinstance(validation.get('feedback'),str) or not validation['feedback'].strip()
             or dependency_validation.get('status')=='stale'):return None
-    outputs=target.get('outputs',[]);hashes={}
+    outputs=[item['id'] for item in target_artifacts(run, target)];hashes={}
     for artifact_id in outputs:
         artifacts=[a for a in run.get('artifacts',[]) if a.get('id')==artifact_id]
         if len(artifacts)!=1:return None
         a=artifacts[0];digest=a.get('sha256')
-        if (a.get('runId')!=run.get('id') or a.get('taskId')!=target['id']
-                or a.get('ownerAgentId',a.get('owner'))!=target.get('agentId')
+        if (a.get('runId')!=run.get('id') or ((target.get('outputContract') or {}).get('kind') != 'delivery' and a.get('taskId')!=target['id'])
+                or ((target.get('outputContract') or {}).get('kind') != 'delivery' and a.get('ownerAgentId',a.get('owner'))!=target.get('agentId'))
                 or not isinstance(digest,str) or not re.fullmatch('[0-9a-f]{64}',digest)):return None
         hashes[artifact_id]=digest
     if validation.get('artifactHashes')!=hashes:return None
@@ -64,8 +65,7 @@ def review_context(run,reviewer,agents,receipt_for,can_access):
         receipt=receipt_for(target)
         rows.append({'taskId':task_id,'agentId':target.get('agentId'),'title':target.get('title','')[:160],
                      'revision':target.get('revision'),'status':target.get('status'),
-                     'artifactHashes':{a['id']:a.get('sha256') for a in run.get('artifacts',[])
-                                       if a.get('id') in target.get('outputs',[])},
+                     'artifactHashes':{a['id']:a.get('sha256') for a in target_artifacts(run, target)},
                      'passReceipt':({key:receipt[key] for key in ('eventId','kind','verified')} if receipt else None)})
         # Explain provenance dependencies which were never direct reviewer inputs.
         # Metadata exposes no private path/body and conveys no implicit grant.

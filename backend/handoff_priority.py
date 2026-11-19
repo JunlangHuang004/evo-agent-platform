@@ -17,7 +17,7 @@ def _path(value):
             and not value.startswith('imports/'))
 
 
-def handoff_priority(run,task,stage,qa_evidence,current_hashes,now_ms,finalization_ms):
+def handoff_priority(run,task,stage,qa_evidence,current_hashes,now_ms,finalization_ms,candidate=None):
     """Only current owned writes and actually served, host-validated browser bytes.
 
     ``qa_evidence`` is supplied by the existing host browser-progress verifier;
@@ -74,14 +74,31 @@ def handoff_priority(run,task,stage,qa_evidence,current_hashes,now_ms,finalizati
                and a.get('id') in task.get('outputs',[]) and a.get('runId')==run.get('id')
                and a.get('taskId')==task.get('id') and a.get('ownerAgentId',a.get('owner'))==task.get('agentId')
                and not a.get('inheritedReadOnly')}
-    rows=[];contract_match=False
+    rows=[];published_rows=[];contract_match=False
     for path,row in sorted(writes.items()):
         digest=row['sha256']
         if (PurePosixPath(path).suffix.lower() not in _TEXT_TYPES or current_hashes.get(path)!=digest
                 or (path,digest) not in tested):continue
         if PurePosixPath(path).suffix.lower() in extensions:contract_match=True
-        if (path,digest) in published:continue
+        if (path,digest) in published:
+            published_rows.append({**row,'browserCallId':tested[(path,digest)]})
+            continue
         rows.append({**row,'browserCallId':tested[(path,digest)]})
+    if not rows and contract_match and published_rows and isinstance(candidate,dict):
+        runtime = [item for item in candidate.get('files',[]) if item.get('path','').lower().endswith(('.html','.htm','.js','.mjs','.css'))]
+        if (candidate.get('status')=='candidate' and candidate.get('runId')==run['id']
+                and candidate.get('taskId')==task['id'] and candidate.get('taskRevision')==revision
+                and runtime and all((item['path'],item['sha256']) in published
+                                    and (item['path'],item['sha256']) in tested
+                                    and current_hashes.get(item['path'])==item['sha256'] for item in runtime)):
+            return {'schemaVersion':1,'advisoryOnly':True,'runId':run['id'],'taskId':task['id'],
+                    'agentId':task['agentId'],'revision':revision,'deadlineAt':budget['deadlineAt'],
+                    'currentOwnedUnpublishedTestedFiles':[], 'currentPublishedTestedFiles':published_rows[:12],
+                    'candidateDeliveryId':candidate['id'],'semanticCoverage':'unassessed',
+                    'instruction':'The soft handoff target has passed and the current candidate runtime already has successful browser observations. '
+                        'Compare the original criteria with existing coverage. Complete only specific missing checks or repairs, '
+                        'then explicitly final with done/partial/failed so the planned independent reviewer can inspect this candidate. '
+                        'Repeated passing tests do not replace independent review. No publication, review, completion or budget was created.'}
     if not rows or not contract_match:return None
     selected=rows[:12]
     priority={'schemaVersion':1,'advisoryOnly':True,'runId':run['id'],'taskId':task['id'],
@@ -110,6 +127,10 @@ def handoff_priority(run,task,stage,qa_evidence,current_hashes,now_ms,finalizati
 
 def priority_tail(priority):
     """One compact current reminder, derived only from the canonical receipt."""
+    if priority.get('candidateDeliveryId'):
+        return {'runId':priority['runId'],'taskId':priority['taskId'],'revision':priority['revision'],
+                'candidateDeliveryId':priority['candidateDeliveryId'],
+                'instruction':priority['instruction']}
     return {'runId':priority['runId'],'taskId':priority['taskId'],'revision':priority['revision'],
         'currentFiles':[{'path':r['path'],'sha256':r['sha256']} for r in priority['currentOwnedUnpublishedTestedFiles']],
         'publicationProposal':copy.deepcopy(priority['publicationProposal']),

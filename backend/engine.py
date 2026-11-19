@@ -27,8 +27,10 @@ from .progress_watchdog import watchdog_tick, current_watchdog_notice
 from .handoff_priority import handoff_priority,priority_tail,PREFIX as HANDOFF_PRIORITY_PREFIX
 from .sandbox import read_text
 from .delivery import create_delivery, _snapshot as _delivery_snapshot, _current_source as _current_delivery_source
+from .delivery_delta import delta_context, reviewed_delta
+from .review_versions import browser_source_feedback, target_artifacts, version_feedback
 from .delivery_review import reviewed_sources, handoff_context, unchanged_bundle_binding, current_packaging_binding
-from .candidate_delivery import publication_candidate, create_candidate_delivery, existing_candidate
+from .candidate_delivery import publication_candidate, create_candidate_delivery, existing_candidate, current_candidate
 from .memory import MemoryService
 from .learning import LearningService
 from .partial_review import budget_partial_receipt, review_dependency_exceptions
@@ -1490,7 +1492,8 @@ class Platform:
             if added_delivery_ancestor and (dep.get('status')!='done'
                     or type(dep.get('revision')) is not int or dep['revision']<0):
                 continue
-            for artifact_id in dep.get('outputs',[]):
+            dependency_artifacts = [item['id'] for item in target_artifacts(run, dep)]
+            for artifact_id in dependency_artifacts:
                 if added_delivery_ancestor:
                     # A delivery needs its declared producers' published files,
                     # not merely a direct QA task's note. Reuse packaging's
@@ -1601,6 +1604,14 @@ class Platform:
                      'recentCalls':[{'id':c['id'],'tool':c['tool'],'status':c['status'],'result':c.get('result')} for c in run['calls'] if c['taskId']==task['id'] and c['tool']!='llm.chat'][-8:]}
             delivery_handoff=handoff_context(self._reviewed_delivery_sources(run,task))
             if delivery_handoff:context['deliverySourceHandoff']=delivery_handoff
+            package_reviews = []
+            for dependency_id in task.get('reviewOf') or task.get('dependsOn', []):
+                dependency = self._task(run, dependency_id)
+                if dependency and (dependency.get('outputContract') or {}).get('kind') == 'delivery':
+                    delta = delta_context(run, dependency, self._reviewed_delivery_sources(run, dependency))
+                    if delta:
+                        package_reviews.append({'taskId': dependency_id, 'targetSnapshot': self._review_snapshot(run, dependency), **delta})
+            if package_reviews:context['deliveryReviewTargets'] = package_reviews
             partial_review=partial_review_context(run,task,self.agents)
             if partial_review:context['partialDependencyReview']=partial_review
             if not task.get('_messages'):
@@ -1622,6 +1633,8 @@ class Platform:
                     initial_context['taskBoard']=context['taskBoard']
                     initial_context.pop('deliverySourceHandoff',None)
                     if delivery_handoff:initial_context['deliverySourceHandoff']=delivery_handoff
+                    initial_context.pop('deliveryReviewTargets', None)
+                    if package_reviews:initial_context['deliveryReviewTargets'] = package_reviews
                     initial_context.pop('partialDependencyReview',None)
                     if partial_review:initial_context['partialDependencyReview']=partial_review
                     if isinstance(initial_context.get('task'),dict) and initial_context['task'].get('id')==task['id']:
@@ -1868,7 +1881,8 @@ class Platform:
                 if not isinstance(path,str) or path.startswith('imports/') or path not in files:continue
                 try:current_hashes[path]=hashlib.sha256(read_text(self.tools.workspace(task['agentId'],run['id']),path).encode('utf-8')).hexdigest()
                 except (ToolError,AttributeError,UnicodeError):continue
-        priority=handoff_priority(run,task,stage,qa_evidence,current_hashes,clock_ms(),closing_ms)
+        candidate = current_candidate(task, run, self.artifacts, task.get('outputs', [])) if current_hashes else None
+        priority=handoff_priority(run,task,stage,qa_evidence,current_hashes,clock_ms(),closing_ms,candidate=candidate)
         if priority:receipt['handoffPriority']=priority
         task['progress']=receipt
         # Only server feedback uses this role/prefix. Remove even a formerly
@@ -2660,10 +2674,14 @@ class Platform:
 
     @staticmethod
     def _review_snapshot(run, task):
-        artifact_ids=set(task.get('outputs',[]))
-        return {'targetRevision':task.get('revision',0),
-                'artifactHashes':{artifact['id']:artifact['sha256'] for artifact in run.get('artifacts',[])
-                                  if artifact['id'] in artifact_ids and artifact.get('sha256')}}
+        snapshot = {'targetRevision': task.get('revision', 0),
+                    'artifactHashes': {item['id']: item['sha256'] for item in target_artifacts(run, task) if item.get('sha256')}}
+        if (task.get('outputContract') or {}).get('kind') == 'delivery':
+            packages = [item for item in run.get('deliveries', []) if item.get('taskId') == task['id']
+                        and item.get('taskRevision') == task.get('revision', 0) and item.get('status') == 'packaged'][-1:]
+            snapshot['deliveryHashes'] = {item['id']: fingerprint({key: item[key] for key in
+                ('entrypoint', 'instructions', 'files')}) for item in packages}
+        return snapshot
 
     def _dependency_validation(self,run,task):
         """Check recorded input versions, including stale transitive consumers."""
@@ -2692,10 +2710,21 @@ class Platform:
     def _current_packaging_binding(self,run,task):
         return current_packaging_binding(run,task,self.artifacts,self._reviewed_delivery_sources(run,task))
 
+    def _delivery_changed_files(self, run, task):
+        delta = delta_context(run, task, self._reviewed_delivery_sources(run, task))
+        if delta is None:return False
+        validation = task.get('validation') or {}
+        reviewer = self._task(run, validation.get('reviewerTaskId'))
+        if (validation.get('kind') == 'editorial_assessment' and reviewer
+                and self._current_review_receipt(run, reviewer, task)):
+            return False
+        own_ids = set(task.get('outputs', []))
+        return any(item['artifactId'] in own_ids and item['change'] != 'unchanged' for item in delta['files'])
+
     def _requires_browser(self,run,task):
         contract=task.get('outputContract') or {}
-        return (any(a['id'] in task.get('outputs',[]) and a.get('name','').lower().endswith(('.html','.htm'))
-                    for a in run.get('artifacts',[]))
+        return (any(a['id'] in task.get('outputs', []) and a.get('name','').lower().endswith(('.html','.htm'))
+                    for a in run.get('artifacts', []))
                 or (contract.get('kind')=='artifact' and any(ext in ('.html','.htm') for ext in contract.get('extensions',[]))))
 
     def _browser_review_evidence(self,run,target,call):
@@ -2714,7 +2743,7 @@ class Platform:
         if (not isinstance(entry,dict) or not isinstance(entry.get('path'),str) or not entry['path']
                 or not isinstance(files,list)):
             return False
-        artifacts=[a for a in run.get('artifacts',[]) if a['id'] in target.get('outputs',[])]
+        artifacts=target_artifacts(run,target)
         html=[a for a in artifacts if a.get('name','').lower().endswith(('.html','.htm'))]
         if not html or not any(a.get('sha256')==entry.get('sha256') for a in html):return False
         observed={item['sha256'] for item in [entry,*files]
@@ -2730,6 +2759,15 @@ class Platform:
                     and validation.get('targetRevision')==snapshot['targetRevision']
                     and validation.get('artifactHashes')==snapshot['artifactHashes'])
         if not current or self._dependency_validation(run,task)['status']=='stale':return False
+        if validation.get('deliveryHashes') != snapshot.get('deliveryHashes'):return False
+        if validation.get('kind') == 'delivery_delta':
+            reviewer = self._task(run, validation.get('reviewerTaskId'))
+            if not reviewer or reviewer.get('revision') != validation.get('reviewerRevision'):return False
+            recorded = validation.get('deliveryDelta')
+            proof = reviewed_delta(run, reviewer, task,
+                {'targetSnapshot': snapshot, 'evidenceCallIds': validation.get('evidenceCallIds', []), 'feedback': validation.get('feedback')},
+                self.artifacts, self._reviewed_delivery_sources(run, task), snapshot)
+            return proof is not None and proof == recorded
         if not self._requires_browser(run,task):return True
         reviewer=self._task(run,validation.get('reviewerTaskId'))
         return bool(reviewer and 'review' in self.agents.get(reviewer.get('agentId'),{}).get('capabilities',[])
@@ -2748,12 +2786,13 @@ class Platform:
         extensions=('.py','.js','.mjs','.ts','.tsx','.jsx','.c','.cpp','.java','.rs','.go','.sh')
         if 'coding' in self.agents.get(task.get('agentId'),{}).get('capabilities',[]):
             extensions=(*extensions,'.html')
-        return any(artifact['id'] in task.get('outputs',[]) and artifact.get('name','').lower().endswith(extensions)
-                   for artifact in run.get('artifacts',[]))
+        return any(artifact['id'] in task.get('outputs', []) and artifact.get('name','').lower().endswith(extensions)
+                   for artifact in run.get('artifacts', []))
 
     def _current_review_receipt(self,run,reviewer,target):
         if target is None:return None
         validation=target.get('validation') or {}
+        if validation.get('deliveryHashes') != self._review_snapshot(run, target).get('deliveryHashes'):return None
         needs_browser=self._requires_browser(run,target)
         needs_code=self._has_code_work(run,target) or needs_browser
         if needs_code and validation.get('kind')=='editorial_assessment':return None
@@ -2775,7 +2814,7 @@ class Platform:
             return bool(isinstance(browser,dict) and browser.get('ok') is True
                         and not any(browser.get(k) for k in ('error','pageErrors','httpErrors','blockedRequests','timedOut','cancelled'))
                         and self._browser_review_evidence(run,target,call))
-        valid_code=self._valid_review(run,target) and any(actual_test(call) for call in run.get('calls',[]))
+        valid_code=self._valid_review(run,target) and (validation.get('kind') == 'delivery_delta' or any(actual_test(call) for call in run.get('calls',[])))
         return current_pass_receipt(run,reviewer,target,self.agents,self._dependency_validation(run,target),valid_code)
 
     def _review_context(self,run,reviewer):
@@ -2832,10 +2871,16 @@ class Platform:
                         'instruction':'This exact current pass was already recorded; no review event, verdict or progress was added. '
                             'Use remainingTargetIds for unresolved scope. If none remain, finish the original report/publication contract and explicitly final. '
                             'Do not alternate passed targets or change feedback merely to repeat a decision. No completion or permission was inferred.'}
+            stale_feedback = version_feedback(run, reviewer, target, action, self._review_snapshot)
+            if stale_feedback is not None:
+                self._event(run, 'stale_review_rejected', reviewer['agentId'], stale_feedback['error']['message'],
+                            {'taskId': reviewer['id'], 'targetTaskId': target['id'], 'actionExecuted': False})
+                self._persist()
+                return stale_feedback
             if verdict=='rework' and target['revision']>=self.config.max_retries:
                 raise ProtocolError('该子任务已达到返工次数上限。')
             snapshot=self._review_snapshot(run,target)
-            needs_browser=self._requires_browser(run,target)
+            needs_browser=self._requires_browser(run,target) or any(item.get('path', item.get('name', '')).lower().endswith(('.html', '.htm')) for item in target_artifacts(run, target))
             evidence=[call for call in run['calls'] if call['id'] in evidence_ids and call['taskId']==reviewer['id']
                       and call.get('agentId')==reviewer['agentId'] and call['tool']=='code.test' and call['status']=='success'
                       and isinstance(call.get('result'),dict) and call['result'].get('ok') is True and call['result'].get('exitCode')==0
@@ -2856,6 +2901,12 @@ class Platform:
                     if call['id'] in evidence_ids and call.get('taskId')==reviewer['id']
                     and call.get('agentId')==reviewer['agentId'] and call.get('status')=='success'
                     and call.get('tool') in ('web.search','web.fetch','file.read')]
+            if verdict == 'pass' and (target.get('outputContract') or {}).get('kind') == 'delivery':
+                delta = reviewed_delta(run, reviewer, target, action, self.artifacts,
+                                       self._reviewed_delivery_sources(run, target), snapshot)
+                if delta is not None:
+                    validation.update(kind='delivery_delta', verified=True, deliveryDelta=delta,
+                                      evidenceCallIds=delta['runtimeEvidenceCallIds'] + delta['documentReadCallIds'])
             if verdict=='rework':
                 diagnostic={'reviewerTaskId':reviewer['id'],'targetRevision':target['revision'],
                             'artifactHashes':copy.deepcopy(snapshot['artifactHashes']),
@@ -3116,6 +3167,15 @@ class Platform:
         self._budget(channel,run_id,task)
         if name not in self.agents[task['agentId']]['tools']:
             raise ToolError('permission','该Agent没有此工具权限。')
+        if name == 'code.test' and pending is None:
+            feedback = browser_source_feedback(self._gate(channel, run_id), task, args,
+                                               self.artifacts, self.tools, self.agents)
+            if feedback is not None:
+                with self.lock:
+                    self._event(self._gate(channel, run_id), 'review_source_mismatch', task['agentId'],
+                                feedback['error']['message'], {'taskId': task['id'], 'actionExecuted': False})
+                    self._persist()
+                return feedback
         with self.lock:
             run=self._gate(channel,run_id)
             args=copy.deepcopy(args)
@@ -3131,7 +3191,7 @@ class Platform:
                       'revision':task.get('revision',0),'attempt':task.get('attempts',0),
                       'status':'running','result':None,'durationMs':0,'sandboxId':f'{task["agentId"]}/{run_id}'}
                 if run.get('continuationHistory'):call['continuationId']=run['continuationHistory'][-1]['id']
-                if 'review' in self.agents[task['agentId']].get('capabilities',[]) and name=='code.test':
+                if 'review' in self.agents[task['agentId']].get('capabilities',[]) and name in ('code.test', 'file.read'):
                     call['reviewTargets']={target['id']:self._review_snapshot(run,target) for target in run['steps']
                                            if target['id']!=task['id'] and target.get('status') in ('done','partial')}
                 run['calls'].append(call)
@@ -3376,7 +3436,7 @@ class Platform:
             if four_role:
                 for task in tasks:
                     if ('review' not in self.agents.get(task.get('agentId'),{}).get('capabilities',[])
-                            and task.get('status') in ('done','partial') and (self._has_code_work(run,task) or self._requires_browser(run,task)) and not self._valid_review(run,task)):
+                            and task.get('status') in ('done','partial') and (self._has_code_work(run,task) or self._requires_browser(run,task) or self._delivery_changed_files(run, task)) and not self._valid_review(run,task)):
                         binding=self._current_packaging_binding(run,task)
                         if binding:
                             # Derived packaging integrity, not a new reviewer verdict.

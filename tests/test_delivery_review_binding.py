@@ -154,14 +154,14 @@ class DeliveryReviewBindingTests(unittest.TestCase):
             for path, body in PRODUCT.items(): self.assertEqual(archive.read(path).decode(), body)
         self.assertEqual(delivery['semanticQuality'], 'unassessed')
 
-    def test_direct_reviewed_originals_plus_new_readme_still_package_normally(self):
+    def test_direct_originals_plus_new_readme_package_but_need_final_assessment(self):
         code = [a['id'] for a in self.originals if a['path'] != 'README.md']
         delivery, _ = self.package({'README.md': 'New delivery instructions: open index.html.'}, selected=code)
         self.assertNotIn('reviewedSourceBinding', delivery)
         self.assertFalse(self.app._has_code_work(self.run, self.pack))
         self.finish()
-        self.assertEqual(self.run['status'], 'done')
-        self.assertEqual(self.run['acceptanceGaps'], [])
+        self.assertEqual(self.run['status'], 'partial')
+        self.assertEqual(len(self.run['acceptanceGaps']), 1)
         self.assertNotIn('validation', self.pack)
         self.assertEqual(delivery['semanticQuality'], 'unassessed')
         with zipfile.ZipFile(io.BytesIO(delivery_zip(delivery, self.run, self.app.artifacts))) as archive:

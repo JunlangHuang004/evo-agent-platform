@@ -107,6 +107,20 @@ class HandoffPriorityTests(unittest.TestCase):
         self.run['artifacts']=[{'id':path,'runId':self.run['id'],'taskId':self.task['id'],'ownerAgentId':'dev','path':path,'sha256':sha} for path,sha in self.hashes.items()]
         self.task['outputs']=list(self.hashes);self.assertIsNone(self.result())
 
+    def test_current_published_candidate_keeps_handoff_advice_after_publication(self):
+        self.run['artifacts']=[{'id':path,'runId':self.run['id'],'taskId':self.task['id'],
+            'ownerAgentId':'dev','path':path,'sha256':digest} for path,digest in self.hashes.items()]
+        self.task['outputs']=list(self.hashes)
+        candidate={'id':'candidate-current','status':'candidate','runId':self.run['id'],
+                   'taskId':self.task['id'],'taskRevision':self.task['revision'],
+                   'files':[{'path':path,'sha256':digest} for path,digest in self.hashes.items()]}
+        priority=handoff_priority(self.run,self.task,self.stage,self.qa,self.hashes,self.now,65000,candidate)
+        self.assertEqual(priority['candidateDeliveryId'],'candidate-current')
+        self.assertEqual(priority['currentOwnedUnpublishedTestedFiles'],[])
+        self.assertEqual(priority_tail(priority)['candidateDeliveryId'],'candidate-current')
+        candidate['taskRevision']+=1
+        self.assertIsNone(handoff_priority(self.run,self.task,self.stage,self.qa,self.hashes,self.now,65000,candidate))
+
     def test_manifest_only_or_unowned_assets_are_not_treated_as_tested(self):
         for c in self.run['calls']:
             if c['tool']=='code.test':c['result']['browser']['testedFiles']=[]
