@@ -2,7 +2,7 @@
 
 EvoMAC is a course project with configurable four-agent teams, task DAGs, independent memory and workspaces, human clarification and approvals, public web tools, isolated execution, immutable artifact handoffs, and downloadable products. The backend uses HKGAI or DeepSeek and the Python standard library. JavaScript and browser checks use the dedicated Docker image.
 
-The latest recorded real-model round, R13, produced outputs for all six Mid-Test tasks, with two runs marked done and four partial. Those historical results remain in the [R13 evidence report](benchmarks/reports/mid-test-r13-20261116.json) and [project status report](docs/project-status-2026-11-16.md). The current fixes address the version and delivery gaps documented in that round. A new live six-task success rate requires another observed course-model run.
+R13 produced outputs for all six Mid-Test tasks, with two runs marked done and four partial. The later [R14 diagnostic round](benchmarks/reports/mid-test-r14-20261120.json) recorded six partial runs after exposing proxy interruptions, premature search timeout propagation and a successful-test review loop. The [R13 evidence](benchmarks/reports/mid-test-r13-20261116.json) retains its original results. The current code addresses those observed workflow defects; regression success alone does not establish reliable six-task delivery.
 
 ## Start
 
@@ -27,8 +27,10 @@ The default profile has bounded calls, turns, tokens, and runtime. `python3 serv
 - Final-package review includes the actual selected files, entrypoint, and run instructions in its snapshot. The reviewer receives the package changes and authorized source files. For an identical runtime and URL layout, a separate explicit package assessment can reuse current browser evidence after reading the packaged documentation. Changed runtime bytes or configuration need fresh executable verification.
 - A producer with an already published, tested candidate continues receiving the overdue handoff reminder. The reminder directs attention to missing criteria and independent QA while preserving actual outcomes and the original budget.
 - Stateful product guidance covers failed reads, destructive stale writes, and misleading zero statistics. Review guidance also checks metric units, periods, denominators, and issuer-concentration evidence.
+- Local search timeouts preserve remaining run time. A bounded Bing fallback preserves earlier provider failures and returns actual unfetched links.
+- Successful browser receipts remain in the host ledger. One version-bound prompt directs repeated identical Reviewer tests toward an explicit evidence-backed decision, with the original loop stop retained.
 
-All 960 regression cases were verified, including real Docker checks and a separate run of the Node UI smoke. The [implementation and verification guide](docs/mid-test-improvements.md) documents the protocol, compatibility, test commands, and evidence limits.
+All 974 regression cases passed with actual Docker checks and Node UI smoke enabled. The [implementation and verification guide](docs/mid-test-improvements.md) documents the protocol, compatibility, test commands, and evidence limits.
 
 ## Run checks
 

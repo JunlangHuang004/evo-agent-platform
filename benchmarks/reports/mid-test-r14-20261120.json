@@ -1,0 +1,235 @@
+{
+  "kind": "Frozen R14 diagnostic observation",
+  "officialScore": false,
+  "date": "2026-11-20",
+  "sourceCommit": "035d91d20c9fb9da92a309a2ff3cb616ea5e4987",
+  "branch": "D-mid-test-improvements",
+  "settings": {
+    "deadlinePerTask": 1800,
+    "profile": "time_only",
+    "maxModelCalls": null,
+    "maxAgentTurns": null,
+    "maxRunTokens": null,
+    "transportMode": "standard",
+    "route": "process-scoped NO_PROXY for the course API"
+  },
+  "configuredModel": "t2_hkgai-v3_fp8_1m_e7",
+  "assistance": {
+    "simulatedRequester": true,
+    "assumptionsRecorded": true,
+    "exactWorkspaceEditApprovals": true,
+    "manualProductEdits": false,
+    "actionsByKind": {
+      "simulated_requester_clarification": 5,
+      "test_operator_permission": 21
+    }
+  },
+  "outcome": {
+    "done": 0,
+    "partial": 6,
+    "total": 6,
+    "independentQualityVerdict": "unassessed"
+  },
+  "limitations": [
+    "The first case includes proxy interruptions and recovery with its original deadline preserved.",
+    "A local search deadline falsely expired four research runs before their wall deadline.",
+    "Software QA executed two identical passing tests, then failed the generic repeated-action guard before any explicit review.",
+    "No formal final delivery was accepted. Candidate or private files do not establish acceptance.",
+    "Route, requester assumptions, operator assistance and historical budget differences prevent a causal comparison."
+  ],
+  "cases": [
+    {
+      "case": "software-1",
+      "title": "Scenario 1, Task 1: Build a Meeting Room Booking System",
+      "sourceSha256": "5348cba2dcb24a5ecf48f047642c132815ac63586858696dac12d29c7de04c6c",
+      "runId": "run-2673f7831a9f4f33",
+      "executionStatus": "partial",
+      "elapsedSec": 1745.596,
+      "checks": {
+        "planned": true,
+        "allRolesParticipated": false,
+        "allRolesDeclaredDone": false,
+        "publishedArtifactsTotal": 1,
+        "newPublishedArtifacts": 1,
+        "inheritedArtifacts": 0,
+        "realWebCallsSucceeded": 0,
+        "realCodeCallsSucceeded": 0,
+        "declaredDoneSubtasks": 1,
+        "plannedSubtasks": 6,
+        "qualityVerdict": "unassessed",
+        "note": "Participation, process exit and agent done status are evidence, not task quality or official scores."
+      },
+      "modelCalls": 41,
+      "reportedTokens": 360300,
+      "failedGenerations": 21,
+      "reviewDecisions": 0,
+      "formalDeliveries": 0
+    },
+    {
+      "case": "software-2",
+      "title": "Scenario 1, Task 2: Add a Room Usage Dashboard",
+      "sourceSha256": "884c6c3210b53e9b245463a95783e83f6c2803b8477030377c8b7d5b6a58ace7",
+      "runId": "run-b35fd1a666a34a5a",
+      "executionStatus": "partial",
+      "elapsedSec": 913.501,
+      "checks": {
+        "planned": true,
+        "allRolesParticipated": false,
+        "allRolesDeclaredDone": false,
+        "publishedArtifactsTotal": 7,
+        "newPublishedArtifacts": 6,
+        "inheritedArtifacts": 1,
+        "realWebCallsSucceeded": 0,
+        "realCodeCallsSucceeded": 7,
+        "declaredDoneSubtasks": 2,
+        "plannedSubtasks": 6,
+        "qualityVerdict": "unassessed",
+        "note": "Participation, process exit and agent done status are evidence, not task quality or official scores."
+      },
+      "modelCalls": 84,
+      "reportedTokens": 2000567,
+      "failedGenerations": 0,
+      "reviewDecisions": 0,
+      "formalDeliveries": 0,
+      "repeatedSuccessfulBrowserCalls": [
+        {
+          "callId": "call-d07b2ee0fced439d",
+          "assertions": 24,
+          "steps": 36
+        },
+        {
+          "callId": "call-a11f6391a7164519",
+          "assertions": 24,
+          "steps": 36
+        }
+      ]
+    },
+    {
+      "case": "newsroom-1",
+      "title": "Scenario 2, Task 1: Produce a News Report",
+      "sourceSha256": "be7250cdbb23f0c5b82d0666df8d25fff87c8cd9dfe7746be2c57046224cdda0",
+      "runId": "run-527c3d8bb30b4869",
+      "executionStatus": "partial",
+      "elapsedSec": 174.089,
+      "checks": {
+        "planned": true,
+        "allRolesParticipated": false,
+        "allRolesDeclaredDone": false,
+        "publishedArtifactsTotal": 0,
+        "newPublishedArtifacts": 0,
+        "inheritedArtifacts": 0,
+        "realWebCallsSucceeded": 0,
+        "realCodeCallsSucceeded": 0,
+        "declaredDoneSubtasks": 1,
+        "plannedSubtasks": 8,
+        "qualityVerdict": "unassessed",
+        "note": "Participation, process exit and agent done status are evidence, not task quality or official scores."
+      },
+      "modelCalls": 9,
+      "reportedTokens": 57802,
+      "failedGenerations": 0,
+      "reviewDecisions": 0,
+      "formalDeliveries": 0
+    },
+    {
+      "case": "newsroom-2",
+      "title": "Scenario 2, Task 2: Fact-Check AI-Writing Detectors",
+      "sourceSha256": "e471ee0d4de335b2e12d991b159b5d6940449e52dd9e9b48e4ee4a31769c5737",
+      "runId": "run-b5d312734f674f1b",
+      "executionStatus": "partial",
+      "elapsedSec": 406.632,
+      "checks": {
+        "planned": true,
+        "allRolesParticipated": false,
+        "allRolesDeclaredDone": false,
+        "publishedArtifactsTotal": 1,
+        "newPublishedArtifacts": 1,
+        "inheritedArtifacts": 0,
+        "realWebCallsSucceeded": 0,
+        "realCodeCallsSucceeded": 0,
+        "declaredDoneSubtasks": 1,
+        "plannedSubtasks": 8,
+        "qualityVerdict": "unassessed",
+        "note": "Participation, process exit and agent done status are evidence, not task quality or official scores."
+      },
+      "modelCalls": 10,
+      "reportedTokens": 75061,
+      "failedGenerations": 1,
+      "reviewDecisions": 0,
+      "formalDeliveries": 0
+    },
+    {
+      "case": "fund-1",
+      "title": "Scenario 3, Task 1: Develop a Simulated Investment Proposal",
+      "sourceSha256": "c35990173358be55aa39e6955faffec9d1972c6550e38a76cbd4de26d0ca4b2b",
+      "runId": "run-1922ca9acf51495b",
+      "executionStatus": "partial",
+      "elapsedSec": 140.132,
+      "checks": {
+        "planned": true,
+        "allRolesParticipated": false,
+        "allRolesDeclaredDone": false,
+        "publishedArtifactsTotal": 0,
+        "newPublishedArtifacts": 0,
+        "inheritedArtifacts": 0,
+        "realWebCallsSucceeded": 0,
+        "realCodeCallsSucceeded": 0,
+        "declaredDoneSubtasks": 1,
+        "plannedSubtasks": 9,
+        "qualityVerdict": "unassessed",
+        "note": "Participation, process exit and agent done status are evidence, not task quality or official scores."
+      },
+      "modelCalls": 6,
+      "reportedTokens": 39164,
+      "failedGenerations": 0,
+      "reviewDecisions": 0,
+      "formalDeliveries": 0
+    },
+    {
+      "case": "fund-2",
+      "title": "Scenario 3, Task 2: The Future of the Semiconductor Industry: An HTML Slide Presentation",
+      "sourceSha256": "06fdc7b62d17bd83a6f5a3ef7d145411a5edb09d6c2851ea1cb76b2b4e0f8baa",
+      "runId": "run-f71ddb08189140c0",
+      "executionStatus": "partial",
+      "elapsedSec": 129.388,
+      "checks": {
+        "planned": true,
+        "allRolesParticipated": false,
+        "allRolesDeclaredDone": false,
+        "publishedArtifactsTotal": 0,
+        "newPublishedArtifacts": 0,
+        "inheritedArtifacts": 0,
+        "realWebCallsSucceeded": 0,
+        "realCodeCallsSucceeded": 0,
+        "declaredDoneSubtasks": 1,
+        "plannedSubtasks": 9,
+        "qualityVerdict": "unassessed",
+        "note": "Participation, process exit and agent done status are evidence, not task quality or official scores."
+      },
+      "modelCalls": 11,
+      "reportedTokens": 90463,
+      "failedGenerations": 0,
+      "reviewDecisions": 0,
+      "formalDeliveries": 0
+    }
+  ],
+  "reportedModels": {
+    "t2_hkgai-v3_fp8_1m_e10": 139
+  },
+  "candidateIntegrity": {
+    "case": "software-2",
+    "packageStatus": "candidate",
+    "zipCRCError": null,
+    "entries": [
+      "app/index.html",
+      "app/dashboard.js",
+      "app/metrics.js",
+      "app/store.js",
+      "app/README.md",
+      "RUN.txt",
+      "DELIVERY.json"
+    ],
+    "zipSha256": "60c2a8efa5792ff5a1b9531091ca5497bd37ae22f391304694e941efe9856453",
+    "productQuality": "unassessed"
+  }
+}

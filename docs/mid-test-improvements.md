@@ -56,3 +56,27 @@ These checks use scripted model responses, actual immutable artifact storage, an
 After configuring the course endpoint and requested e7 model locally, the model-list request returned HTTP 200 and listed the configured model. Five generation smoke requests returned HTTP 502, including standard and compatible transports, plain and JSON responses, the production output budget, and a direct connection bypassing the local proxy. The raw gateway response identified `bad_response_status_code`. These observations do not identify the underlying service failure or establish a task success rate.
 
 The local `.env` remains ignored by Git. No credential is included in source, reports, or examples. The bulk runner now accepts `--time-only --deadline 1800` and records its effective call, token, and turn limits. Its bounded default remains available. The harness and time-only regression group passed all 22 tests.
+
+## R14 diagnostics and follow-up fixes on 20 November 2026
+
+The API accepted generation requests again. Requests named e7 while response metadata named e10. Large requests through this machine's system proxy repeatedly disconnected; the actual platform client succeeded with standard transport and a process-scoped direct course-API route. The first case resumed its checkpoint with its original deadline. The [frozen diagnostic report](../benchmarks/reports/mid-test-r14-20261120.json) records **zero done and six partial**, including all failures. This observation is not an official score or a controlled comparison with R13.
+
+The assistant answered actual clarification questions as the user-authorized simulated requester and recorded the resulting assumptions. An automated test operator approved only exact model-proposed edits to existing generated workspace files after checking the confined path and current SHA-256. No generated product bytes were manually edited. Raw prompts, full receipts, exact approvals and databases remain local.
+
+Four research cases exposed a deadline propagation defect: a search provider's attempt deadline was mistaken for the whole run deadline. Search now separates its operation budget from the caller's absolute deadline and returns retryable `search_unavailable` when its local budget is exhausted. The engine expires a run from its actual remaining wall time, preserving unknown-effect reconciliation and the original deadline. Regressions prove that a later valid action can run after a local timeout and that true expiry still stops execution.
+
+Both original search entrances timed out on this machine while HKUST and arXiv pages were directly readable. A bounded Bing fallback now extracts direct links from organic result headings, excludes adverts/answer sections and unsupported wrappers, and preserves earlier provider failures. All providers share the same operation budget and the existing pinned, per-redirect URL checks. Returned titles are unfetched discovery links; claims still need actual source reads.
+
+Software QA recorded two identical successful current-source tests with 24 assertions and 36 steps each, then proposed a third instead of reviewing. Successful compressed browser views now explain that `review.evidenceCallIds` resolves the original full host receipt. A third identical reviewer proposal can receive one nonexecuting handoff prompt, bound to two real full successful calls, reviewer identity/revision, current target snapshots, selected readable source hashes and unchanged test setup. The Reviewer must explicitly decide pass/rework or report missing coverage. The prompt never creates a test, pass or extra time; an unchanged repeat reaches the original loop stop. The marker persists across restart, and the observation is protected through the existing authenticated context-feedback path.
+
+For this machine's verified direct API route, use a process-local launch setting:
+
+```bash
+NO_PROXY=api1.hkgai.net,127.0.0.1,localhost \
+no_proxy=api1.hkgai.net,127.0.0.1,localhost \
+LLM_TRANSPORT_MODE=standard python3 server.py --time-only
+```
+
+This changes only that process's provider route. Public web retrieval retains its existing validated transport. Other environments should use the route appropriate to their network.
+
+The final regression on 20 November ran **974 tests in 204.612 seconds, all passing with no skips**, with both Docker flags enabled and the bundled Node directory on PATH. This includes two actual Chromium successes followed by an explicit review citing the original receipt without a third execution. Scripted decision-loop tests cover the one-prompt bound, continued repetition stopping, current-source checks, invalid evidence, and authenticated feedback preservation. Compilation and `git diff --check` also passed. The live web diagnostic reached Bing after retaining two real provider timeouts in 13.994 seconds. These checks do not establish the outcome of the new six-case model round.
