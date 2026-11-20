@@ -27,7 +27,8 @@ def _target(value, source_url):
                 or any(ord(c) < 33 for c in url) or '\\' in url):
             return None
         host = parsed.hostname.lower().rstrip('.')
-        if (host == 'yahoo.com' or host.endswith('.yahoo.com') or host == 'localhost'
+        if (host == 'yahoo.com' or host.endswith('.yahoo.com')
+                or host == 'bing.com' or host.endswith('.bing.com') or host == 'localhost'
                 or host.endswith(('.localhost', '.local', '.internal')) or '.' not in host):
             return None
         try:
@@ -41,8 +42,9 @@ def _target(value, source_url):
 
 
 class _YahooOrganic(HTMLParser):
-    def __init__(self):
+    def __init__(self, provider='yahoo'):
         super().__init__(convert_charrefs=True)
+        self.provider = provider
         self.stack = []
         self.active = None
         self.rows = []
@@ -60,14 +62,22 @@ class _YahooOrganic(HTMLParser):
         self.stack.append((tag, attributes))
         depth = len(self.stack)
         classes = (attributes.get('class') or '').split()
-        excluded = any({'ad', 'ads', 'genaipaa'} & set((attr.get('class') or '').lower().split())
+        excluded = any({'ad', 'ads', 'genaipaa', 'b_ad', 'b_ans', 'b_syd'} & set((attr.get('class') or '').lower().split())
                        or attr.get('data-type') in ('ad', 'advertisement', 'ai-answer')
                        for _, attr in self.stack)
-        if self.active is None and tag == 'div' and 'relsrch' in classes and 'algo' in classes and not excluded:
+        organic = ((tag == 'div' and 'relsrch' in classes and 'algo' in classes) if self.provider == 'yahoo'
+                   else tag == 'li' and 'b_algo' in classes)
+        if self.active is None and organic and not excluded:
             self.active = {'depth': depth, 'href': None, 'title': [], 'titleChars': 0, 'titleDepth': None,
                            'anchorDepth': None, 'closedTitle': False}
         row = self.active
         if row is None:
+            return
+        if self.provider == 'bing':
+            # Only the complete linked h2 inside an organic li is a result.
+            if (tag == 'a' and row['href'] is None and not excluded
+                    and any(node == 'h2' for node, _ in self.stack[row['depth']:])):
+                row.update(href=attributes.get('href'), anchorDepth=depth, titleDepth=depth)
             return
         if tag == 'a' and row['href'] is None and any(
                 node == 'div' and 'compTitle' in (attr.get('class') or '').split()
@@ -120,8 +130,8 @@ class _YahooOrganic(HTMLParser):
                     row['titleChars'] += len(part)
 
 
-def yahoo_search_results(content, source_url, limit=5):
-    parser = _YahooOrganic()
+def _results(content, source_url, limit, provider):
+    parser = _YahooOrganic(provider)
     parser.feed(content)
     parser.close()
     if parser.aborted:
@@ -137,3 +147,12 @@ def yahoo_search_results(content, source_url, limit=5):
         if len(results) >= limit:
             break
     return results
+
+
+def yahoo_search_results(content, source_url, limit=5):
+    return _results(content, source_url, limit, 'yahoo')
+
+
+def bing_search_results(content, source_url, limit=5):
+    """Direct organic links observed in live Bing HTML; omit wrapped/ad/AI links."""
+    return _results(content, source_url, limit, 'bing')

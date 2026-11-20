@@ -171,6 +171,9 @@ def compact_browser_result(result, max_chars=2600):
         sourceResultSHA256=_hash(result), sourceResultCharacters=_size(result),
         sourceBrowserSHA256=_hash(source), hashEncoding='canonical-json-utf8-not-report-file-bytes',
         sourceTotals=totals, evidenceComplete=False)
+    if result.get('ok') is True and source.get('ok') is True and result.get('callId'):
+        projection['receiptAccess'] = ('review.evidenceCallIds resolves this callId to the full host receipt. '
+            'Rerunning adds no detail. Review current sources and remaining criteria before deciding.')
     browser = {key: copy.deepcopy(source[key]) for key in
                ('engine', 'executed', 'ok', 'assertionCount', 'assertionsPassed', 'faultCoverageComplete', 'readFaultCoverageComplete', 'dialogCoverageComplete', 'reportPath') if key in source}
     projection['browser'] = browser

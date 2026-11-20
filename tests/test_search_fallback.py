@@ -8,7 +8,7 @@ from urllib.parse import quote, parse_qs, urlsplit
 
 from backend.config import Config
 from backend.sandbox import ToolError
-from backend.search_results import _YahooOrganic, yahoo_search_results
+from backend.search_results import _YahooOrganic, yahoo_search_results, bing_search_results
 from backend.tools import ToolGateway
 
 
@@ -19,6 +19,15 @@ def organic(url='https://example.edu/paper', title='Actual paper &amp; evidence'
 
 
 class SearchExtractionTests(unittest.TestCase):
+    def test_bing_direct_organic_heading_links_exclude_ads_answers_and_wrappers(self):
+        row = '<li class="b_algo"><div><a href="https://label.example/">Display URL</a></div><h2><a href="https://hkust.edu.hk/news/item">Actual <strong>campus</strong> event</a></h2><p>Unfetched excerpt</p></li>'
+        page = '<li class="b_ad">'+row+'</li><div class="b_ans">'+row+'</div>'+row
+        page += '<li class="b_algo"><h2><a href="https://www.bing.com/ck/a?u=wrapped">Wrapped</a></h2></li>'
+        page += '<li class="b_algo"><h2><a href="http://127.0.0.1/">Unsafe</a></h2></li>'
+        self.assertEqual(bing_search_results(page,'https://www.bing.com/search?q=AI'),
+                         [{'title':'Actual campus event','url':'https://hkust.edu.hk/news/item'}])
+        self.assertEqual(bing_search_results('<li class="b_algo"><h2>Unlinked heading</h2><a href="https://wrong.example/">Other link</a></li>', 'https://www.bing.com/search'), [])
+
     def test_fragmented_long_title_stops_retaining_fragments_at_label_bound(self):
         parser = _YahooOrganic()
         parser.feed('<div class="algo relsrch"><div class="compTitle"><a href="https://example.edu/paper"><h3>')
@@ -111,11 +120,24 @@ class SearchFallbackTests(unittest.TestCase):
         with patch.object(self.gateway,'_fetch_url',side_effect=fetch):result=self.call()
         self.assertEqual(result['providerAttempts'][0]['status'],'failed');self.assertEqual(len(result['results']),1)
 
+    def test_two_unavailable_providers_can_reach_actual_bing_links_in_same_budget(self):
+        def fetch(url, deadline=None):
+            if 'bing.com' not in url:
+                raise ToolError('transient', 'Actual provider timeout.', True)
+            return self.response(url, '<li class="b_algo"><h2><a href="https://hkust.edu.hk/news">Campus news</a></h2></li>')
+        with patch.object(self.gateway, '_fetch_url', side_effect=fetch) as mock:
+            result = self.call()
+        self.assertEqual(mock.call_count, 3)
+        self.assertEqual(result['provider'], 'Bing Search')
+        self.assertEqual([a['status'] for a in result['providerAttempts']], ['failed','failed','success'])
+        self.assertTrue(result['resultsAreUnfetched'])
+        self.assertNotIn('content', result)
+
     def test_all_provider_failures_remain_failed_and_preserve_both_messages(self):
-        failures=[ToolError('permanent','HTTP 202'),ToolError('transient','HTTP 429',True)]
+        failures=[ToolError('permanent','HTTP 202'),ToolError('transient','HTTP 429',True),ToolError('transient','HTTP 503',True)]
         with patch.object(self.gateway,'_fetch_url',side_effect=failures)as mock:
             with self.assertRaises(ToolError)as caught:self.call()
-        self.assertEqual(mock.call_count,2);self.assertEqual(caught.exception.code,'search_unavailable')
+        self.assertEqual(mock.call_count,3);self.assertEqual(caught.exception.code,'search_unavailable')
         self.assertIn('HTTP 202',str(caught.exception));self.assertIn('HTTP 429',str(caught.exception))
 
     def test_original_deadline_expiring_during_first_attempt_never_launches_second(self):
@@ -123,6 +145,33 @@ class SearchFallbackTests(unittest.TestCase):
         with patch.object(self.gateway,'_fetch_url',side_effect=fetch)as mock:
             with self.assertRaises(ToolError)as caught:self.call(deadline=time.monotonic()+.01)
         self.assertEqual(mock.call_count,1);self.assertEqual(caught.exception.code,'deadline')
+
+    def test_attempt_deadlines_exhaust_search_budget_without_expiring_caller(self):
+        clock = [100.0]
+        def fetch(url, deadline=None):
+            clock[0] = deadline + .001
+            raise ToolError('deadline', 'Provider attempt timed out.', True)
+        with patch('time.monotonic', side_effect=lambda: clock[0]), patch.object(self.gateway, '_fetch_url', side_effect=fetch) as mock:
+            with self.assertRaises(ToolError) as caught:
+                self.call(deadline=1000.0)
+        self.assertEqual(mock.call_count, 3)
+        self.assertEqual(caught.exception.code, 'search_unavailable')
+        self.assertTrue(caught.exception.retryable)
+        self.assertIn('DuckDuckGo Lite', str(caught.exception))
+        self.assertIn('Yahoo Search', str(caught.exception))
+        self.assertIn('Bing Search', str(caught.exception))
+        self.assertLess(clock[0], 121)
+
+    def test_same_attempt_timeout_at_actual_caller_deadline_remains_deadline(self):
+        clock = [100.0]
+        def fetch(url, deadline=None):
+            clock[0] = 101.0
+            raise ToolError('deadline', 'Caller expired.', True)
+        with patch('time.monotonic', side_effect=lambda: clock[0]), patch.object(self.gateway, '_fetch_url', side_effect=fetch) as mock:
+            with self.assertRaises(ToolError) as caught:
+                self.call(deadline=101.0)
+        self.assertEqual(mock.call_count, 1)
+        self.assertEqual(caught.exception.code, 'deadline')
 
     def test_security_and_unknown_outcomes_are_not_relabelled_as_search_unavailability(self):
         for error in [ToolError('permission','Blocked target'),ToolError('parameter','Invalid URL'),

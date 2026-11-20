@@ -33,6 +33,17 @@ def browser_result(click_failure=False):
 
 
 class ToolContextTests(unittest.TestCase):
+    def test_success_projection_points_to_existing_full_receipt_without_accepting_it(self):
+        source = browser_result(); source.update(ok=True, callId='actual-call', exitCode=0)
+        source['browser'].update(ok=True)
+        before = copy.deepcopy(source)
+        projection = compact_browser_result(source)
+        self.assertIn('review.evidenceCallIds', projection['receiptAccess'])
+        self.assertIn('actual-call', projection['callId'])
+        self.assertTrue(projection['fullResultRequiredForAcceptance'])
+        self.assertFalse(projection['evidenceComplete'])
+        self.assertEqual(source, before)
+
     def test_real_failure_values_source_binding_and_provenance_survive_without_mutating_audit(self):
         original = browser_result(); before = copy.deepcopy(original)
         projected = compact_browser_result(original)

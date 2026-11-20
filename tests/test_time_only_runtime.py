@@ -141,6 +141,35 @@ class TimeOnlyRuntimeTests(unittest.TestCase):
         self.assertFalse(run['artifacts']);self.assertNotEqual(run['status'],'done')
         self.assertEqual(run['steps'][-1]['finalizationFailure']['code'],'final_action_required')
 
+    def test_local_tool_deadline_keeps_run_alive_and_preserves_original_deadline(self):
+        class LocalTimeout(Files):
+            def execute(self, agent, run, name, args, approved=False, deadline=None):
+                if name == 'file.list':
+                    raise ToolError('deadline', 'A local operation timed out.', True)
+                return super().execute(agent, run, name, args, approved, deadline=deadline)
+        config = Config(Path(self.tmp.name), {'LLM_API_KEY':'offline-time', 'MAX_RETRIES':'0'})
+        config.apply_time_only_profile()
+        original_deadline = []
+        def action(n, context, messages):
+            run = self.current_run(app)
+            if n == 0:
+                original_deadline.append(run['budget']['deadlineAt'])
+                return {'type':'tool','name':'file.list','args':{}}
+            self.assertFalse(run.get('timeExpired'))
+            self.assertEqual(run['budget']['deadlineAt'], original_deadline[0])
+            if n == 1:
+                return {'type':'tool','name':'file.write','args':{'path':'after.txt','content':'Continued after local failure.'}}
+            return {'type':'final','text':'Preserved the failed operation and continued with remaining wall time.'}
+        model = Model(action)
+        app = Platform(config, provider=model, tools=LocalTimeout(config)); self.apps.append(app)
+        self.send(app); self.assertTrue(app.wait_for_idle(4)); run = self.current_run(app)
+        self.assertEqual(run['status'], 'done')
+        failed = next(c for c in run['calls'] if c['tool'] == 'file.list')
+        self.assertEqual(failed['status'], 'failed')
+        self.assertEqual(failed['result']['error']['code'], 'deadline')
+        self.assertEqual((app.tools.workspace('coordinator',run['id'])/'after.txt').read_text(), 'Continued after local failure.')
+        self.assertEqual(run['budgetExtensions'], 0)
+
     def test_deadline_preserves_actual_published_artifact_as_unassessed_partial(self):
         def action(n,c,m):
             return [{'type':'tool','name':'file.write','args':{'path':'draft.md','content':'Actual snapshot.'}},

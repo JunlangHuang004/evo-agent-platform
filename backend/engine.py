@@ -23,6 +23,7 @@ from .browser_failure_recovery import browser_failure_trend
 from .browser_execution_diagnostics import current_browser_execution_diagnostic
 from .browser_diagnostic_recovery import browser_diagnostic_recovery,current_browser_diagnostic_checkpoint
 from .browser_stagnation import browser_stagnation_feedback
+from .browser_success_handoff import browser_success_handoff
 from .progress_watchdog import watchdog_tick, current_watchdog_notice
 from .handoff_priority import handoff_priority,priority_tail,PREFIX as HANDOFF_PRIORITY_PREFIX
 from .sandbox import read_text
@@ -2185,8 +2186,23 @@ class Platform:
                 and self._current_review_receipt(run,task,self._task(run,action.get('taskId'))) is not None
                 and (scope:=self._review_context(run,task)) is not None
                 and action.get('taskId') in [row['taskId'] for row in scope['targets']])
-            if task['_actions'][-3:]==[key]*3 and not repairing_contract and recovery is None and browser_recovery is None and not current_duplicate:
+            success_handoff=None
+            if not final_only and task['_actions'][-3:]==[key]*3:
+                success_handoff=browser_success_handoff(run,task,action,self.agents,
+                    self._review_context(run,task),self._review_snapshot,self._browser_review_evidence,
+                    self.artifacts,self.tools)
+            if task['_actions'][-3:]==[key]*3 and not repairing_contract and recovery is None and browser_recovery is None and not current_duplicate and success_handoff is None:
                 raise ProtocolError('检测到重复动作循环，已停止。')
+            if success_handoff is not None:
+                with self.lock:
+                    task.setdefault('_browserSuccessHandoffs',[]).append(success_handoff['bindingSha256'])
+                    task['_messages'].append({'role':'user','content':'Browser evidence handoff: '+json.dumps(success_handoff,ensure_ascii=False,separators=(',',':'))})
+                    self._transcript(run,'system',json.dumps(success_handoff,ensure_ascii=False),task['agentId'],
+                                     kind='browser_success_handoff',taskId=task['id'])
+                    self._event(run,'browser_success_handoff',task['agentId'],
+                        'Repeated successful tests already have full host receipts; request an explicit review decision.',success_handoff)
+                    self._persist()
+                continue
             if recovery is not None:
                 with self.lock:
                     task['_messages'].append({'role':'user','content':'只读失败恢复：'+json.dumps(self.config.scrub(recovery),ensure_ascii=False,separators=(',',':'))})
@@ -3290,7 +3306,7 @@ class Platform:
                     self.repo.complete_effect(effect_key,call['result'])
                 self._event(run,'tool_failed',task['agentId'],name+'：'+str(exc),{'callId':call['id'],'taskId':task['id']})
                 self._persist()
-                if self._time_only(run) and (getattr(exc,'code',None)=='deadline' or self._remaining_ms(run)<=0):
+                if self._time_only(run) and self._remaining_ms(run)<=0:
                     self._expire_time_budget(channel,run)
                     raise Stopped()
                 if unknown:

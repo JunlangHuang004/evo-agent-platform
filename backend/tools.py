@@ -20,7 +20,7 @@ import threading
 import time
 
 from .agents import AGENTS
-from .search_results import yahoo_search_results
+from .search_results import yahoo_search_results, bing_search_results
 from .sandbox import (ToolError, SandboxManager, MAX_FILE_BYTES, SAFE_TEXT_SUFFIXES,
                       identifier, relative_parts, confined_path, secure_directory,
                       read_text, write_text, delete_file, run_process, check_deadline, bounded_timeout)
@@ -81,7 +81,7 @@ _DESCRIPTIONS = {
     'file.write': 'Create UTF-8 text. Existing-file replacement requires human approval bound to its SHA256; prefer patch.',
     'file.patch': 'Apply one unique exact old→new text replacement; requires human approval and unchanged original SHA256.',
     'file.delete': 'Delete one regular private file after human approval bound to its SHA256.',
-    'web.search': 'Search public web sources through DuckDuckGo Lite; returns actual links, never fabricated search results.',
+    'web.search': 'Discover actual public links through bounded DuckDuckGo Lite, Yahoo and Bing fallback. Results are unfetched link titles; fetch each source before verifying claims.',
     'web.fetch': 'Fetch bounded public HTTP(S) text and actual page links with DNS/IP pinning and per-redirect SSRF checks. Links are discovery only: fetch a target before citing its content.',
     'code.run': 'Run Python (default), JavaScript/Node, or declarative browser checks exclusively in an offline resource-limited Docker container. Python/JS require exactly one code/path; browser requires an HTML path plus checks.',
     'code.test': 'Verify Python/JavaScript or actual HTML in offline Docker Chromium. Steps: click(selector); fill/select(selector,value); press(selector,key); reload(); assert_text(selector,text,exact?); assert_count(selector,count); assert_value(selector,value); assert_visible(selector); assert_storage(key,value); assert_storage_missing(key) checks real null; assert_attribute(selector,name,value); capture_canvas(selector,key) then assert_canvas_changed(selector,key). respond_dialog(dialogType=alert|confirm|prompt,accept:boolean,value?) arms one response BEFORE the click/press that opens the next native dialog; value only for accepted prompt. Unused or type-mismatched responses fail coverage. All steps optionally pageId (default main); new_page(pageId) opens the same whitelisted entry with shared storage, no reseed, max3. For localStorage apps, storage_write_denied(enabled:true,key?) intercepts setItem/removeItem/clear only in the selected page; false restores it. A targeted clear is denied only if target key exists; key omitted blocks all API writes. Every enabled segment must block a real matching write or test coverage is incomplete. Use this plus explicit UI/storage assertions to check save failures, and pre-open two pages before writes to check stale-tab conflicts. storage_read_denied(enabled:true,key?) denies only localStorage.getItem in the selected page, persists across reload, and leaves sessionStorage unchanged. false restores reads. Require actual application blockedReads; assertions do not count. Disable it before assert_storage/assert_storage_missing to verify prior records were not overwritten after a read failure. Include at least one assertion and explicit JS/CSS resource mapping. Results include per-page assertions/errors, actual fault counts/keys, screenshotPageId and tested file hashes; no arbitrary evaluate or external URL.',
@@ -733,19 +733,26 @@ class ToolGateway:
             raise ToolError('parameter', 'Search query must not be empty.')
         overall = min(time.monotonic()+self.timeout, deadline) if deadline is not None else time.monotonic()+self.timeout
         providers = [('DuckDuckGo Lite', 'https://lite.duckduckgo.com/lite/?'+urlencode({'q': query})),
-                     ('Yahoo Search', 'https://search.yahoo.com/search?'+urlencode({'p': query}))]
+                     ('Yahoo Search', 'https://search.yahoo.com/search?'+urlencode({'p': query})),
+                     ('Bing Search', 'https://www.bing.com/search?'+urlencode({'q': query}))]
         attempts = []
         for index, (provider, url) in enumerate(providers):
-            check_deadline(overall)
-            # Both providers share one original operation deadline. Reserve a
-            # fraction for fallback instead of allowing two full tool timeouts.
+            # Only the caller's absolute deadline can expire the entire run.
+            # Exhausting this search's smaller budget is an ordinary failure.
+            check_deadline(deadline)
+            if time.monotonic() >= overall:
+                break
+            # Providers share one operation budget, including fallback.
             remaining = overall-time.monotonic()
             attempt_deadline = time.monotonic()+remaining/(len(providers)-index)
             try:
                 response = self._fetch_url(url, deadline=min(overall, attempt_deadline))
-                check_deadline(overall)
+                check_deadline(deadline)
+                if time.monotonic() >= overall:
+                    raise ToolError('transient', 'Search operation budget exhausted.', True)
                 results = (self._duckduckgo_results(response, args.get('max_results', 5)) if index == 0
-                           else yahoo_search_results(response['content'], response['url'], args.get('max_results', 5)))
+                           else (yahoo_search_results if index == 1 else bing_search_results)(
+                               response['content'], response['url'], args.get('max_results', 5)))
                 if not results:
                     raise ToolError('transient', 'The search page contained no parseable organic results; no sources were inferred.', True)
                 attempts.append({'provider': provider, 'sourceUrl': response['url'], 'status': 'success', 'resultCount': len(results)})
@@ -753,7 +760,7 @@ class ToolGateway:
                         'sourceUrl': response['url'], 'providerAttempts': attempts, 'resultsAreUnfetched': True,
                         'evidenceMeaning': 'Search returned link titles only. Each target must be fetched/read before claims can be verified.'}
             except ToolError as error:
-                check_deadline(overall)
+                check_deadline(deadline)
                 if error.outcome_unknown or error.code not in ('permanent', 'transient', 'deadline', 'no-readable-content'):
                     raise
                 attempts.append({'provider': provider, 'sourceUrl': url, 'status': 'failed',

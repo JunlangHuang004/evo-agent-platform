@@ -12,7 +12,8 @@ from .generation_retry import trusted_generation_failure
 _PREFIXES={'stage_action_blocked':'阶段动作结果：','browser_failure_recovery':'浏览器测试失败恢复：',
            'readonly_failure_recovery':'只读失败恢复：','generation_phase_refresh':'模型阶段恢复：',
            'protocol_feedback':'动作协议错误：','truncation_feedback':'输出截断修复：',
-           'action_result':'动作的真实结果：','repeated_action_warning':'重复动作警告：'}
+           'action_result':'动作的真实结果：','repeated_action_warning':'重复动作警告：',
+           'browser_success_handoff':'Browser evidence handoff: '}
 _MAX_FEEDBACK=16000
 _MAX_PROPOSAL=8000
 
