@@ -64,6 +64,26 @@ def _artifact_model_view(artifact):
     return reference
 
 
+def _tool_type_feedback(action, allowed_tools):
+    """Show a separate corrected proposal; never execute or grant a tool."""
+    name=action.get('type')
+    if not isinstance(name,str) or name not in allowed_tools:return None
+    # Models sometimes place file.read's path beside type, without an args
+    # object. Telling them to reuse that nonexistent object loses the path.
+    args=action.get('args')
+    if args is None and 'args' not in action:
+        args={key:copy.deepcopy(value) for key,value in action.items() if key not in ('type','name')}
+    if not isinstance(args,dict):args={}
+    example={'type':'tool','name':name,'args':copy.deepcopy(args)}
+    if len(json.dumps(example,ensure_ascii=False))>800:
+        example['args']={}
+    return {'ok':False,'actionExecuted':False,'notExecuted':True,
+            'error':{'code':'protocol','retryable':False,
+                     'message':'工具名不能作为 type；此请求未执行。必须 type="tool"，name="'+name+'"，参数放入 args。'},
+            'correctActionExample':example,
+            'instruction':'Submit a separate complete action using the original parameters. This example is not executed; normal schema, ACL, stage and approval checks still apply. Do not replay completed tools.'}
+
+
 def _action_not_tool_feedback(action):
     """Explain three known action schemas; never convert or execute a proposal."""
     if action.get('type')!='tool':return None
@@ -2473,10 +2493,12 @@ class Platform:
                     result={'ok':True,'message':'任务已接受，请执行获准动作。'}
                 else:
                     if isinstance(kind,str) and kind in self.agents[task['agentId']]['tools']:
-                        example=json.dumps({'type':'tool','name':kind,'args':{}},ensure_ascii=False)
-                        raise ProtocolError('工具名不能作为 type；此请求未执行。请改为 '+example+
-                                            '，并将空 args 替换为上一条动作原有的 args 对象。必须 type="tool"、name="'+kind+'"；不要重放已完成工具。')
-                    raise ProtocolError('未知动作类型；此请求未执行。合法 type：tool、publish_artifact、publish_artifacts、package_delivery、final、ask_human、delegate、await_task、grant_artifact、message、reject、review、accept。请只返回一个合法动作 JSON。')
+                        result=_tool_type_feedback(action,self.agents[task['agentId']]['tools'])
+                        with self.lock:
+                            self._event(run,'action_rejected',task['agentId'],result['error']['message'],
+                                        {'taskId':task['id'],'action':kind})
+                    else:
+                        raise ProtocolError('未知动作类型；此请求未执行。合法 type：tool、publish_artifact、publish_artifacts、package_delivery、final、ask_human、delegate、await_task、grant_artifact、message、reject、review、accept。请只返回一个合法动作 JSON。')
             except (ToolError,ProtocolError,ValueError,KeyError,TypeError) as exc:
                 result={'ok':False,'error':{'code':getattr(exc,'code','parameters'),'message':self.config.scrub(str(exc))[:1200],
                                           'retryable':bool(getattr(exc,'retryable',False))}}
