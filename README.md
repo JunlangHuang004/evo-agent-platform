@@ -1,5 +1,21 @@
 # EvoMAC 多 Agent 协作后端
 
+## Mid-Test 运行预算与协议恢复
+
+`benchmarks/mid_test_live.py` 支持显式 `--time-only --deadline 1800`：保留每题墙钟时限，取消总调用、轮次和 Token 上限。默认仍使用有界预算；该选项可能显著增加模型用量。`suite-results.json` 在首题开始前保存，并记录实际生效的 profile、调用、轮次与 Token 限制，不能仅凭进程退出码判断题目通过。
+
+```bash
+python3 benchmarks/mid_test_live.py --live --suite-root /path/to/Mid_Test \
+  --config-root /path/to/local-config --data-dir /path/to/new-state \
+  --output /path/to/new-results --time-only --deadline 1800
+```
+
+在 Docker 控制器中调用主机 Docker 启动浏览器时，源码中的 `backend/browser_runner.cjs` 及工作区必须使用 Docker 主机也可访问的绝对路径（例如同一路径挂载的命名卷）；仅在控制器内存在的 `/source` 路径不能作为子容器的主机 bind source。
+
+对于把 `file.read` 等工具名误写成 `type` 的模型提议，运行时返回独立的 `correctActionExample`，保留原有的平铺或嵌套参数。错误提议本身不执行；模型另行提交合法动作后仍经过原有参数、权限、阶段和审批检查。此恢复不产生验收证据，也不会自动完成任务。
+
+每题报告中的 `finalPackageReviewCoverage` 按当前审查事件、目标版本、实际证据调用和包内路径/哈希列出未覆盖文件。正文在审查后改写、新增 README 或重定位文件都不会沿用旧文件的覆盖记录。该字段只描述已记录的版本覆盖，质量仍为 `unassessed`；即使全部文件被覆盖，也不能替代独立内容验收。
+
 通用多 Agent 课程项目。现有三页界面连接真实 HKGAI 模型服务，并提供 DeepSeek 配置路径，后端提供可配置团队、任务 DAG、并行调度、工具网关、Docker 沙箱、人工审批、Artifact 交接与独立记忆。
 
 ## 当前能力与课程要求对照
