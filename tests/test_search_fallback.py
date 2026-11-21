@@ -2,6 +2,7 @@
 from pathlib import Path
 import tempfile
 import time
+import json
 import unittest
 from unittest.mock import patch
 from urllib.parse import quote, parse_qs, urlsplit
@@ -70,69 +71,79 @@ class SearchExtractionTests(unittest.TestCase):
         self.assertEqual(yahoo_search_results(organic(title='   '),'https://search.yahoo.com/search'),[])
 
 
-class SearchFallbackTests(unittest.TestCase):
+class SerpSearchTests(unittest.TestCase):
     def setUp(self):
         self.directory=tempfile.TemporaryDirectory();self.addCleanup(self.directory.cleanup)
-        self.gateway=ToolGateway(Config(Path(self.directory.name),{}))
-        self.query='大学 AI 证据 & original?'
+        self.config=Config(Path(self.directory.name), {'SERPAPI_API_KEY':'test-serp-secret'})
+        self.gateway=ToolGateway(self.config)
 
-    def response(self,url,body):
-        return {'url':url,'content':body,'contentType':'text/html','truncated':False}
+    def call(self, **kwargs):
+        return self.gateway.execute('research','search-test','web.search',
+                                    {'query':'大学 AI & evidence?', 'max_results':2}, **kwargs)
 
-    def call(self,**kwargs):
-        return self.gateway.execute('research','search-test','web.search',{'query':self.query,'max_results':5},**kwargs)
+    def test_missing_key_fails_without_any_network_fallback(self):
+        self.gateway._serpapi_api_key=''
+        with patch.object(self.gateway,'_serp_response') as request:
+            with self.assertRaises(ToolError) as caught:self.call()
+        self.assertEqual(caught.exception.code,'configuration');request.assert_not_called()
 
-    def test_primary_success_does_not_query_second_provider_or_claim_source_text(self):
-        def fetch(url,deadline=None):
-            return self.response(url,'<a class="result-link" href="https://example.edu/primary">Primary result</a>')
-        with patch.object(self.gateway,'_fetch_url',side_effect=fetch)as mock:
+    def test_organic_results_are_bounded_safe_deduplicated_and_unfetched(self):
+        rows=[{'title':'Paper','link':'https://example.edu/paper','snippet':'unverified'},
+              {'title':'Duplicate','link':'https://example.edu/paper#fragment'},
+              {'title':'Bad','link':'http://127.0.0.1/'},
+              {'title':'Credentials','link':'https://user:secret@example.edu/'},
+              {'title':'Leak','link':'https://example.edu/test-serp-secret'},
+              {'title':'Other','link':'https://example.org/other'},
+              {'title':'Extra','link':'https://example.net/extra'}]
+        with patch.object(self.gateway,'_serp_response',return_value={'organic_results':rows}) as request:
             result=self.call()
-        self.assertEqual(mock.call_count,1);self.assertEqual(result['provider'],'DuckDuckGo Lite')
-        self.assertEqual(result['providerAttempts'][0]['status'],'success');self.assertTrue(result['resultsAreUnfetched'])
-        self.assertNotIn('content',result);self.assertNotIn('snippet',result['results'][0])
+        request.assert_called_once();self.assertEqual(result['provider'],'SerpAPI')
+        self.assertEqual([r['url'] for r in result['results']],['https://example.edu/paper','https://example.org/other'])
+        self.assertTrue(result['resultsAreUnfetched']);self.assertNotIn('snippet',result['results'][0])
+        self.assertNotIn('test-serp-secret',str(result));self.assertNotIn('api_key',result['sourceUrl'])
 
-    def test_actual_http_202_error_is_retained_when_fallback_returns_exact_links(self):
-        seen=[];before=time.monotonic();deadline=before+4
-        def fetch(url,deadline=None):
-            seen.append((url,deadline))
-            if 'duckduckgo.com' in url:raise ToolError('permanent','Public web server returned HTTP 202.',False)
-            return self.response(url,organic())
-        with patch.object(self.gateway,'_fetch_url',side_effect=fetch):result=self.call(deadline=deadline)
-        self.assertEqual(len(seen),2);self.assertEqual(result['provider'],'Yahoo Search')
-        self.assertEqual(parse_qs(urlsplit(seen[0][0]).query)['q'],[self.query])
-        self.assertEqual(parse_qs(urlsplit(seen[1][0]).query)['p'],[self.query])
-        self.assertEqual(result['providerAttempts'][0]['error']['message'],'Public web server returned HTTP 202.')
-        self.assertEqual([r['status']for r in result['providerAttempts']],['failed','success'])
-        self.assertLessEqual(seen[0][1],before+2.1);self.assertLessEqual(seen[1][1],deadline)
-        self.assertEqual(result['results'][0]['url'],'https://example.edu/paper')
+    def test_real_empty_results_are_not_provider_failure(self):
+        with patch.object(self.gateway,'_serp_response',return_value={'organic_results':[]}):result=self.call()
+        self.assertTrue(result['ok']);self.assertEqual(result['results'],[])
 
-    def test_no_parseable_primary_results_uses_real_fallback_not_fabricated_links(self):
-        def fetch(url,deadline=None):return self.response(url,'<html>Challenge or no results</html>' if 'duckduckgo' in url else organic())
-        with patch.object(self.gateway,'_fetch_url',side_effect=fetch):result=self.call()
-        self.assertEqual(result['providerAttempts'][0]['status'],'failed');self.assertEqual(len(result['results']),1)
+    def test_api_error_is_not_a_success_or_fallback(self):
+        with patch.object(self.gateway,'_serp_response',return_value={'error':True}) as request:
+            with self.assertRaises(ToolError) as caught:self.call()
+        self.assertEqual(caught.exception.code,'search_unavailable');request.assert_called_once()
 
-    def test_all_provider_failures_remain_failed_and_preserve_both_messages(self):
-        failures=[ToolError('permanent','HTTP 202'),ToolError('transient','HTTP 429',True)]
-        with patch.object(self.gateway,'_fetch_url',side_effect=failures)as mock:
-            with self.assertRaises(ToolError)as caught:self.call()
-        self.assertEqual(mock.call_count,2);self.assertEqual(caught.exception.code,'search_unavailable')
-        self.assertIn('HTTP 202',str(caught.exception));self.assertIn('HTTP 429',str(caught.exception))
+    def test_malformed_results_are_not_success(self):
+        with patch.object(self.gateway,'_serp_response',return_value={'organic_results':{}}):
+            with self.assertRaises(ToolError):self.call()
 
-    def test_original_deadline_expiring_during_first_attempt_never_launches_second(self):
-        def fetch(url,deadline=None):time.sleep(.03);raise ToolError('transient','First timed out',True)
-        with patch.object(self.gateway,'_fetch_url',side_effect=fetch)as mock:
-            with self.assertRaises(ToolError)as caught:self.call(deadline=time.monotonic()+.01)
-        self.assertEqual(mock.call_count,1);self.assertEqual(caught.exception.code,'deadline')
+    def test_total_deadline_is_not_reset(self):
+        with patch.object(self.gateway,'_serp_response') as request:
+            with self.assertRaises(ToolError) as caught:self.call(deadline=time.monotonic()-1)
+        self.assertEqual(caught.exception.code,'deadline');request.assert_not_called()
 
-    def test_security_and_unknown_outcomes_are_not_relabelled_as_search_unavailability(self):
-        for error in [ToolError('permission','Blocked target'),ToolError('parameter','Invalid URL'),
-                      ToolError('transient','Unknown outcome',True,outcome_unknown=True)]:
-            with self.subTest(code=error.code),patch.object(self.gateway,'_fetch_url',side_effect=error)as mock:
-                with self.assertRaises(ToolError)as caught:self.call()
-                self.assertEqual(caught.exception.code,error.code)
-                self.assertEqual(str(caught.exception),str(error))
-                self.assertEqual(caught.exception.outcome_unknown,error.outcome_unknown)
-                self.assertEqual(mock.call_count,1)
+    def test_secret_is_scrubbed_from_nested_public_state(self):
+        value={'url':'https://serpapi.com/?api_key=test-serp-secret','items':['test-serp-secret']}
+        result=self.config.scrub(value)
+        self.assertNotIn('test-serp-secret',str(result))
+        self.assertEqual(result['items'],['[REDACTED]'])
+
+    def test_worker_receives_secret_only_in_environment(self):
+        from backend.tools import _SERP_SEARCH_WORKER
+        payload={'payload':{'organic_results':[{'title':'Paper','link':'https://example.edu/'}]}}
+        completed={'timedOut':False,'exitCode':0,'outputLimitExceeded':False,'stdout':json.dumps(payload)}
+        with patch('backend.tools.run_process',return_value=completed) as process:
+            self.call()
+        args,kwargs=process.call_args
+        self.assertNotIn('test-serp-secret',str(args));self.assertEqual(kwargs['env']['SERPAPI_API_KEY'],'test-serp-secret')
+        self.assertIn('_reject_redirects=True',_SERP_SEARCH_WORKER)
+        with patch.dict('os.environ', {'SERPAPI_API_KEY':'test-serp-secret'}):
+            self.assertNotIn('SERPAPI_API_KEY',self.gateway.sandbox._environment())
+
+    def test_invalid_json_and_failed_transport_do_not_expose_raw_output(self):
+        for stdout,exit_code in [('test-serp-secret',0),('',1)]:
+            completed={'timedOut':False,'exitCode':exit_code,'outputLimitExceeded':False,'stdout':stdout}
+            with patch('backend.tools.run_process',return_value=completed):
+                with self.assertRaises(ToolError) as caught:self.call()
+            self.assertNotIn('test-serp-secret',str(caught.exception))
 
 
 if __name__=='__main__':unittest.main()
