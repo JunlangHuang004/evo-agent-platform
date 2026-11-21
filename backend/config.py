@@ -30,6 +30,10 @@ class Config:
                 or not any(parsed.hostname == host or (parsed.hostname or '').endswith('.' + host) for host in allowed)):
             raise ValueError('LLM_BASE_URL 必须是对应课程允许服务的 HTTPS 地址。')
         self.api_key = values.get('LLM_API_KEY', '')
+        self.serpapi_api_key = values.get('SERPAPI_API_KEY', '')
+        if (not isinstance(self.serpapi_api_key, str) or len(self.serpapi_api_key) > 4096
+                or any(ord(char) < 33 or ord(char) == 127 for char in self.serpapi_api_key)):
+            raise ValueError('SERPAPI_API_KEY must be a bounded token without whitespace or control characters.')
         self.model = values.get('LLM_MODEL', 't2_hkgai-v3_fp8_1m_e7' if self.provider == 'hkgai' else 'deepseek-chat')
         transport_mode=values.get('LLM_TRANSPORT_MODE','standard')
         if not isinstance(transport_mode,str):
@@ -122,6 +126,8 @@ class Config:
 
     def scrub(self, value):
         if isinstance(value, str):
+            if self.serpapi_api_key:
+                value = value.replace(self.serpapi_api_key, '[REDACTED]')
             if self.api_key:
                 value = value.replace(self.api_key, '[REDACTED]')
             if self.git_token:

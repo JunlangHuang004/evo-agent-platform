@@ -20,7 +20,7 @@ import threading
 import time
 
 from .agents import AGENTS
-from .search_results import yahoo_search_results
+from .search_results import _target
 from .sandbox import (ToolError, SandboxManager, MAX_FILE_BYTES, SAFE_TEXT_SUFFIXES,
                       identifier, relative_parts, confined_path, secure_directory,
                       read_text, write_text, delete_file, run_process, check_deadline, bounded_timeout)
@@ -81,7 +81,7 @@ _DESCRIPTIONS = {
     'file.write': 'Create UTF-8 text. Existing-file replacement requires human approval bound to its SHA256; prefer patch.',
     'file.patch': 'Apply one unique exact old→new text replacement; requires human approval and unchanged original SHA256.',
     'file.delete': 'Delete one regular private file after human approval bound to its SHA256.',
-    'web.search': 'Search public web sources through DuckDuckGo Lite; returns actual links, never fabricated search results.',
+    'web.search': 'Search public web sources through SerpAPI (Google organic results); returns discovery links, not verified source bodies. The server requires SERPAPI_API_KEY.',
     'web.fetch': 'Fetch bounded public HTTP(S) text and actual page links with DNS/IP pinning and per-redirect SSRF checks. Links are discovery only: fetch a target before citing its content.',
     'code.run': 'Run Python (default), JavaScript/Node, or declarative browser checks exclusively in an offline resource-limited Docker container. Python/JS require exactly one code/path; browser requires an HTML path plus checks.',
     'code.test': 'Verify Python/JavaScript or actual HTML in offline Docker Chromium. Steps: click(selector); fill/select(selector,value); press(selector,key); reload(); assert_text(selector,text,exact?); assert_count(selector,count); assert_value(selector,value); assert_visible(selector); assert_storage(key,value); assert_storage_missing(key) checks real null; assert_attribute(selector,name,value); capture_canvas(selector,key) then assert_canvas_changed(selector,key). respond_dialog(dialogType=alert|confirm|prompt,accept:boolean,value?) arms one response BEFORE the click/press that opens the next native dialog; value only for accepted prompt. Unused or type-mismatched responses fail coverage. All steps optionally pageId (default main); new_page(pageId) opens the same whitelisted entry with shared storage, no reseed, max3. For localStorage apps, storage_write_denied(enabled:true,key?) intercepts setItem/removeItem/clear only in the selected page; false restores it. A targeted clear is denied only if target key exists; key omitted blocks all API writes. Every enabled segment must block a real matching write or test coverage is incomplete. Use this plus explicit UI/storage assertions to check save failures, and pre-open two pages before writes to check stale-tab conflicts. storage_read_denied(enabled:true,key?) denies only localStorage.getItem in the selected page, persists across reload, and leaves sessionStorage unchanged. false restores reads. Require actual application blockedReads; assertions do not count. Disable it before assert_storage/assert_storage_missing to verify prior records were not overwritten after a read failure. Include at least one assertion and explicit JS/CSS resource mapping. Results include per-page assertions/errors, actual fault counts/keys, screenshotPageId and tested file hashes; no arbitrary evaluate or external URL.',
@@ -296,6 +296,33 @@ except ToolError as error:
 print(json.dumps(result,ensure_ascii=False))
 '''
 
+# A fixed server-side worker bounds DNS, TLS and response reading together.
+# Credentials are passed only in its private environment, never argv or a model action.
+_SERP_SEARCH_WORKER = '''import json,os,sys
+from urllib.parse import urlencode
+sys.path.insert(0,sys.argv[1])
+from backend.tools import ToolGateway,ToolError
+gateway=object.__new__(ToolGateway)
+gateway.timeout=float(sys.argv[2])
+gateway._reject_redirects=True
+try:
+    response=gateway._fetch_url('https://serpapi.com/search.json?'+urlencode({
+        'engine':'google','q':os.environ['SERPAPI_QUERY'],'api_key':os.environ['SERPAPI_API_KEY']}))
+    if response['truncated']:
+        raise ToolError('transient','SerpAPI response exceeded the response limit.',True)
+    payload=json.loads(response['content'])
+    if not isinstance(payload,dict):
+        raise ValueError('Invalid object')
+    # Do not export metadata: SerpAPI metadata can contain credential-bearing URLs.
+    result={'payload':{'error':bool(payload.get('error')),
+                       'organic_results':payload.get('organic_results',[])}}
+except ToolError as error:
+    result={'error':{'code':error.code,'message':error.message,'retryable':error.retryable}}
+except Exception:
+    result={'error':{'code':'transient','message':'SerpAPI returned invalid JSON or transport failed.','retryable':True}}
+print(json.dumps(result,ensure_ascii=False))
+'''
+
 
 def _resolve_addresses(host, port, deadline=None):
     if deadline is None:
@@ -365,6 +392,7 @@ class ToolGateway:
             if not isinstance(allowed, list) or any(name not in _SCHEMAS for name in allowed):
                 raise ToolError('parameter', 'Each agent needs an explicit allowlist of supported tools.')
         self.git_remote = getattr(config, 'git_remote', '')
+        self._serpapi_api_key = getattr(config, 'serpapi_api_key', '')
         self._git_token = getattr(config, 'git_token', '')
         self._git_username = getattr(config, 'git_username', 'x-access-token')
         if not isinstance(self._git_token, str) or len(self._git_token) > 4096 or any(ord(char) < 33 or ord(char) == 127 for char in self._git_token):
@@ -668,6 +696,8 @@ class ToolGateway:
                 connection.request('GET', urlunsplit(('', '', parsed.path, parsed.query, '')), headers={'User-Agent': 'EvoAgentCourse/1.0', 'Accept': 'text/html,text/plain,application/json;q=0.9', 'Accept-Encoding': 'identity', 'Connection': 'close'})
                 response = connection.getresponse()
                 if response.status in (301, 302, 303, 307, 308):
+                    if getattr(self, '_reject_redirects', False):
+                        raise ToolError('permanent', 'SerpAPI redirects are rejected; credentials are not forwarded.')
                     location = response.getheader('Location')
                     if not location or redirect == 5:
                         raise ToolError('permanent', 'Too many or invalid redirects.')
@@ -726,62 +756,64 @@ class ToolGateway:
             raise ToolError('no-readable-content', 'The fetched response contains no readable content after text extraction; no source content was retrieved.')
         return {'ok': True, 'url': response['url'], 'title': title, 'content': content[:120000], 'truncated': response['truncated'] or len(content) > 120000, 'sources': [{'title': title, 'url': response['url']}], **discovery}
 
+    def _serp_response(self, query, deadline):
+        timeout = bounded_timeout(self.timeout, deadline)
+        result = run_process([sys.executable, '-I', '-c', _SERP_SEARCH_WORKER,
+                              str(Path(__file__).resolve().parent.parent), str(timeout)],
+                             env={'PATH': os.defpath, 'SERPAPI_API_KEY': self._serpapi_api_key,
+                                  'SERPAPI_QUERY': query},
+                             timeout=timeout, deadline=deadline,
+                             max_output_bytes=MAX_WEB_BYTES * 6 + 8192)
+        check_deadline(deadline)
+        if result['timedOut'] or result['exitCode'] or result['outputLimitExceeded']:
+            raise ToolError('search_unavailable', 'SerpAPI transport failed or exceeded its deadline.', True)
+        try:
+            response = json.loads(result['stdout'])
+            if 'error' in response:
+                error = response['error']
+                raise ToolError(error['code'], error['message'], error.get('retryable', False))
+            payload = response['payload']
+            if not isinstance(payload, dict):
+                raise ValueError('Invalid payload')
+            return payload
+        except (KeyError, TypeError, ValueError):
+            raise ToolError('search_unavailable', 'SerpAPI returned invalid search evidence.', True) from None
+
     def _search(self, args, deadline=None):
         check_deadline(deadline)
         query = args['query'].strip()
         if not query:
             raise ToolError('parameter', 'Search query must not be empty.')
+        if not self._serpapi_api_key:
+            raise ToolError('configuration', 'SERPAPI_API_KEY is not configured. Set it in the server .env and restart; no alternate search provider is used.')
         overall = min(time.monotonic()+self.timeout, deadline) if deadline is not None else time.monotonic()+self.timeout
-        providers = [('DuckDuckGo Lite', 'https://lite.duckduckgo.com/lite/?'+urlencode({'q': query})),
-                     ('Yahoo Search', 'https://search.yahoo.com/search?'+urlencode({'p': query}))]
-        attempts = []
-        for index, (provider, url) in enumerate(providers):
-            check_deadline(overall)
-            # Both providers share one original operation deadline. Reserve a
-            # fraction for fallback instead of allowing two full tool timeouts.
-            remaining = overall-time.monotonic()
-            attempt_deadline = time.monotonic()+remaining/(len(providers)-index)
-            try:
-                response = self._fetch_url(url, deadline=min(overall, attempt_deadline))
-                check_deadline(overall)
-                results = (self._duckduckgo_results(response, args.get('max_results', 5)) if index == 0
-                           else yahoo_search_results(response['content'], response['url'], args.get('max_results', 5)))
-                if not results:
-                    raise ToolError('transient', 'The search page contained no parseable organic results; no sources were inferred.', True)
-                attempts.append({'provider': provider, 'sourceUrl': response['url'], 'status': 'success', 'resultCount': len(results)})
-                return {'ok': True, 'query': query, 'results': results, 'sources': results, 'provider': provider,
-                        'sourceUrl': response['url'], 'providerAttempts': attempts, 'resultsAreUnfetched': True,
-                        'evidenceMeaning': 'Search returned link titles only. Each target must be fetched/read before claims can be verified.'}
-            except ToolError as error:
-                check_deadline(overall)
-                if error.outcome_unknown or error.code not in ('permanent', 'transient', 'deadline', 'no-readable-content'):
-                    raise
-                attempts.append({'provider': provider, 'sourceUrl': url, 'status': 'failed',
-                                 'error': {'code': error.code, 'message': error.message[:200], 'retryable': error.retryable}})
-        detail = '; '.join(item['provider']+': '+item['error']['message'] for item in attempts)
-        raise ToolError('search_unavailable', 'Search providers returned no results. '+detail, True)
-
-    @staticmethod
-    def _duckduckgo_results(response, limit):
-        parser = _TextParser()
-        parser.feed(response['content'])
-        results = []
-        seen = set()
-        for link in parser.links:
-            if 'result-link' not in link['class']:
+        payload = self._serp_response(query, overall)
+        check_deadline(overall)
+        if payload.get('error'):
+            raise ToolError('search_unavailable', 'SerpAPI reported an API error; check credentials and search quota.', False)
+        rows = payload.get('organic_results', [])
+        if not isinstance(rows, list):
+            raise ToolError('search_unavailable', 'SerpAPI returned malformed organic results.', True)
+        source_url = 'https://serpapi.com/search.json?' + urlencode({'engine': 'google', 'q': query})
+        results, seen = [], set()
+        for row in rows[:100]:
+            if not isinstance(row, dict):
                 continue
-            target = urljoin(response['url'], link['url'])
-            parsed = urlsplit(target)
-            if parsed.hostname and parsed.hostname.endswith('duckduckgo.com'):
-                target = parse_qs(parsed.query).get('uddg', [target])[0]
-            parsed = urlsplit(target)
-            if parsed.scheme not in ('http', 'https') or not parsed.hostname or parsed.username or parsed.password or target in seen:
+            title, url = row.get('title'), row.get('link')
+            target = _target(url, source_url) if isinstance(url, str) else None
+            if (not isinstance(title, str) or not title.strip() or not target or target in seen
+                    or self._serpapi_api_key in title or self._serpapi_api_key in target):
                 continue
             seen.add(target)
-            results.append({'title': re.sub(r'\s+', ' ', link['title']).strip()[:300], 'url': target})
-            if len(results) >= limit:
+            results.append({'title': title.strip()[:300], 'url': target})
+            if len(results) >= args.get('max_results', 5):
                 break
-        return results
+        return {'ok': True, 'query': query, 'results': results, 'sources': results, 'provider': 'SerpAPI',
+                'sourceUrl': source_url,
+                'providerAttempts': [{'provider': 'SerpAPI', 'sourceUrl': source_url,
+                                      'status': 'success', 'resultCount': len(results)}],
+                'resultsAreUnfetched': True,
+                'evidenceMeaning': 'Search returned discovery links only. Fetch/read each target before verifying claims.'}
 
     @staticmethod
     def _check_remote_format(remote):
