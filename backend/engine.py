@@ -17,7 +17,7 @@ from .feedback_context import latest_feedback_proof
 from .stage_control import stage_control,stage_action_feedback,failure_references,latest_test_diagnostic,allocate_review_rework,allocate_review_recheck,allocate_synthesis_recovery
 from .generation_retry import generation_retry_allowed,generation_retry_decision
 from .generation_cooldown import new_cooldown,cooldown_binding
-from .readonly_recovery import readonly_failure_feedback
+from .readonly_recovery import readonly_failure_feedback, local_read_failure_feedback
 from .necessary_source import necessary_source_admission
 from .browser_failure_recovery import browser_failure_trend
 from .browser_execution_diagnostics import current_browser_execution_diagnostic
@@ -1495,7 +1495,10 @@ class Platform:
         dependency_ids=set(direct_dependency_ids)
         delivery_ancestors=(not task.get('finalSummary')
                             and (task.get('outputContract') or {}).get('kind')=='delivery')
-        if task.get('finalSummary') or delivery_ancestors:
+        review_ancestors=(bool(task.get('reviewOf'))
+                          and 'review' in self.agents[task['agentId']].get('capabilities',[]))
+        published_ancestors=delivery_ancestors or review_ancestors
+        if task.get('finalSummary') or published_ancestors:
             pending=list(dependency_ids)
             while pending:
                 parent=self._task(run,pending.pop())
@@ -1506,15 +1509,14 @@ class Platform:
         for dep_id in dependency_ids:
             dep=self._task(run,dep_id)
             if not dep: continue
-            added_delivery_ancestor=delivery_ancestors and dep_id not in direct_dependency_ids
+            added_delivery_ancestor=published_ancestors and dep_id not in direct_dependency_ids
             if added_delivery_ancestor and (dep.get('status')!='done'
                     or type(dep.get('revision')) is not int or dep['revision']<0):
                 continue
             for artifact_id in dep.get('outputs',[]):
                 if added_delivery_ancestor:
-                    # A delivery needs its declared producers' published files,
-                    # not merely a direct QA task's note. Reuse packaging's
-                    # immutable/current-source checks before the existing grant.
+                    # Delivery and declared independent review need current
+                    # published ancestor inputs, never private or stale files.
                     try:
                         snapshot=_delivery_snapshot(run,self.artifacts,artifact_id)
                         source=_current_delivery_source(run,snapshot)
@@ -2180,6 +2182,16 @@ class Platform:
                     self._transcript(run,'system',json.dumps(phase_feedback,ensure_ascii=False),task['agentId'],kind='stage_action_blocked',taskId=task['id'])
                     self._event(run,'stage_action_blocked',task['agentId'],phase_feedback['error']['message'],{'taskId':task['id'],'code':phase_feedback['error']['code']})
                     self._persist()
+                continue
+            local_recovery=local_read_failure_feedback(run,task,action) if not final_only else None
+            if local_recovery is not None:
+                with self.lock:
+                    task['_messages'].append({'role':'user','content':'本地读取失败恢复：'+json.dumps(local_recovery,ensure_ascii=False,separators=(',',':'))})
+                    self._event(run,'local_read_failure_recovery',task['agentId'],
+                                '重复失败路径未再次读取；核对授权输入、提交返工或如实说明缺口。',local_recovery)
+                    self._persist()
+                if local_recovery['stopTask']:
+                    raise ProtocolError('本地文件读取持续无进展；两次纠错反馈后仍重复失败路径，已停止并保留产物及验收缺口。')
                 continue
             recovery=readonly_failure_feedback(run,task,action) if not final_only else None
             # Every recovery that continues this loop must have a bounded

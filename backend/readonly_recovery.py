@@ -10,6 +10,67 @@ import copy
 import json
 
 
+def local_read_failure_feedback(run, task, action):
+    """Bound alternating local failures, scoped to actual task/revision evidence.
+
+    Successful tools, new grants and settled mutations invalidate the streak.
+    No filesystem access, permission changes or synthetic tool calls occur here.
+    """
+    if (action.get('type') != 'tool' or action.get('name') not in ('file.read', 'file.list')
+            or not isinstance(action.get('args'), dict)):
+        return None
+    path = action['args'].get('path', '')
+    if not isinstance(path, str) or not path:
+        return None
+    events = run.get('events', [])
+    last_grant = -1
+    for index, event in enumerate(events):
+        if (event.get('type') == 'artifact_granted'
+                and event.get('payload', {}).get('toAgent') == task['agentId']):
+            last_grant = index
+    after_grant = {event.get('payload', {}).get('callId') for event in events[last_grant+1:]
+                   if event.get('type') in ('tool_failed', 'tool_finished')}
+    failures = []
+    for call in run.get('calls', []):
+        result = call.get('result')
+        if not isinstance(result, dict):
+            continue
+        # A completed mutation can make a previously absent path readable.
+        if (call.get('agentId') == task['agentId'] and call.get('status') == 'success'
+                and result.get('ok') is True and call.get('tool') in ('file.write', 'file.patch', 'file.delete')):
+            failures = []
+        if (call.get('agentId') != task['agentId'] or call.get('taskId') != task['id']
+                or type(call.get('revision')) is not int or call['revision'] != task['revision']
+                or not str(call.get('tool', '')).startswith(('file.', 'code.'))):
+            continue
+        if last_grant >= 0 and call.get('id') not in after_grant:
+            continue
+        if call.get('status') == 'success' and result.get('ok') is True:
+            failures = []
+            continue
+        error = result.get('error', {})
+        if (call.get('tool') in ('file.read', 'file.list') and call.get('status') == 'failed'
+                and result.get('ok') is False and not result.get('notExecuted')
+                and not any(result.get(key) or call.get(key) for key in _UNKNOWN)
+                and error.get('code') in ('permanent', 'permission', 'parameter')
+                and error.get('retryable') is False):
+            failures.append(call)
+        else:
+            failures = []
+    if len(failures) < 4 or path not in {(c.get('args') or {}).get('path') for c in failures}:
+        return None
+    signature = [c['id'] for c in failures[-4:]]
+    previous = sum(1 for event in events if event.get('type') == 'local_read_failure_recovery'
+                   and event.get('payload', {}).get('taskId') == task['id']
+                   and event['payload'].get('revision') == task['revision']
+                   and event['payload'].get('observedCallIds') == signature)
+    return {'ok': False, 'notExecuted': True, 'actionExecuted': False,
+            'taskId': task['id'], 'revision': task['revision'], 'observedCallIds': signature,
+            'failedPaths': sorted({c['args']['path'] for c in failures if c.get('args', {}).get('path')})[:8],
+            'feedbackAttempt': previous+1, 'stopTask': previous >= 2,
+            'instruction': 'Repeated local reads failed without new evidence. Read the authorizedArtifacts paths actually supplied in your current context; do not guess artifact IDs or retry inaccessible paths. If a required input is missing, request clarification or submit an evidenced review/rework decision where authorized; otherwise finish partial with the missing input identified. No read, new permission or acceptance was created. Two feedback opportunities are allowed before stopping unchanged failures.'}
+
+
 _READS={'web.fetch','web.search'}
 _UNKNOWN=('outcomeUnknown','deadlineExceeded','cancelled','timedOut')
 
