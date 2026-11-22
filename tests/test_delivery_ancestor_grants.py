@@ -282,3 +282,28 @@ class DeliveryAncestorGrantTests(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+    def test_review_gets_current_design_ancestor_but_not_unrelated_or_private_files(self):
+        self.build['dependsOn']=[self.unrelated['id']]
+        self.qa.update(status='running',reviewOf=[self.build['id']])
+        self.app._prepare_task('group',self.run['id'],self.qa)
+        self.assertTrue(self.app.artifacts.can_access(self.other['id'],'reviewer',self.run['id']))
+        receipt=self.tools.execute('reviewer',self.run['id'],'file.read',
+            {'path':'imports/'+self.other['id']+'/'+self.other['name']})
+        self.assertEqual(receipt['content'],self.other['content'])
+        self.assertEqual(self.qa['dependsOn'],[self.build['id']])
+        self.assertIn(self.unrelated['id'],self.qa['dependencySnapshots'])
+        self.assertNotIn('validation',self.build)
+
+    def test_ordinary_consumer_does_not_get_transitive_design_files(self):
+        self.build['dependsOn']=[self.unrelated['id']]
+        self.qa.update(status='running',reviewOf=[])
+        self.app._prepare_task('group',self.run['id'],self.qa)
+        self.assertFalse(self.app.artifacts.can_access(self.other['id'],'reviewer',self.run['id']))
+
+    def test_review_does_not_get_partial_ancestor(self):
+        self.build['dependsOn']=[self.unrelated['id']]
+        self.unrelated['status']='partial'
+        self.qa.update(status='running',reviewOf=[self.build['id']])
+        self.app._prepare_task('group',self.run['id'],self.qa)
+        self.assertFalse(self.app.artifacts.can_access(self.other['id'],'reviewer',self.run['id']))

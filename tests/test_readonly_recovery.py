@@ -126,3 +126,54 @@ class ReadonlyRecoveryTests(unittest.TestCase):
 
 
 if __name__=='__main__':unittest.main()
+
+
+class LocalReadFailureTests(unittest.TestCase):
+    def setUp(self):
+        from backend.readonly_recovery import local_read_failure_feedback
+        self.feedback=local_read_failure_feedback
+        self.task={'id':'qa','agentId':'reviewer','revision':0}
+        self.run={'id':'run','calls':[], 'events':[]}
+        for n in range(4):
+            self.run['calls'].append({'id':'call-'+str(n),'taskId':'qa','agentId':'reviewer','revision':0,
+                'tool':'file.read','args':{'path':['a.md','b.md'][n%2]},'status':'failed',
+                'result':{'ok':False,'error':{'code':'permanent','retryable':False,'message':'Missing'}}})
+        self.action={'type':'tool','name':'file.read','args':{'path':'a.md'}}
+
+    def test_alternating_paths_and_changed_read_windows_are_detected(self):
+        self.action['args']['startLine']=4
+        result=self.feedback(self.run,self.task,self.action)
+        self.assertEqual(result['failedPaths'],['a.md','b.md'])
+        self.assertTrue(result['notExecuted']);self.assertFalse(result['stopTask'])
+
+    def test_different_path_is_allowed(self):
+        self.action['args']['path']='available.md'
+        self.assertIsNone(self.feedback(self.run,self.task,self.action))
+
+    def test_other_owner_and_revision_do_not_count(self):
+        for field,value in [('agentId','executor'),('revision',1),('taskId','other')]:
+            run=copy.deepcopy(self.run);run['calls'][-1][field]=value
+            self.assertIsNone(self.feedback(run,self.task,self.action))
+
+    def test_unknown_and_retryable_errors_are_not_permanent_evidence(self):
+        for change in [{'outcomeUnknown':True},{'error':{'code':'transient','retryable':True,'message':'Temporary'}}]:
+            run=copy.deepcopy(self.run);run['calls'][-1]['result'].update(change)
+            self.assertIsNone(self.feedback(run,self.task,self.action))
+
+    def test_successful_read_or_write_resets_the_streak(self):
+        for tool in ['file.read','file.write','code.test']:
+            run=copy.deepcopy(self.run);run['calls'].append({'id':'ok','taskId':'qa','agentId':'reviewer',
+                'revision':0,'tool':tool,'status':'success','result':{'ok':True}})
+            self.assertIsNone(self.feedback(run,self.task,self.action))
+
+    def test_new_grant_allows_retry_of_previously_missing_input(self):
+        self.run['events']=[{'type':'artifact_granted','payload':{'toAgent':'reviewer'}}]
+        self.assertIsNone(self.feedback(self.run,self.task,self.action))
+
+    def test_two_feedbacks_then_stop_without_executing_more_reads(self):
+        for attempt in range(3):
+            result=self.feedback(self.run,self.task,self.action)
+            self.assertEqual(result['feedbackAttempt'],attempt+1)
+            self.assertEqual(result['stopTask'],attempt==2)
+            self.run['events'].append({'type':'local_read_failure_recovery','payload':result})
+        self.assertEqual(len(self.run['calls']),4)

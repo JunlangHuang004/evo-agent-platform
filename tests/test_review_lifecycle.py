@@ -130,10 +130,10 @@ class ReviewLifecycleRuntimeTests(unittest.TestCase):
         self.assertEqual(model.counts['QA'],7);self.assertEqual(len([e for e in run['events'] if e['type']=='review_pass']),2)
         self.assertEqual(len(run['deliveries']),1)
 
-    def test_unrelated_read_and_denied_read_do_not_reset_duplicate_recovery_or_grant_source(self):
+    def test_ancestor_grant_and_denied_read_do_not_reset_duplicate_recovery(self):
         def qa(i,c,m,app):
             inputs=c['reviewProgress']['reviewInputs'];self.assertTrue(inputs)
-            self.assertTrue(all(x['accessible'] is False for x in inputs));self.assertFalse(any('importPath' in x for x in inputs))
+            self.assertTrue(all(x['accessible'] is True for x in inputs))
             self.assertNotIn('Original source body',json.dumps(c['reviewProgress']))
             if i<2:return self.decision(c,i)
             if i==2:return self.decision(c,0)
@@ -147,8 +147,8 @@ class ReviewLifecycleRuntimeTests(unittest.TestCase):
         app,run,model=self.run_case(qa,source=True)
         q=self.qa_task(run);self.assertEqual(model.counts['QA'],7);self.assertEqual(q['status'],'partial')
         source=next(a for a in run['artifacts'] if a['name']=='source.md')
-        self.assertFalse(app.artifacts.can_access(source['id'],'reviewer',run['id']))
-        self.assertFalse(any(e['type']=='artifact_granted' and e['payload'].get('artifactId')==source['id']
+        self.assertTrue(app.artifacts.can_access(source['id'],'reviewer',run['id']))
+        self.assertTrue(any(e['type']=='artifact_granted' and e['payload'].get('artifactId')==source['id']
                              and e['payload'].get('toAgent')=='reviewer' for e in run['events']))
 
     def test_identical_report_republication_does_not_reset_final_handoff(self):

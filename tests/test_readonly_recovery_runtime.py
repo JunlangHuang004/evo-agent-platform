@@ -78,5 +78,33 @@ class ReadonlyRecoveryRuntimeTests(unittest.TestCase):
         task=next(t for t in run['steps'] if not t.get('_planning'));self.assertIn('重复动作循环',task['error']['message'])
         self.assertFalse(any(e['type']=='readonly_failure_recovery' for e in run['events']))
 
+    def test_alternating_missing_local_paths_stop_after_four_calls_and_two_feedbacks(self):
+        config=Config(Path(self.directory.name),{'LLM_API_KEY':'offline-local','MAX_RETRIES':'0'})
+        config.apply_time_only_profile()
+        model=Model(lambda n,c,m:{'type':'tool','name':'file.read','args':{'path':['missing-a.md','missing-b.md'][n%2]}})
+        app=Platform(config,provider=model,tools=Files(config));model.app=app;self.apps.append(app)
+        app.action({'action':'send','mode':'task','participants':['coordinator'],'text':'Report missing files honestly.'})
+        self.assertTrue(app.wait_for_idle(15));run=app.state['sessions']['group']['run']
+        reads=[c for c in run['calls'] if c['tool']=='file.read']
+        self.assertEqual(len(reads),4);self.assertTrue(all(c['status']=='failed' for c in reads))
+        feedback=[e for e in run['events'] if e['type']=='local_read_failure_recovery']
+        self.assertEqual(len(feedback),3);self.assertTrue(feedback[-1]['payload']['stopTask'])
+        self.assertNotEqual(run['status'],'done');self.assertLess(run['modelCalls'],12)
+
+    def test_local_read_feedback_can_lead_to_honest_partial_without_fake_acceptance(self):
+        def action(n,c,m):
+            if n<4:return {'type':'tool','name':'file.read','args':{'path':['missing-a.md','missing-b.md'][n%2]}}
+            if n==4:return {'type':'tool','name':'file.read','args':{'path':'missing-a.md'}}
+            self.assertTrue(any(message['content'].startswith('本地读取失败恢复：') for message in m))
+            return {'type':'final','status':'partial','text':'Required files are not available; no acceptance claimed.'}
+        config=Config(Path(self.directory.name),{'LLM_API_KEY':'offline-local','MAX_RETRIES':'0'})
+        config.apply_time_only_profile();model=Model(action)
+        app=Platform(config,provider=model,tools=Files(config));model.app=app;self.apps.append(app)
+        app.action({'action':'send','mode':'task','participants':['coordinator'],'text':'Report missing files honestly.'})
+        self.assertTrue(app.wait_for_idle(15));run=app.state['sessions']['group']['run']
+        self.assertEqual(run['status'],'partial')
+        self.assertEqual(len([c for c in run['calls'] if c['tool']=='file.read']),4)
+        self.assertFalse(any(e['type']=='review_pass' for e in run['events']))
+
 
 if __name__=='__main__':unittest.main()
