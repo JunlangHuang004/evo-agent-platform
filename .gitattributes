@@ -1,0 +1,5 @@
+
+# Preserve exported evidence bytes; source code keeps existing repository policy.
+reports/midtest-8099-20261123/** -text
+README.md text eol=lf
+.env.example text eol=lf

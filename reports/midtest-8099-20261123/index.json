@@ -1,0 +1,98 @@
+[
+  {
+    "label": "S1",
+    "id": "run-b1cbb756b1294e29",
+    "team": "software",
+    "status": "done",
+    "activeMs": 841067,
+    "modelCalls": 56,
+    "acceptanceGaps": [],
+    "package": {
+      "id": "delivery-60659b295a8947c19b5abb6f6b2f70ab",
+      "status": "packaged",
+      "entrypoint": "app/index.html",
+      "sha256": "a9dae8f627287f0a1b7bfd0bb88d15cd9602859cda55cd40b262c15a27f04d84"
+    }
+  },
+  {
+    "label": "S2",
+    "id": "run-6e5bf8809cc347a5",
+    "team": "software",
+    "status": "partial",
+    "activeMs": 566270,
+    "modelCalls": 34,
+    "acceptanceGaps": [
+      "Implement analytics dashboard in booking app：最新代码 revision / 产物尚无匹配的审核角色独立验收。"
+    ],
+    "package": {
+      "id": "delivery-2f8acd5e83fc426c896f34783f3db5db",
+      "status": "candidate",
+      "entrypoint": "app/index.html",
+      "sha256": "30d75efc209e43ae19f32b44dda905d91412a1d586783fce8c190bcce8840639"
+    }
+  },
+  {
+    "label": "N1",
+    "id": "run-0005bd701419416b",
+    "team": "newsroom",
+    "status": "done",
+    "activeMs": 816900,
+    "modelCalls": 81,
+    "acceptanceGaps": [],
+    "package": {
+      "id": "delivery-e85c3fe8b76047a9a8db0492ea213ddb",
+      "status": "packaged",
+      "entrypoint": "web-article.md",
+      "sha256": "02568cbcf731e85027cfdb63ee436a6a86a9baa0b8acee081fc0a0da25a12a11"
+    }
+  },
+  {
+    "label": "N2",
+    "id": "run-c26997fdf3864734",
+    "team": "newsroom",
+    "status": "done",
+    "activeMs": 467933,
+    "modelCalls": 41,
+    "acceptanceGaps": [],
+    "package": {
+      "id": "delivery-0178083f22814c09b8b659d0d8fa3ea6",
+      "status": "candidate",
+      "entrypoint": "fact-check-article.md",
+      "sha256": "309039b9e68f6a0abd3dff3100a88e74ac4e77e17cdc74e25dc4d16a3cbea06f"
+    }
+  },
+  {
+    "label": "F1",
+    "id": "run-a278051f4d7a4597",
+    "team": "fund",
+    "status": "done",
+    "activeMs": 712790,
+    "modelCalls": 59,
+    "acceptanceGaps": [
+      "Package proposal, risks and introduction：最新代码 revision / 产物尚无匹配的审核角色独立验收。"
+    ],
+    "package": {
+      "id": "delivery-b9a3f043225147c2aebaa719dd4151a2",
+      "status": "packaged",
+      "entrypoint": "package/index.html",
+      "sha256": "b8c0214aab7dcfb16ff894c61862b4f66a74fa725b4eb01bbeffe74bf3c59e7d"
+    },
+    "originalStatus": "partial",
+    "manualCompletion": true
+  },
+  {
+    "label": "F2",
+    "id": "run-a7bbed97021941ad",
+    "team": "fund",
+    "status": "done",
+    "activeMs": 394695,
+    "modelCalls": 49,
+    "acceptanceGaps": [],
+    "package": {
+      "id": "delivery-151cb3ea03f24177a4c0cf04c4a7564e",
+      "status": "candidate",
+      "entrypoint": "deck/index.html",
+      "sha256": "06fe60aa7599e310fc85778086bcb0891bac62857fc6d30bf89b4d97e1c394cd"
+    }
+  }
+]

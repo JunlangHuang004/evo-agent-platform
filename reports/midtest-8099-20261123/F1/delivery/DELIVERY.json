@@ -1,0 +1,60 @@
+{
+  "agentId": "marketing",
+  "createdAt": 1795382444113,
+  "entrypoint": "package/index.html",
+  "files": [
+    {
+      "artifactId": "artifact-a55da01aed954fac9db158c2f3f2864e",
+      "inherited": false,
+      "path": "package/index.html",
+      "sha256": "bd25635918980576368c9730ecc7cbbb362254777bc28ad9c3d4f51d25b92eba",
+      "size": 13281,
+      "sourceRevision": 0,
+      "sourceTaskId": "task-269e41a5094f45b7"
+    },
+    {
+      "artifactId": "artifact-f1f12f923ce6490c8a26725ba02644d3",
+      "inherited": false,
+      "path": "package/README.md",
+      "sha256": "2df70b1e8eb488ed61c0ae8a2efe4b8417b32e3511e7ecbfc78e362b2bd46a41",
+      "size": 3176,
+      "sourceRevision": 0,
+      "sourceTaskId": "task-269e41a5094f45b7"
+    },
+    {
+      "artifactId": "artifact-d2715bb2e38e41e88b606b10eb9a1114",
+      "inherited": false,
+      "path": "package/proposal.md",
+      "sha256": "548b7b82e333ea6552ae33605554ae82ba5b7e929ec7a41a3299ca6bcc737b1b",
+      "size": 7735,
+      "sourceRevision": 0,
+      "sourceTaskId": "task-269e41a5094f45b7"
+    },
+    {
+      "artifactId": "artifact-bc8929a9c6234e828692489dd69ddbfb",
+      "inherited": false,
+      "path": "package/risk_assessment.md",
+      "sha256": "09ffe72f0a2ffd5716cc98b972170d9b54ea3ced89ccdd068421946f6d2768bd",
+      "size": 8503,
+      "sourceRevision": 0,
+      "sourceTaskId": "task-269e41a5094f45b7"
+    },
+    {
+      "artifactId": "artifact-5909d6d34de04603b0a9f72e16af7313",
+      "inherited": false,
+      "path": "package/client_introduction.md",
+      "sha256": "df4f85ddeb0cdf9d43a73c573b043e30333790a1e984d57c09afff0be6e5be43",
+      "size": 8391,
+      "sourceRevision": 0,
+      "sourceTaskId": "task-269e41a5094f45b7"
+    }
+  ],
+  "id": "delivery-b9a3f043225147c2aebaa719dd4151a2",
+  "instructions": "Open package/index.html in any browser for the full self-contained package (introduction, proposal, market evidence, risk assessment, next steps, sources). Or read the markdown files in this order: 1) package/client_introduction.md (plain-language start here), 2) package/proposal.md (assumptions, allocation, rationale, evidence), 3) package/risk_assessment.md (risks, suitability, mitigations, conditions). package/README.md explains the package and its limits. No internet or build step required. This is a simulated proposal, not personalized financial advice.",
+  "runId": "run-a278051f4d7a4597",
+  "semanticQuality": "unassessed",
+  "status": "packaged",
+  "taskId": "task-269e41a5094f45b7",
+  "taskRevision": 0,
+  "version": 1
+}

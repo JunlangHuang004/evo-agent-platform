@@ -1,0 +1,8 @@
+{
+  "sourceCallId": "call-66906a93bd9b4fcd",
+  "purpose": "Screenshot illustration using the original synthetic test inputs; not a new acceptance result.",
+  "storage": {
+    "meetingRoomBookings.cancellations.v1": "[{\"id\":\"c1\",\"room\":\"B\",\"date\":\"2026-11-04\",\"start\":\"11:00\",\"end\":\"12:00\",\"booker\":\"Cara\",\"title\":\"Cancelled\",\"cancelledAt\":\"2026-11-04T10:00:00Z\"}]",
+    "meetingRoomBookings.v1": "[{\"id\":\"b1\",\"room\":\"A\",\"date\":\"2026-11-03\",\"start\":\"09:00\",\"end\":\"11:00\",\"booker\":\"Alice\",\"title\":\"Sprint\"},{\"id\":\"b2\",\"room\":\"A\",\"date\":\"2026-11-03\",\"start\":\"13:00\",\"end\":\"14:00\",\"booker\":\"Bob\",\"title\":\"Review\"},{\"id\":\"b3\",\"room\":\"B\",\"date\":\"2026-11-04\",\"start\":\"09:00\",\"end\":\"10:30\",\"booker\":\"Cara\",\"title\":\"Design\"},{\"id\":\"b4\",\"room\":\"A\",\"date\":\"2026-11-04\",\"start\":\"15:00\",\"end\":\"16:00\",\"booker\":\"Dan\",\"title\":\"Sync\"},{\"id\":\"b5\",\"room\":\"C\",\"date\":\"2026-11-05\",\"start\":\"09:00\",\"end\":\"10:00\",\"booker\":\"Eve\",\"title\":\"Plan\"}]"
+  }
+}

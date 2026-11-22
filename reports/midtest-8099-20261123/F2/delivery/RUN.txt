@@ -1,0 +1,1 @@
+Open deck/index.html in a browser. Navigate with ArrowRight/Space/PageDown (next), ArrowLeft/PageUp (previous), Home/End (first/last), or the on-screen Prev/Next buttons. 10 slides cover outlook, investment implications and key risks. See deck/README.md for sources and limitations.

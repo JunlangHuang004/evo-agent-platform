@@ -1,0 +1,62 @@
+{
+  "agentId": "dev",
+  "createdAt": 1795377086245,
+  "entrypoint": "app/index.html",
+  "files": [
+    {
+      "artifactId": "artifact-136e028360eb4ee6a8749147eecf163c",
+      "inherited": false,
+      "path": "app/index.html",
+      "sha256": "b4df0958bed73cd8a8de574bad9bc60b9bd4eb191fc9fae0615c7b81e50a186f",
+      "size": 2967,
+      "sourceRevision": 0,
+      "sourceTaskId": "task-9dcfa4eb08d64b5a"
+    },
+    {
+      "artifactId": "artifact-068e9b56f608460a955dff4833725457",
+      "inherited": false,
+      "path": "app/app.js",
+      "sha256": "37a635a3d3db93b93d7fc2a3b3a57d4e1d3d7521581498f6a4e67db861cdd1e3",
+      "size": 11679,
+      "sourceRevision": 0,
+      "sourceTaskId": "task-9dcfa4eb08d64b5a"
+    },
+    {
+      "artifactId": "artifact-08bfb48571504373bfd49308f4264eef",
+      "inherited": false,
+      "path": "app/dashboard.js",
+      "sha256": "f3286d0f99d6f8e5385c64d4a292ef1ef5e37a8c95f8693d23a9d1c54044fd90",
+      "size": 11531,
+      "sourceRevision": 0,
+      "sourceTaskId": "task-9dcfa4eb08d64b5a"
+    },
+    {
+      "artifactId": "artifact-9a75097f64e94f3691e1a7ba360b49e2",
+      "inherited": false,
+      "path": "app/styles.css",
+      "sha256": "ce7d7244a2181642dbb6ed383eee6fc57cd5441b9f1cfc52f0c61d17209751d7",
+      "size": 3368,
+      "sourceRevision": 0,
+      "sourceTaskId": "task-9dcfa4eb08d64b5a"
+    },
+    {
+      "artifactId": "artifact-96f4cc9343ce4c44b454d8ff25d5ff0f",
+      "inherited": false,
+      "path": "app/README.md",
+      "sha256": "80a5d03016244a57d21eed776ac133d779e1caf390ab20f4bf173da2b5fea5be",
+      "size": 2980,
+      "sourceRevision": 0,
+      "sourceTaskId": "task-9dcfa4eb08d64b5a"
+    }
+  ],
+  "id": "delivery-2f8acd5e83fc426c896f34783f3db5db",
+  "instructions": "Open app/index.html in a modern browser (no server/build/network needed). Use sections 1-3 to check availability, book, and cancel rooms; data persists in localStorage. Scroll to section 4 'Manager dashboard', pick From/To dates (defaults to current month-to-date), and the dashboard renders immediately: headline summary (total bookings, reserved hours, cancellations, cancellation rate, busiest day/time), five bar charts (bookings per room, reserved hours per room, bookings per weekday, bookings per 30-min start slot, cancellations per room), a per-room summary table sorted by bookings, and an allocation hint naming most/least used rooms. From>To shows an inline error with no charts; an empty range shows an empty-state message. Cancellations are counted from the additive log key meetingRoomBookings.cancellations.v1 written by the cancel path (absent => 0).",
+  "purpose": "Published product candidate; independent review and formal delivery remain separate.",
+  "reviewStatusAtCreation": "pending",
+  "runId": "run-6e5bf8809cc347a5",
+  "semanticQuality": "unassessed",
+  "status": "candidate",
+  "taskId": "task-9dcfa4eb08d64b5a",
+  "taskRevision": 0,
+  "version": 1
+}

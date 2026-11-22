@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Meeting Room Booking</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header>
+  <h1>Meeting Room Booking</h1>
+  <p class="sub">Rooms A&ndash;E &middot; 08:00&ndash;18:00 &middot; 30-minute slots &middot; no double bookings</p>
+</header>
+
+<main>
+  <section class="card" id="availability-section">
+    <h2>1. Check availability</h2>
+    <label for="avail-date">Date</label>
+    <input type="date" id="avail-date">
+    <button id="refresh-btn" type="button">Refresh</button>
+    <div id="availability" class="availability"></div>
+  </section>
+
+  <section class="card" id="book-section">
+    <h2>2. Book a room</h2>
+    <form id="book-form">
+      <div class="row">
+        <label for="book-room">Room</label>
+        <select id="book-room"></select>
+      </div>
+      <div class="row">
+        <label for="book-date">Date</label>
+        <input type="date" id="book-date" required>
+      </div>
+      <div class="row">
+        <label for="book-start">Start</label>
+        <select id="book-start"></select>
+      </div>
+      <div class="row">
+        <label for="book-end">End</label>
+        <select id="book-end"></select>
+      </div>
+      <div class="row">
+        <label for="book-booker">Booker name</label>
+        <input type="text" id="book-booker" required maxlength="60" placeholder="e.g. Alice">
+      </div>
+      <div class="row">
+        <label for="book-title">Title</label>
+        <input type="text" id="book-title" required maxlength="80" placeholder="e.g. Sprint planning">
+      </div>
+      <button type="submit" id="book-btn">Book room</button>
+    </form>
+    <div id="book-msg" class="msg" role="status" aria-live="polite"></div>
+  </section>
+
+  <section class="card" id="cancel-section">
+    <h2>3. Cancel a booking</h2>
+    <p class="hint">Only the booker who created a booking can cancel it. Enter the same booker name.</p>
+    <div id="bookings" class="bookings"></div>
+    <div id="cancel-msg" class="msg" role="status" aria-live="polite"></div>
+  </section>
+
+  <section class="card" id="dashboard-section">
+    <h2>4. Manager dashboard</h2>
+    <p class="hint">Analytics over existing booking records for a selected date range (inclusive). Read-only.</p>
+    <div class="row">
+      <label for="dash-from">From</label>
+      <input type="date" id="dash-from">
+    </div>
+    <div class="row">
+      <label for="dash-to">To</label>
+      <input type="date" id="dash-to">
+      <button id="dash-refresh" type="button">Refresh</button>
+    </div>
+    <div id="dash-error" class="msg" role="status" aria-live="polite"></div>
+    <div id="dashboard-output" class="dashboard"></div>
+  </section>
+</main>
+
+<footer>
+  <p>Data is stored in this browser (localStorage) and survives reloads.</p>
+</footer>
+
+<script src="app.js"></script>
+<script src="dashboard.js"></script>
+</body>
+</html>

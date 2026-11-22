@@ -1,0 +1,60 @@
+{
+  "agentId": "release",
+  "createdAt": 1795376527043,
+  "entrypoint": "app/index.html",
+  "files": [
+    {
+      "artifactId": "artifact-bbc11c0bbfaa4f0d96ed8d95e3f814cf",
+      "inherited": false,
+      "path": "app/index.html",
+      "sha256": "30fc85eae3c6deded4dde646ce61d1fcdf634f2198edc6d275305dc6cff54625",
+      "size": 2298,
+      "sourceRevision": 0,
+      "sourceTaskId": "task-abf42320a6aa4a11"
+    },
+    {
+      "artifactId": "artifact-827c42af0d764c80ab683995df876c4b",
+      "inherited": false,
+      "path": "app/app.js",
+      "sha256": "d0b14b697946a7bf0c3d29f4354347813083c711ffc90da63c3bc173171abe09",
+      "size": 10735,
+      "sourceRevision": 0,
+      "sourceTaskId": "task-abf42320a6aa4a11"
+    },
+    {
+      "artifactId": "artifact-a4a519415cf84cfcb71198b452da74fa",
+      "inherited": false,
+      "path": "app/styles.css",
+      "sha256": "bbe6dc18ceb6a3c7d1d8b9b8cff52350089dc0a969620a2cf8ed60e9fad988c3",
+      "size": 2359,
+      "sourceRevision": 0,
+      "sourceTaskId": "task-abf42320a6aa4a11"
+    },
+    {
+      "artifactId": "artifact-cbd3aca0e22c4fd19ecf78100ede65f7",
+      "inherited": false,
+      "path": "README.md",
+      "sha256": "d2bf4e641434634f162bd1aef26b1f67dcea1a2a09cf721ff0cbb386363c3078",
+      "size": 1603,
+      "sourceRevision": 0,
+      "sourceTaskId": "task-abf42320a6aa4a11"
+    },
+    {
+      "artifactId": "artifact-776779bd0d004cb4af876cc05b8ce8d3",
+      "inherited": false,
+      "path": "RELEASE_NOTES.md",
+      "sha256": "1c9c038ccd85c77f426d82f8202985d8c4bfd6923d79f53c4488e34edb61ecc3",
+      "size": 2844,
+      "sourceRevision": 0,
+      "sourceTaskId": "task-a6bbf2f061c84990"
+    }
+  ],
+  "id": "delivery-60659b295a8947c19b5abb6f6b2f70ab",
+  "instructions": "Meeting Room Booking System v1.0.0 — how to use:\n\n1. Download/unzip the package and open app/index.html in a desktop browser (no build step, no server required).\n2. Check availability: pick a date in the Availability panel; each room (A–E) shows its booked slots for that date.\n3. Book a room: fill in room, date, start time, end time, your name, and a title, then click Book. Times are 30-minute slots between 08:00 and 18:00. Overlapping bookings for the same room/date are hard-blocked with a clear message.\n4. Cancel a booking: find it in the list, type the same booker name used to create it, and click Cancel. Only the original booker can cancel.\n5. Bookings persist in browser localStorage (key meetingRoomBookings.v1) and survive reloads.\n\nFiles: app/index.html (entrypoint), app/app.js (logic), app/styles.css (styling), README.md (usage), RELEASE_NOTES.md (version + notes).\n\nVerification: independently QA-tested in real Chromium (verdict PASS) covering availability, booking, double-booking prevention, owner-only cancel, persistence, and storage read/write failure handling. Known limits: no mobile-overflow or two-page stale-tab test; data is per-browser.",
+  "runId": "run-b1cbb756b1294e29",
+  "semanticQuality": "unassessed",
+  "status": "packaged",
+  "taskId": "task-a6bbf2f061c84990",
+  "taskRevision": 0,
+  "version": 1
+}

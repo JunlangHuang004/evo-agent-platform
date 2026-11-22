@@ -1,0 +1,548 @@
+{
+  "id": "run-a7bbed97021941ad",
+  "title": "Taking an end-of-2026 perspective, prepare an analytical presentation for our fund team on the future of the semiconductor industry. Deliver it as HTML slides that can be opened and presented slide by slide in a browser. Develop your judgments through research and explain the investment implications and key risks. Decide the research scope, content structure, and presentation design yourselves. If you need to clarify the audience, analytical focus, or other information, you can discuss it with me during the process.",
+  "status": "done",
+  "startedAt": 1795386844281,
+  "finishedAt": 1795387230472,
+  "activeMs": 394695,
+  "modelCalls": 49,
+  "tokenUsage": 810263,
+  "acceptanceGaps": [],
+  "summary": "FINAL SYNTHESIS AND HANDOFF — Semiconductor Industry Outlook (end-2026 perspective)\n\nThis is a text-only synthesis (task.finalSummary=true). No products were rewritten, republished or repackaged.\n\n=== 1. DELIVERED DECK ===\nEntrypoint: deck/index.html (artifact-18bcaf6317d04e46b24d1c699ee677d3, sha256 d6bd02955b8c89ea561ddfaa7b0fd00d732f081122c2f6a886886368dabcbe0d).\nSupporting assets (same task-3c4b9221c3aa4859, revision 0):\n- deck/styles.css — artifact-8c6d0d22b1ea4f8ca8724fa4390a1206 (f923d531371e6e877369882a6d65f94d4628c5cb539e4e0beb2da21ac42ad65b)\n- deck/app.js — artifact-92added1f5154be78d55a9b2ce3a03f2 (0a80458efa6be4601c4109360731b5c515d4419d196468552f13f057f0e9f662)\n- deck/README.md — artifact-1daffd82759f4feb9b552591a1496164 (fcfde4bb2d1df334d741e855f94a5e323600c87509e8d244188bb649e22d5530)\n- deck/slides.md — artifact-b4bdc4be83644021af8191c81b09dc2d (6d86f9acc1a428ba1f7656d702d25a11e2e25c61bd732c855ac970d68bc98c5b)\n\nHow to present: open deck/index.html in any modern browser (no server or build step; self-contained HTML+CSS+JS). Navigate slide by slide with the Prev/Next buttons, ArrowLeft/ArrowRight, Space, Home (first slide) and End (last slide). 10 slides: title, executive summary, demand drivers, supply/geopolitics, valuation/drawdown, investment implications, key risks, scenarios, evidence gaps, sources & disclaimer.\n\n=== 2. RESEARCH EVIDENCE (actual sources, with as-of dates) ===\nEvidence brief: artifact-277039c2805e49d3a9cc1bba21b1a5aa (sha256 c85a189e96ac6ba2ac945c9f9e03a643eca3216231839b8d9c3efa1e8e69d808), as-of 2026-11-22. Sources cited in the deck:\n1. SIA, \"Global Semiconductor Sales Increase 9.2% Month-to-Month in May,\" 6 Jul 2026 — https://www.semiconductors.org/global-semiconductor-sales-increase-9-2-month-to-month-in-may/ (May 2026 sales $120.6bn, +9.2% MoM, +104.1% YoY, 15th consecutive record; regional YoY Americas +132.2%, APAC +118.9%, China +88.8%, Europe +60.7%, Japan +23.8%).\n2. Deloitte Insights, \"2026 Semiconductor Industry Outlook\" — https://www.deloitte.com/us/en/insights/industry/technology/technology-media-telecom-outlooks/semiconductor-industry-outlook.html (AI data-center ~half of 2026 revenues; AI network fabric ~38% CAGR 2024-2029; DRAM capex +14% to $61bn, NAND +5% to $21bn; four 2027-2028 divergence risks: ROI/monetization, ~92 GW added power need by 2027, innovation efficiency, price deflation; Dec 2025 US approval of NVIDIA H200 sales to China with 25% revenue share).\n3. Leverage Shares, \"The 2026 Semiconductor Selloff Creates an Opportunity,\" 24 Aug 2026 — https://leverageshares.com/en-eu/insights/the-2026-semiconductor-selloff-creates-an-opportunity/ (SOX -29% from late-June 2026 peak after >100% run; Broadcom Q3 AI guide $16bn vs ~$17.2bn expected; Brent >$84/bbl; China DUV mass-production and CXMT >500x oversubscription claims). Secondary/commentary source, flagged as such.\n\n=== 3. REVIEW OUTCOMES (actual verdicts, current revision 0) ===\n- Risk & suitability review (task-fc8dbe166b764425, reviewer=risk): VERDICT PASS, verified=true, no rework required. Independent browser test (call-587494c6e0f1427f) against the exact entrypoint/assets: 11/11 assertions passed, 0 page errors, 0 console errors, 0 blocked requests; verified 10 slides, Next→'Executive Summary' counter '2 / 10', ArrowRight/ArrowLeft, End→'Sources & Disclaimer' '10 / 10', Home→title, Prev clamps at first slide. Risk coverage judged adequate (slides 4,5,7,9); suitability appropriate for an internal fund team (slide 6 framed as selection principles, not client advice); evidence fidelity reconciled with the brief. Three bounded, non-blocking recommendations: (a) add explicit as-of date next to SOX -29% and Broadcom figures on slide 5; (b) add a one-line note on slide 6 that implications are generic and must be mapped to a mandate/risk profile; (c) state the latest market data point (24 Aug 2026) directly on slide 9.\n- Client-facing framing review (task-a2e6693f514641b6, reviewer=marketing; artifact-83b15082aa9c4858bf96cd5f81a5091c, sha256 c5c42d603a0bbfa36db00eaa92511f3c4945ec5c5bac9cb1d2f7c9c0c272513e): VERDICT PASS WITH MINOR MESSAGING FIXES, no rework required. Audience fit confirmed for the internal fund team; structure and one-line thesis judged sound; honesty (gaps slide, conflict-surfaced-not-blended) judged a credibility strength. Optional fixes: gloss acronyms on first use (HBM, SOX, DUV, CXMT, CPO/LPO, heterogeneous integration); add \"(vs May 2025)\" to +104.1% YoY; clarify \"own the bottleneck\"; add \"do not assign probabilities\" to the scenario slide; lead the source-conflict slide with one bold sentence. Editorial only — no code execution or source re-verification.\n\n=== 4. ACCEPTANCE CRITERIA STATUS ===\n- \"Summarizes delivered deck, review outcomes and remaining gaps\" — MET (sections 1-3, 5).\n- \"States the deck entrypoint and how to present it\" — MET (section 1).\n- \"Synthesize actual research sources, execution evidence, reviewer verdicts and limitations; do not replace missing verification with prose\" — MET: real artifact IDs/hashes, real source URLs with as-of dates, the actual executed browser-test call ID and its 11/11 result, both actual reviewer verdicts, and the limitations below. No missing verification was substituted with prose.\n\n=== 5. REMAINING GAPS AND LIMITATIONS (honest) ===\n- Recency gap: latest primary industry data is SIA May 2026 (published 6 Jul 2026) and latest market data is 24 Aug 2026, while the deck is dated 22 Nov 2026. No Nov-2026 SOX level, valuation dataset or Q3-2026 hyperscaler capex figure was retrieved. Disclosed on the deck's gaps slide.\n- Source quality: supply/geopolitics (China DUV, CXMT) and valuation (SOX -29%, Broadcom guide) rest on a single secondary ETP-issuer commentary, not primary sources; flagged as Low-Medium confidence and not blended with the Deloitte structural view.\n- No primary valuation dataset (e.g., forward P/E for SOX constituents) was retrieved.\n- The three risk-review and five marketing-review recommendations are non-blocking and were NOT applied in this final-summary task (readonly synthesis); the deck remains at revision 0 as reviewed. Applying them would require a new producer revision and re-review.\n- Verification scope: the browser test confirms navigation/rendering behavior only; it does not validate the analytical claims or source figures. Editorial reviews are not code execution.\n- No formal package_delivery was created in this task; the deck is delivered as the published artifacts listed in section 1 (candidate bundle from task-3c4b9221c3aa4859).\n\n=== 6. OVERALL STATUS ===\nDeck delivered and independently verified (browser test pass) with both reviews returning PASS (no rework). Remaining items are disclosed evidence gaps and optional, non-blocking polish. This task's text output contract is satisfied.\n\n执行记录：\n- Refresh semiconductor evidence brief [done]：Refreshed semiconductor evidence brief delivered.\n\nArtifact: artifact-277039c2805e49d3a9cc1bba21b1a5aa (semiconductor_evidence_brief.md, sha256 c85a189e96ac6ba2ac945c9f9e03a643eca3216231839b8d9c3efa1e8e69d808, 10569 bytes).\n\nAcceptance criteria coverage:\n1. Updated brief covers demand drivers, supply/geopolitics, valuation and explicit gaps with sources — DONE. Sections: (1) Demand drivers (SIA May 2026 record $120.6bn, +9.2% MoM, +104.1% YoY, 15th consecutive record; Deloitte AI data-center concentration ~half of 2026 revenues, 92GW power need by 2027, memory ~50% price spikes, CPO/LPO 30-50% power savings); (2) Supply/geopolitics (US Dec-2025 H200-to-China approval with 25% revenue share, China immersion DUV mass production, CXMT listing >500x oversubscription, regional back-end/advanced-packaging divergence, power constraints); (3) Valuation (SOX +100% then -29% from June peak, Broadcom $16bn vs ~$17.2bn guidance, Brent >$84, JPMorgan vs Morgan Stanley views, Deloitte multiple-compression framing); (4) Explicit gaps table with confidence labels.\n2. Reuses prior scope_brief.md and semiconductor_evidence_brief.md without republishing them — DONE. The brief is a refresh that references prior scope; only the refreshed file was published (one artifact).\n\nSources cited with URLs and as-of dates: SIA (6 Jul 2026), Deloitte 2026 Semiconductor Industry Outlook, Leverage Shares (24 Aug 2026, flagged as secondary/commentary).\n\nKey limitations (documented in the brief):\n- No primary valuation dataset (e.g., SOX forward P/E) retrieved; drawdown and Broadcom figures are from secondary commentary (Low-Medium confidence).\n- No source retrieved confirming the SOX level or valuation as of Nov 2026; latest market data point is 24 Aug 2026 (Low confidence).\n- No primary hyperscaler Q3 2026 capex figure retrieved (Low confidence).\n- China DUV/CXMT claims are secondary (Low-Medium confidence).\n- Source conflict between Deloitte's structurally-intact demand view and Leverage Shares' 2026 drawdown is surfaced separately, not blended.\n\nNote: one web.fetch to vaneck.com was blocked (permission: mixed public/private DNS); it is not cited as evidence.\n- Build HTML slide deck [done]：Built the HTML slide deck for task-3c4b9221c3aa4859. Deliverable: self-contained browser presentation, entrypoint deck/index.html (artifact-18bcaf6317d04e46b24d1c699ee677d3).\n\nPublished artifacts (all current revision 0):\n- artifact-18bcaf6317d04e46b24d1c699ee677d3 — deck/index.html (entrypoint, 10 slides)\n- artifact-8c6d0d22b1ea4f8ca8724fa4390a1206 — deck/styles.css\n- artifact-92added1f5154be78d55a9b2ce3a03f2 — deck/app.js\n- artifact-1daffd82759f4feb9b552591a1496164 — deck/README.md (usage notes)\n- artifact-b4bdc4be83644021af8191c81b09dc2d — deck/slides.md (content plan)\nCandidate delivery: delivery-151cb3ea03f24177a4c0cf04c4a7564e (entrypoint deck/index.html).\n\nUsage: open deck/index.html in a browser; navigate with ArrowRight/Space/PageDown (next), ArrowLeft/PageUp (previous), Home/End (first/last), or on-screen Prev/Next buttons; progress bar and slide counter shown.\n\nAcceptance criteria:\n1. Self-contained HTML opens in browser and navigates slide by slide — met: index.html + styles.css + app.js, keyboard and button navigation, 10 slides.\n2. Covers outlook, investment implications and key risks with entrypoint and usage notes — met: slides cover demand drivers, supply/geopolitics, valuation, investment implications, key risks, scenarios, evidence gaps; README.md provides entrypoint and usage.\n\nEvidence base: research brief artifact-277039c2805e49d3a9cc1bba21b1a5aa (read in full). Sources cited in deck and README with as-of dates: SIA (6 Jul 2026), Deloitte 2026 Semiconductor Industry Outlook, Leverage Shares (24 Aug 2026).\n\nLimitations: latest primary SIA data is May 2026 (no Jun–Oct 2026 release retrieved); no Nov 2026 SOX/valuation data (latest market point 24 Aug 2026); China DUV and CXMT claims are secondary commentary; Deloitte vs Leverage Shares conflict surfaced, not blended. Deck is internal research input, not investment advice. Independent risk and marketing reviews (task-fc8dbe166b764425, task-a2e6693f514641b6) are still pending; candidate delivery is not formal acceptance.\n- Risk and suitability review [done]：Risk & suitability review of task-3c4b9221c3aa4859 (HTML slide deck, revision 0) — VERDICT: PASS, no rework required. Submitted as explicit review action (reviewEventId evt-2c8fe94d4728428a, verdict=pass, verified=true).\n\nAcceptance criteria met:\n1) Verdict on risk coverage, suitability and bounded rework requests — delivered (pass; three non-blocking recommendations).\n2) Evidence cites specific slides and the evidence brief — delivered.\n\nRISK COVERAGE (adequate): Slide 7 covers the four Deloitte-flagged demand-side risks (ROI/monetization, power ~92 GW by 2027, innovation efficiency, price deflation) plus geopolitics/export controls, China memory (CXMT) pricing pressure and valuation drawdown. Slide 4 covers supply/geopolitics (Dec 2025 H200 25% revenue-share approval; China DUV/CXMT flagged secondary). Slide 5 covers valuation/drawdown (SOX -29% from late-June 2026 peak; Broadcom guide $16bn vs ~$17.2bn expected; Brent >$84/bbl). Slide 9 lists evidence gaps and surfaces the Deloitte-vs-Leverage Shares conflict without blending. Matches evidence brief sections 1.4, 2, 3, 4.\n\nSUITABILITY (appropriate for internal fund team): Slide 6 is framed as selection principles, not a client-specific recommendation — correct given no client risk profile/mandate/horizon was supplied. Slide 8 labels scenarios 'illustrative, not forecasts'. Slide 10 carries a 'not investment advice / figures as reported, not independently verified' disclaimer. No suitability breach.\n\nEVIDENCE FIDELITY: Slides 2,3,4,5,7 reconcile with the evidence brief (SIA May 2026 $120.6bn, +9.2% MoM, +104.1% YoY, 15th record; regional YoY Americas +132.2%, APAC +118.9%, China +88.8%, Europe +60.7%, Japan +23.8%; DRAM capex +14% to $61bn, NAND +5% to $21bn; AI network fabric ~38% CAGR 2024-2029). Secondary-sourced claims (China DUV, CXMT >500x, SOX -29%, Broadcom guide) correctly attributed and caveated on slides 4,5,9.\n\nEXECUTED VERIFICATION: Independent browser test (call-587494c6e0f1427f) against the exact granted entrypoint/assets (index.html d6bd0295..., styles.css f923d531..., app.js 0a80458e...): 11/11 assertions passed, 0 page/console errors, 0 blocked requests. Verified 10 slides; Next advances to 'Executive Summary' with counter '2 / 10'; ArrowRight/ArrowLeft navigate; End jumps to 'Sources & Disclaimer' with '10 / 10'; Home returns to title; Prev clamps at first slide. Slide-by-slide navigation and clamping satisfy the acceptance criteria.\n\nBOUNDED RECOMMENDATIONS (non-blocking, for final synthesis owner): (a) add explicit as-of date next to SOX -29% and Broadcom figures on slide 5; (b) add one-line note on slide 6 that implications are generic and must be mapped to a mandate/risk profile before client use; (c) state the most recent market data point (24 Aug 2026) directly on slide 9.\n\nLIMITS: Review is editorial + one browser navigation test; it does not independently verify the underlying source figures (SIA/Deloitte/Leverage Shares) — those remain as-reported. No client risk profile was supplied, so suitability is assessed only as internal-briefing-appropriate.\n- Client-facing framing review [done]：Client-facing framing review complete for task-a2e6693f514641b6 (review of task-3c4b9221c3aa4859, revision 0).\n\nDeliverable: artifact-83b15082aa9c4858bf96cd5f81a5091c (client_framing_review.md, sha256 c5c42d603a0bbfa36db00eaa92511f3c4945ec5c5bac9cb1d2f7c9c0c272513e).\n\nVerdict: PASS WITH MINOR MESSAGING FIXES. The deck is clear, well-structured and audience-appropriate for an internal fund investment team; it meets both acceptance criteria (clarity/audience fit; concrete messaging fixes or confirmation of readiness). No producer rework required for framing reasons.\n\nEvidence base (read this run, SHA256 pinned): index.html d6bd0295..., slides.md 6d86f9ac..., README.md fcfde4bb..., research brief c85a189e....\n\nConcrete messaging fixes offered (optional polish): (1) expand acronyms on first use (SOX, HBM, DUV, CXMT, CPO/LPO); (2) add context to '+104.1% YoY (vs May 2025)'; (3) gloss 'own the bottleneck'; (4) add 'do not assign probabilities' to scenarios; (5) lead the source-conflict slide with one bold sentence.\n\nMessaging risks flagged: keep the 'not investment advice' disclaimer and evidence-gaps slide attached if reused externally; keep the single-publisher (Leverage Shares) caveat and do not upgrade to 'verified'; recency gap (SIA May 2026, market data 24 Aug 2026 vs deck dated 22 Nov 2026) is honestly disclosed and should not be skipped in live presentation.\n\nLimits: editorial/framing only — no HTML/JS execution or rendering verification (risk reviewer's scope); no independent source re-verification; no producer status changed.\n- Final synthesis and handoff [done]：FINAL SYNTHESIS AND HANDOFF — Semiconductor Industry Outlook (end-2026 perspective)\n\nThis is a text-only synthesis (task.finalSummary=true). No products were rewritten, republished or repackaged.\n\n=== 1. DELIVERED DECK ===\nEntrypoint: deck/index.html (artifact-18bcaf6317d04e46b24d1c699ee677d3, sha256 d6bd02955b8c89ea561ddfaa7b0fd00d732f081122c2f6a886886368dabcbe0d).\nSupporting assets (same task-3c4b9221c3aa4859, revision 0):\n- deck/styles.css — artifact-8c6d0d22b1ea4f8ca8724fa4390a1206 (f923d531371e6e877369882a6d65f94d4628c5cb539e4e0beb2da21ac42ad65b)\n- deck/app.js — artifact-92added1f5154be78d55a9b2ce3a03f2 (0a80458efa6be4601c4109360731b5c515d4419d196468552f13f057f0e9f662)\n- deck/README.md — artifact-1daffd82759f4feb9b552591a1496164 (fcfde4bb2d1df334d741e855f94a5e323600c87509e8d244188bb649e22d5530)\n- deck/slides.md — artifact-b4bdc4be83644021af8191c81b09dc2d (6d86f9acc1a428ba1f7656d702d25a11e2e25c61bd732c855ac970d68bc98c5b)\n\nHow to present: open deck/index.html in any modern browser (no server or build step; self-contained HTML+CSS+JS). Navigate slide by slide with the Prev/Next buttons, ArrowLeft/ArrowRight, Space, Home (first slide) and End (last slide). 10 slides: title, executive summary, demand drivers, supply/geopolitics, valuation/drawdown, investment implications, key risks, scenarios, evidence gaps, sources & disclaimer.\n\n=== 2. RESEARCH EVIDENCE (actual sources, with as-of dates) ===\nEvidence brief: artifact-277039c2805e49d3a9cc1bba21b1a5aa (sha256 c85a189e96ac6ba2ac945c9f9e03a643eca3216231839b8d9c3efa1e8e69d808), as-of 2026-11-22. Sources cited in the deck:\n1. SIA, \"Global Semiconductor Sales Increase 9.2% Month-to-Month in May,\" 6 Jul 2026 — https://www.semiconductors.org/global-semiconductor-sales-increase-9-2-month-to-month-in-may/ (May 2026 sales $120.6bn, +9.2% MoM, +104.1% YoY, 15th consecutive record; regional YoY Americas +132.2%, APAC +118.9%, China +88.8%, Europe +60.7%, Japan +23.8%).\n2. Deloitte Insights, \"2026 Semiconductor Industry Outlook\" — https://www.deloitte.com/us/en/insights/industry/technology/technology-media-telecom-outlooks/semiconductor-industry-outlook.html (AI data-center ~half of 2026 revenues; AI network fabric ~38% CAGR 2024-2029; DRAM capex +14% to $61bn, NAND +5% to $21bn; four 2027-2028 divergence risks: ROI/monetization, ~92 GW added power need by 2027, innovation efficiency, price deflation; Dec 2025 US approval of NVIDIA H200 sales to China with 25% revenue share).\n3. Leverage Shares, \"The 2026 Semiconductor Selloff Creates an Opportunity,\" 24 Aug 2026 — https://leverageshares.com/en-eu/insights/the-2026-semiconductor-selloff-creates-an-opportunity/ (SOX -29% from late-June 2026 peak after >100% run; Broadcom Q3 AI guide $16bn vs ~$17.2bn expected; Brent >$84/bbl; China DUV mass-production and CXMT >500x oversubscription claims). Secondary/commentary source, flagged as such.\n\n=== 3. REVIEW OUTCOMES (actual verdicts, current revision 0) ===\n- Risk & suitability review (task-fc8dbe166b764425, reviewer=risk): VERDICT PASS, verified=true, no rework required. Independent browser test (call-587494c6e0f1427f) against the exact entrypoint/assets: 11/11 assertions passed, 0 page errors, 0 console errors, 0 blocked requests; verified 10 slides, Next→'Executive Summary' counter '2 / 10', ArrowRight/ArrowLeft, End→'Sources & Disclaimer' '10 / 10', Home→title, Prev clamps at first slide. Risk coverage judged adequate (slides 4,5,7,9); suitability appropriate for an internal fund team (slide 6 framed as selection principles, not client advice); evidence fidelity reconciled with the brief. Three bounded, non-blocking recommendations: (a) add explicit as-of date next to SOX -29% and Broadcom figures on slide 5; (b) add a one-line note on slide 6 that implications are generic and must be mapped to a mandate/risk profile; (c) state the latest market data point (24 Aug 2026) directly on slide 9.\n- Client-facing framing review (task-a2e6693f514641b6, reviewer=marketing; artifact-83b15082aa9c4858bf96cd5f81a5091c, sha256 c5c42d603a0bbfa36db00eaa92511f3c4945ec5c5bac9cb1d2f7c9c0c272513e): VERDICT PASS WITH MINOR MESSAGING FIXES, no rework required. Audienc",
+  "team": "fund",
+  "label": "F2",
+  "steps": [
+    {
+      "id": "task-f4b67d3399f64eb6",
+      "title": "任务拆解与依赖规划",
+      "agentId": "fund_manager",
+      "status": "done",
+      "turns": 0,
+      "revision": 0,
+      "error": null,
+      "outputValidation": null,
+      "validation": null,
+      "result": "Resume the partial run: reuse the existing scope brief and evidence brief, complete the missing research refresh, build the HTML slide deck, run risk and marketing reviews, then synthesize."
+    },
+    {
+      "id": "task-9cdf071476264eb8",
+      "title": "Refresh semiconductor evidence brief",
+      "agentId": "research",
+      "status": "done",
+      "turns": 15,
+      "revision": 0,
+      "error": null,
+      "outputValidation": {
+        "checkedArtifactIds": [
+          "artifact-277039c2805e49d3a9cc1bba21b1a5aa"
+        ],
+        "issues": [],
+        "kind": "artifact",
+        "matchedArtifactIds": [
+          "artifact-277039c2805e49d3a9cc1bba21b1a5aa"
+        ],
+        "semanticQuality": "unassessed",
+        "status": "passed"
+      },
+      "validation": null,
+      "result": "Refreshed semiconductor evidence brief delivered.\n\nArtifact: artifact-277039c2805e49d3a9cc1bba21b1a5aa (semiconductor_evidence_brief.md, sha256 c85a189e96ac6ba2ac945c9f9e03a643eca3216231839b8d9c3efa1e8e69d808, 10569 bytes).\n\nAcceptance criteria coverage:\n1. Updated brief covers demand drivers, supply/geopolitics, valuation and explicit gaps with sources — DONE. Sections: (1) Demand drivers (SIA May 2026 record $120.6bn, +9.2% MoM, +104.1% YoY, 15th consecutive record; Deloitte AI data-center concentration ~half of 2026 revenues, 92GW power need by 2027, memory ~50% price spikes, CPO/LPO 30-50% power savings); (2) Supply/geopolitics (US Dec-2025 H200-to-China approval with 25% revenue share, China immersion DUV mass production, CXMT listing >500x oversubscription, regional back-end/advanced-packaging divergence, power constraints); (3) Valuation (SOX +100% then -29% from June peak, Broadcom $16bn vs ~$17.2bn guidance, Brent >$84, JPMorgan vs Morgan Stanley views, Deloitte multiple-compression framing); (4) Explicit gaps table with confidence labels.\n2. Reuses prior scope_brief.md and semiconductor_evidence_brief.md without republishing them — DONE. The brief is a refresh that references prior scope; only the refreshed file was published (one artifact).\n\nSources cited with URLs and as-of dates: SIA (6 Jul 2026), Deloitte 2026 Semiconductor Industry Outlook, Leverage Shares (24 Aug 2026, flagged as secondary/commentary).\n\nKey limitations (documented in the brief):\n- No primary valuation dataset (e.g., SOX forward P/E) retrieved; drawdown and Broadcom figures are from secondary commentary (Low-Medium confidence).\n- No source retrieved confirming the SOX level or valuation as of Nov 2026; latest market data point is 24 Aug 2026 (Low confidence).\n- No primary hyperscaler Q3 2026 capex figure retrieved (Low confidence).\n- China DUV/CXMT claims are secondary (Low-Medium confidence).\n- Source conflict between Deloitte's structurally-intact demand view and Leverage Shares' 2026 drawdown is surfaced separately, not blended.\n\nNote: one web.fetch to vaneck.com was blocked (permission: mixed public/private DNS); it is not cited as evidence."
+    },
+    {
+      "id": "task-3c4b9221c3aa4859",
+      "title": "Build HTML slide deck",
+      "agentId": "fund_manager",
+      "status": "done",
+      "turns": 11,
+      "revision": 0,
+      "error": null,
+      "outputValidation": {
+        "candidateDeliveryId": "delivery-151cb3ea03f24177a4c0cf04c4a7564e",
+        "checkedArtifactIds": [
+          "artifact-18bcaf6317d04e46b24d1c699ee677d3",
+          "artifact-8c6d0d22b1ea4f8ca8724fa4390a1206",
+          "artifact-92added1f5154be78d55a9b2ce3a03f2",
+          "artifact-1daffd82759f4feb9b552591a1496164",
+          "artifact-b4bdc4be83644021af8191c81b09dc2d"
+        ],
+        "issues": [],
+        "kind": "artifact",
+        "matchedArtifactIds": [
+          "artifact-18bcaf6317d04e46b24d1c699ee677d3"
+        ],
+        "semanticQuality": "unassessed",
+        "status": "passed"
+      },
+      "validation": {
+        "artifactHashes": {
+          "artifact-18bcaf6317d04e46b24d1c699ee677d3": "d6bd02955b8c89ea561ddfaa7b0fd00d732f081122c2f6a886886368dabcbe0d",
+          "artifact-1daffd82759f4feb9b552591a1496164": "fcfde4bb2d1df334d741e855f94a5e323600c87509e8d244188bb649e22d5530",
+          "artifact-8c6d0d22b1ea4f8ca8724fa4390a1206": "f923d531371e6e877369882a6d65f94d4628c5cb539e4e0beb2da21ac42ad65b",
+          "artifact-92added1f5154be78d55a9b2ce3a03f2": "0a80458efa6be4601c4109360731b5c515d4419d196468552f13f057f0e9f662",
+          "artifact-b4bdc4be83644021af8191c81b09dc2d": "6d86f9acc1a428ba1f7656d702d25a11e2e25c61bd732c855ac970d68bc98c5b"
+        },
+        "assessed": true,
+        "evidenceCallIds": [
+          "call-587494c6e0f1427f"
+        ],
+        "feedback": "Risk & suitability review of the HTML deck (task-3c4b9221c3aa4859, revision 0).\n\nVERDICT: PASS with bounded, non-blocking recommendations. No rework required.\n\n1) RISK COVERAGE — adequate. Slide 7 (Key Risks) covers the four Deloitte-flagged demand-side risks (ROI/monetization, power ~92 GW by 2027, innovation efficiency, price deflation) plus geopolitics/export controls, China memory (CXMT) pricing pressure and valuation drawdown. Slide 4 covers supply/geopolitics (Dec 2025 H200 25% revenue-share approval; China DUV/CXMT flagged as secondary). Slide 5 covers valuation/drawdown (SOX -29% from late-June 2026 peak; Broadcom guide $16bn vs ~$17.2bn expected; Brent >$84/bbl). Slide 9 explicitly lists evidence gaps and surfaces the Deloitte-vs-Leverage Shares conflict without blending. This matches the evidence brief sections 1.4, 2, 3 and 4.\n\n2) SUITABILITY — appropriate for an internal fund team. Slide 6 (Investment Implications) is framed as selection principles (own the bottleneck; diversify; fabs/toolmakers lower sensitivity; stage entries; power as a factor) rather than as a recommendation to a specific client, which is correct given no client risk profile, mandate or horizon was supplied. Slide 8 labels scenarios as 'illustrative, not forecasts'. Slide 10 carries a 'not investment advice / figures as reported, not independently verified' disclaimer. No suitability breach identified.\n\n3) EVIDENCE FIDELITY — figures on slides 2, 3, 4, 5, 7 reconcile with the evidence brief (SIA May 2026 $120.6bn, +9.2% MoM, +104.1% YoY, 15th record; regional YoY Americas +132.2%, APAC +118.9%, China +88.8%, Europe +60.7%, Japan +23.8%; DRAM capex +14% to $61bn, NAND +5% to $21bn; AI network fabric ~38% CAGR 2024-2029). Secondary-sourced claims (China DUV, CXMT >500x, SOX -29%, Broadcom guide) are correctly attributed and caveated on slides 4, 5 and 9.\n\n4) EXECUTED VERIFICATION — I ran an independent browser test (call-587494c6e0f1427f) against the exact granted entrypoint and assets (index.html d6bd0295..., styles.css f923d531..., app.js 0a80458e...): 11/11 assertions passed, 0 page errors, 0 console errors, 0 blocked requests. Verified: 10 slides present; Next button advances to 'Executive Summary' with counter '2 / 10'; ArrowRight/ArrowLeft navigate; End jumps to 'Sources & Disclaimer' with '10 / 10'; Home returns to title; Prev at first slide clamps correctly. Slide-by-slide navigation and clamping work as required by the acceptance criteria.\n\n5) BOUNDED RECOMMENDATIONS (non-blocking, for the final synthesis owner):\n   a. Add an explicit 'as-of' date next to the SOX -29% and Broadcom figures on slide 5 (currently only in the small-print caveat) so a presenter cannot misread them as current.\n   b. Consider a one-line note on slide 6 that implications are generic and must be mapped to a specific mandate/risk profile before any client use.\n   c. Slide 9 could state the most recent market data point (24 Aug 2026) directly on the slide, not only in the brief.\n\nRESI",
+        "kind": "browser_test",
+        "reviewerRevision": 0,
+        "reviewerTaskId": "task-fc8dbe166b764425",
+        "targetRevision": 0,
+        "verdict": "pass",
+        "verified": true
+      },
+      "result": "Built the HTML slide deck for task-3c4b9221c3aa4859. Deliverable: self-contained browser presentation, entrypoint deck/index.html (artifact-18bcaf6317d04e46b24d1c699ee677d3).\n\nPublished artifacts (all current revision 0):\n- artifact-18bcaf6317d04e46b24d1c699ee677d3 — deck/index.html (entrypoint, 10 slides)\n- artifact-8c6d0d22b1ea4f8ca8724fa4390a1206 — deck/styles.css\n- artifact-92added1f5154be78d55a9b2ce3a03f2 — deck/app.js\n- artifact-1daffd82759f4feb9b552591a1496164 — deck/README.md (usage notes)\n- artifact-b4bdc4be83644021af8191c81b09dc2d — deck/slides.md (content plan)\nCandidate delivery: delivery-151cb3ea03f24177a4c0cf04c4a7564e (entrypoint deck/index.html).\n\nUsage: open deck/index.html in a browser; navigate with ArrowRight/Space/PageDown (next), ArrowLeft/PageUp (previous), Home/End (first/last), or on-screen Prev/Next buttons; progress bar and slide counter shown.\n\nAcceptance criteria:\n1. Self-contained HTML opens in browser and navigates slide by slide — met: index.html + styles.css + app.js, keyboard and button navigation, 10 slides.\n2. Covers outlook, investment implications and key risks with entrypoint and usage notes — met: slides cover demand drivers, supply/geopolitics, valuation, investment implications, key risks, scenarios, evidence gaps; README.md provides entrypoint and usage.\n\nEvidence base: research brief artifact-277039c2805e49d3a9cc1bba21b1a5aa (read in full). Sources cited in deck and README with as-of dates: SIA (6 Jul 2026), Deloitte 2026 Semiconductor Industry Outlook, Leverage Shares (24 Aug 2026).\n\nLimitations: latest primary SIA data is May 2026 (no Jun–Oct 2026 release retrieved); no Nov 2026 SOX/valuation data (latest market point 24 Aug 2026); China DUV and CXMT claims are secondary commentary; Deloitte vs Leverage Shares conflict surfaced, not blended. Deck is internal research input, not investment advice. Independent risk and marketing reviews (task-fc8dbe166b764425, task-a2e6693f514641b6) are still pending; candidate delivery is not formal acceptance."
+    },
+    {
+      "id": "task-fc8dbe166b764425",
+      "title": "Risk and suitability review",
+      "agentId": "risk",
+      "status": "done",
+      "turns": 9,
+      "revision": 0,
+      "error": null,
+      "outputValidation": {
+        "checkedArtifactIds": [],
+        "issues": [],
+        "kind": "text",
+        "matchedArtifactIds": [],
+        "semanticQuality": "unassessed",
+        "status": "passed"
+      },
+      "validation": null,
+      "result": "Risk & suitability review of task-3c4b9221c3aa4859 (HTML slide deck, revision 0) — VERDICT: PASS, no rework required. Submitted as explicit review action (reviewEventId evt-2c8fe94d4728428a, verdict=pass, verified=true).\n\nAcceptance criteria met:\n1) Verdict on risk coverage, suitability and bounded rework requests — delivered (pass; three non-blocking recommendations).\n2) Evidence cites specific slides and the evidence brief — delivered.\n\nRISK COVERAGE (adequate): Slide 7 covers the four Deloitte-flagged demand-side risks (ROI/monetization, power ~92 GW by 2027, innovation efficiency, price deflation) plus geopolitics/export controls, China memory (CXMT) pricing pressure and valuation drawdown. Slide 4 covers supply/geopolitics (Dec 2025 H200 25% revenue-share approval; China DUV/CXMT flagged secondary). Slide 5 covers valuation/drawdown (SOX -29% from late-June 2026 peak; Broadcom guide $16bn vs ~$17.2bn expected; Brent >$84/bbl). Slide 9 lists evidence gaps and surfaces the Deloitte-vs-Leverage Shares conflict without blending. Matches evidence brief sections 1.4, 2, 3, 4.\n\nSUITABILITY (appropriate for internal fund team): Slide 6 is framed as selection principles, not a client-specific recommendation — correct given no client risk profile/mandate/horizon was supplied. Slide 8 labels scenarios 'illustrative, not forecasts'. Slide 10 carries a 'not investment advice / figures as reported, not independently verified' disclaimer. No suitability breach.\n\nEVIDENCE FIDELITY: Slides 2,3,4,5,7 reconcile with the evidence brief (SIA May 2026 $120.6bn, +9.2% MoM, +104.1% YoY, 15th record; regional YoY Americas +132.2%, APAC +118.9%, China +88.8%, Europe +60.7%, Japan +23.8%; DRAM capex +14% to $61bn, NAND +5% to $21bn; AI network fabric ~38% CAGR 2024-2029). Secondary-sourced claims (China DUV, CXMT >500x, SOX -29%, Broadcom guide) correctly attributed and caveated on slides 4,5,9.\n\nEXECUTED VERIFICATION: Independent browser test (call-587494c6e0f1427f) against the exact granted entrypoint/assets (index.html d6bd0295..., styles.css f923d531..., app.js 0a80458e...): 11/11 assertions passed, 0 page/console errors, 0 blocked requests. Verified 10 slides; Next advances to 'Executive Summary' with counter '2 / 10'; ArrowRight/ArrowLeft navigate; End jumps to 'Sources & Disclaimer' with '10 / 10'; Home returns to title; Prev clamps at first slide. Slide-by-slide navigation and clamping satisfy the acceptance criteria.\n\nBOUNDED RECOMMENDATIONS (non-blocking, for final synthesis owner): (a) add explicit as-of date next to SOX -29% and Broadcom figures on slide 5; (b) add one-line note on slide 6 that implications are generic and must be mapped to a mandate/risk profile before client use; (c) state the most recent market data point (24 Aug 2026) directly on slide 9.\n\nLIMITS: Review is editorial + one browser navigation test; it does not independently verify the underlying source figures (SIA/Deloitte/Leverage Shares) — those remain as-reported. No client risk profile was supplied, so suitability is assessed only as internal-briefing-appropriate."
+    },
+    {
+      "id": "task-a2e6693f514641b6",
+      "title": "Client-facing framing review",
+      "agentId": "marketing",
+      "status": "done",
+      "turns": 9,
+      "revision": 0,
+      "error": null,
+      "outputValidation": {
+        "checkedArtifactIds": [],
+        "issues": [],
+        "kind": "text",
+        "matchedArtifactIds": [],
+        "semanticQuality": "unassessed",
+        "status": "passed"
+      },
+      "validation": null,
+      "result": "Client-facing framing review complete for task-a2e6693f514641b6 (review of task-3c4b9221c3aa4859, revision 0).\n\nDeliverable: artifact-83b15082aa9c4858bf96cd5f81a5091c (client_framing_review.md, sha256 c5c42d603a0bbfa36db00eaa92511f3c4945ec5c5bac9cb1d2f7c9c0c272513e).\n\nVerdict: PASS WITH MINOR MESSAGING FIXES. The deck is clear, well-structured and audience-appropriate for an internal fund investment team; it meets both acceptance criteria (clarity/audience fit; concrete messaging fixes or confirmation of readiness). No producer rework required for framing reasons.\n\nEvidence base (read this run, SHA256 pinned): index.html d6bd0295..., slides.md 6d86f9ac..., README.md fcfde4bb..., research brief c85a189e....\n\nConcrete messaging fixes offered (optional polish): (1) expand acronyms on first use (SOX, HBM, DUV, CXMT, CPO/LPO); (2) add context to '+104.1% YoY (vs May 2025)'; (3) gloss 'own the bottleneck'; (4) add 'do not assign probabilities' to scenarios; (5) lead the source-conflict slide with one bold sentence.\n\nMessaging risks flagged: keep the 'not investment advice' disclaimer and evidence-gaps slide attached if reused externally; keep the single-publisher (Leverage Shares) caveat and do not upgrade to 'verified'; recency gap (SIA May 2026, market data 24 Aug 2026 vs deck dated 22 Nov 2026) is honestly disclosed and should not be skipped in live presentation.\n\nLimits: editorial/framing only — no HTML/JS execution or rendering verification (risk reviewer's scope); no independent source re-verification; no producer status changed."
+    },
+    {
+      "id": "task-b2d1e962819e4fe1",
+      "title": "Final synthesis and handoff",
+      "agentId": "fund_manager",
+      "status": "done",
+      "turns": 4,
+      "revision": 0,
+      "error": null,
+      "outputValidation": {
+        "checkedArtifactIds": [],
+        "issues": [],
+        "kind": "text",
+        "matchedArtifactIds": [],
+        "semanticQuality": "unassessed",
+        "status": "passed"
+      },
+      "validation": null,
+      "result": "FINAL SYNTHESIS AND HANDOFF — Semiconductor Industry Outlook (end-2026 perspective)\n\nThis is a text-only synthesis (task.finalSummary=true). No products were rewritten, republished or repackaged.\n\n=== 1. DELIVERED DECK ===\nEntrypoint: deck/index.html (artifact-18bcaf6317d04e46b24d1c699ee677d3, sha256 d6bd02955b8c89ea561ddfaa7b0fd00d732f081122c2f6a886886368dabcbe0d).\nSupporting assets (same task-3c4b9221c3aa4859, revision 0):\n- deck/styles.css — artifact-8c6d0d22b1ea4f8ca8724fa4390a1206 (f923d531371e6e877369882a6d65f94d4628c5cb539e4e0beb2da21ac42ad65b)\n- deck/app.js — artifact-92added1f5154be78d55a9b2ce3a03f2 (0a80458efa6be4601c4109360731b5c515d4419d196468552f13f057f0e9f662)\n- deck/README.md — artifact-1daffd82759f4feb9b552591a1496164 (fcfde4bb2d1df334d741e855f94a5e323600c87509e8d244188bb649e22d5530)\n- deck/slides.md — artifact-b4bdc4be83644021af8191c81b09dc2d (6d86f9acc1a428ba1f7656d702d25a11e2e25c61bd732c855ac970d68bc98c5b)\n\nHow to present: open deck/index.html in any modern browser (no server or build step; self-contained HTML+CSS+JS). Navigate slide by slide with the Prev/Next buttons, ArrowLeft/ArrowRight, Space, Home (first slide) and End (last slide). 10 slides: title, executive summary, demand drivers, supply/geopolitics, valuation/drawdown, investment implications, key risks, scenarios, evidence gaps, sources & disclaimer.\n\n=== 2. RESEARCH EVIDENCE (actual sources, with as-of dates) ===\nEvidence brief: artifact-277039c2805e49d3a9cc1bba21b1a5aa (sha256 c85a189e96ac6ba2ac945c9f9e03a643eca3216231839b8d9c3efa1e8e69d808), as-of 2026-11-22. Sources cited in the deck:\n1. SIA, \"Global Semiconductor Sales Increase 9.2% Month-to-Month in May,\" 6 Jul 2026 — https://www.semiconductors.org/global-semiconductor-sales-increase-9-2-month-to-month-in-may/ (May 2026 sales $120.6bn, +9.2% MoM, +104.1% YoY, 15th consecutive record; regional YoY Americas +132.2%, APAC +118.9%, China +88.8%, Europe +60.7%, Japan +23.8%).\n2. Deloitte Insights, \"2026 Semiconductor Industry Outlook\" — https://www.deloitte.com/us/en/insights/industry/technology/technology-media-telecom-outlooks/semiconductor-industry-outlook.html (AI data-center ~half of 2026 revenues; AI network fabric ~38% CAGR 2024-2029; DRAM capex +14% to $61bn, NAND +5% to $21bn; four 2027-2028 divergence risks: ROI/monetization, ~92 GW added power need by 2027, innovation efficiency, price deflation; Dec 2025 US approval of NVIDIA H200 sales to China with 25% revenue share).\n3. Leverage Shares, \"The 2026 Semiconductor Selloff Creates an Opportunity,\" 24 Aug 2026 — https://leverageshares.com/en-eu/insights/the-2026-semiconductor-selloff-creates-an-opportunity/ (SOX -29% from late-June 2026 peak after >100% run; Broadcom Q3 AI guide $16bn vs ~$17.2bn expected; Brent >$84/bbl; China DUV mass-production and CXMT >500x oversubscription claims). Secondary/commentary source, flagged as such.\n\n=== 3. REVIEW OUTCOMES (actual verdicts, current revision 0) ===\n- Risk & suitability review (task-fc8dbe166b764425, reviewer=risk): VERDICT PASS, verified=true, no rework required. Independent browser test (call-587494c6e0f1427f) against the exact entrypoint/assets: 11/11 assertions passed, 0 page errors, 0 console errors, 0 blocked requests; verified 10 slides, Next→'Executive Summary' counter '2 / 10', ArrowRight/ArrowLeft, End→'Sources & Disclaimer' '10 / 10', Home→title, Prev clamps at first slide. Risk coverage judged adequate (slides 4,5,7,9); suitability appropriate for an internal fund team (slide 6 framed as selection principles, not client advice); evidence fidelity reconciled with the brief. Three bounded, non-blocking recommendations: (a) add explicit as-of date next to SOX -29% and Broadcom figures on slide 5; (b) add a one-line note on slide 6 that implications are generic and must be mapped to a mandate/risk profile; (c) state the latest market data point (24 Aug 2026) directly on slide 9.\n- Client-facing framing review (task-a2e6693f514641b6, reviewer=marketing; artifact-83b15082aa9c4858bf96cd5f81a5091c, sha256 c5c42d603a0bbfa36db00eaa92511f3c4945ec5c5bac9cb1d2f7c9c0c272513e): VERDICT PASS WITH MINOR MESSAGING FIXES, no rework required. Audience fit confirmed for the internal fund team; structure and one-line thesis judged sound; honesty (gaps slide, conflict-surfaced-not-blended) judged a credibility strength. Optional fixes: gloss acronyms on first use (HBM, SOX, DUV, CXMT, CPO/LPO, heterogeneous integration); add \"(vs May 2025)\" to +104.1% YoY; clarify \"own the bottleneck\"; add \"do not assign probabilities\" to the scenario slide; lead the source-conflict slide with one bold sentence. Editorial only — no code execution or source re-verification.\n\n=== 4. ACCEPTANCE CRITERIA STATUS ===\n- \"Summarizes delivered deck, review outcomes and remaining gaps\" — MET (sections 1-3, 5).\n- \"States the deck entrypoint and how to present it\" — MET (section 1).\n- \"Synthesize actual research sources, execution evidence, reviewer verdicts and limitations; do not replace missing verification with prose\" — MET: real artifact IDs/hashes, real source URLs with as-of dates, the actual executed browser-test call ID and its 11/11 result, both actual reviewer verdicts, and the limitations below. No missing verification was substituted with prose.\n\n=== 5. REMAINING GAPS AND LIMITATIONS (honest) ===\n- Recency gap: latest primary industry data is SIA May 2026 (published 6 Jul 2026) and latest market data is 24 Aug 2026, while the deck is dated 22 Nov 2026. No Nov-2026 SOX level, valuation dataset or Q3-2026 hyperscaler capex figure was retrieved. Disclosed on the deck's gaps slide.\n- Source quality: supply/geopolitics (China DUV, CXMT) and valuation (SOX -29%, Broadcom guide) rest on a single secondary ETP-issuer commentary, not primary sources; flagged as Low-Medium confidence and not blended with the Deloitte structural view.\n- No primary valuation dataset (e.g., forward P/E for SOX constituents) was retrieved.\n- The three risk-review and five marketing-review recommendations are non-blocking and were NOT applied in this final-summary task (readonly synthesis); the deck remains at revision 0 as reviewed. Applying them would require a new producer revision and re-review.\n- Verification scope: the browser test confirms navigation/rendering behavior only; it does not validate the analytical claims or source figures. Editorial reviews are not code execution.\n- No formal package_delivery was created in this task; the deck is delivered as the published artifacts listed in section 1 (candidate bundle from task-3c4b9221c3aa4859).\n\n=== 6. OVERALL STATUS ===\nDeck delivered and independently verified (browser test pass) with both reviews returning PASS (no rework). Remaining items are disclosed evidence gaps and optional, non-blocking polish. This task's text output contract is satisfied."
+    }
+  ],
+  "package": {
+    "id": "delivery-151cb3ea03f24177a4c0cf04c4a7564e",
+    "status": "candidate",
+    "entrypoint": "deck/index.html",
+    "sha256": "06fe60aa7599e310fc85778086bcb0891bac62857fc6d30bf89b4d97e1c394cd"
+  },
+  "artifacts": [
+    {
+      "id": "artifact-277039c2805e49d3a9cc1bba21b1a5aa",
+      "name": "semiconductor_evidence_brief.md",
+      "path": "semiconductor_evidence_brief.md",
+      "sha256": "c85a189e96ac6ba2ac945c9f9e03a643eca3216231839b8d9c3efa1e8e69d808",
+      "taskId": "task-9cdf071476264eb8",
+      "sourceRunId": null
+    },
+    {
+      "id": "artifact-18bcaf6317d04e46b24d1c699ee677d3",
+      "name": "index.html",
+      "path": "deck/index.html",
+      "sha256": "d6bd02955b8c89ea561ddfaa7b0fd00d732f081122c2f6a886886368dabcbe0d",
+      "taskId": "task-3c4b9221c3aa4859",
+      "sourceRunId": null
+    },
+    {
+      "id": "artifact-8c6d0d22b1ea4f8ca8724fa4390a1206",
+      "name": "styles.css",
+      "path": "deck/styles.css",
+      "sha256": "f923d531371e6e877369882a6d65f94d4628c5cb539e4e0beb2da21ac42ad65b",
+      "taskId": "task-3c4b9221c3aa4859",
+      "sourceRunId": null
+    },
+    {
+      "id": "artifact-92added1f5154be78d55a9b2ce3a03f2",
+      "name": "app.js",
+      "path": "deck/app.js",
+      "sha256": "0a80458efa6be4601c4109360731b5c515d4419d196468552f13f057f0e9f662",
+      "taskId": "task-3c4b9221c3aa4859",
+      "sourceRunId": null
+    },
+    {
+      "id": "artifact-1daffd82759f4feb9b552591a1496164",
+      "name": "README.md",
+      "path": "deck/README.md",
+      "sha256": "fcfde4bb2d1df334d741e855f94a5e323600c87509e8d244188bb649e22d5530",
+      "taskId": "task-3c4b9221c3aa4859",
+      "sourceRunId": null
+    },
+    {
+      "id": "artifact-b4bdc4be83644021af8191c81b09dc2d",
+      "name": "slides.md",
+      "path": "deck/slides.md",
+      "sha256": "6d86f9acc1a428ba1f7656d702d25a11e2e25c61bd732c855ac970d68bc98c5b",
+      "taskId": "task-3c4b9221c3aa4859",
+      "sourceRunId": null
+    },
+    {
+      "id": "artifact-83b15082aa9c4858bf96cd5f81a5091c",
+      "name": "client_framing_review.md",
+      "path": "client_framing_review.md",
+      "sha256": "c5c42d603a0bbfa36db00eaa92511f3c4945ec5c5bac9cb1d2f7c9c0c272513e",
+      "taskId": "task-a2e6693f514641b6",
+      "sourceRunId": null
+    }
+  ],
+  "testCalls": [
+    {
+      "id": "call-587494c6e0f1427f",
+      "agentId": "risk",
+      "taskId": "task-fc8dbe166b764425",
+      "status": "success",
+      "durationMs": 5908,
+      "revision": 0,
+      "result": {
+        "browser": {
+          "assertionCount": 11,
+          "assertions": [
+            {
+              "action": "assert_visible",
+              "actual": true,
+              "expected": true,
+              "pageId": "main",
+              "passed": true,
+              "selector": ".slide.active"
+            },
+            {
+              "action": "assert_text",
+              "actual": "Semiconductors at End-2026",
+              "expected": "Semiconductors at End-2026",
+              "pageId": "main",
+              "passed": true,
+              "selector": ".slide.active h1"
+            },
+            {
+              "action": "assert_count",
+              "actual": 10,
+              "expected": 10,
+              "pageId": "main",
+              "passed": true,
+              "selector": ".slide"
+            },
+            {
+              "action": "assert_text",
+              "actual": "Executive Summary",
+              "expected": "Executive Summary",
+              "pageId": "main",
+              "passed": true,
+              "selector": ".slide.active h2"
+            },
+            {
+              "action": "assert_text",
+              "actual": "2 / 10",
+              "expected": "2 / 10",
+              "pageId": "main",
+              "passed": true,
+              "selector": "#counter"
+            },
+            {
+              "action": "assert_text",
+              "actual": "Demand Drivers",
+              "expected": "Demand Drivers",
+              "pageId": "main",
+              "passed": true,
+              "selector": ".slide.active h2"
+            },
+            {
+              "action": "assert_text",
+              "actual": "Executive Summary",
+              "expected": "Executive Summary",
+              "pageId": "main",
+              "passed": true,
+              "selector": ".slide.active h2"
+            },
+            {
+              "action": "assert_text",
+              "actual": "Sources & Disclaimer",
+              "expected": "Sources & Disclaimer",
+              "pageId": "main",
+              "passed": true,
+              "selector": ".slide.active h2"
+            },
+            {
+              "action": "assert_text",
+              "actual": "10 / 10",
+              "expected": "10 / 10",
+              "pageId": "main",
+              "passed": true,
+              "selector": "#counter"
+            },
+            {
+              "action": "assert_text",
+              "actual": "Semiconductors at End-2026",
+              "expected": "Semiconductors at End-2026",
+              "pageId": "main",
+              "passed": true,
+              "selector": ".slide.active h1"
+            },
+            {
+              "action": "assert_text",
+              "actual": "Semiconductors at End-2026",
+              "expected": "Semiconductors at End-2026",
+              "pageId": "main",
+              "passed": true,
+              "selector": ".slide.active h1"
+            }
+          ],
+          "assertionsPassed": 11,
+          "blockedRequests": [],
+          "chromiumSandbox": false,
+          "console": [],
+          "dialogCoverageComplete": true,
+          "dialogResponses": [],
+          "engine": "chromium",
+          "entry": {
+            "path": "imports/artifact-18bcaf6317d04e46b24d1c699ee677d3/index.html",
+            "sha256": "d6bd02955b8c89ea561ddfaa7b0fd00d732f081122c2f6a886886368dabcbe0d"
+          },
+          "executed": true,
+          "faultCoverageComplete": true,
+          "faults": [],
+          "httpErrors": [],
+          "ok": true,
+          "pageErrors": [],
+          "pages": [
+            {
+              "entryPath": "imports/artifact-18bcaf6317d04e46b24d1c699ee677d3/index.html",
+              "pageId": "main"
+            }
+          ],
+          "readFaultCoverageComplete": true,
+          "readFaults": [],
+          "reportPath": "browser-evidence/browser-b1feecc1a2454476adee3b2e1d0cb263/report.json",
+          "screenshot": {
+            "bytes": 44249,
+            "path": "browser-evidence/browser-b1feecc1a2454476adee3b2e1d0cb263/screenshot.png",
+            "sha256": "c4382c52987d39345cf710033294280c90f3e507b17b2cf4aa8662f46008db12"
+          },
+          "screenshotCaptured": true,
+          "screenshotPageId": "main",
+          "sourceManifest": [
+            {
+              "path": "imports/artifact-18bcaf6317d04e46b24d1c699ee677d3/index.html",
+              "sha256": "d6bd02955b8c89ea561ddfaa7b0fd00d732f081122c2f6a886886368dabcbe0d"
+            },
+            {
+              "path": "imports/artifact-8c6d0d22b1ea4f8ca8724fa4390a1206/styles.css",
+              "sha256": "f923d531371e6e877369882a6d65f94d4628c5cb539e4e0beb2da21ac42ad65b"
+            },
+            {
+              "path": "imports/artifact-92added1f5154be78d55a9b2ce3a03f2/app.js",
+              "sha256": "0a80458efa6be4601c4109360731b5c515d4419d196468552f13f057f0e9f662"
+            }
+          ],
+          "steps": [
+            {
+              "action": "assert_visible",
+              "actual": true,
+              "expected": true,
+              "ok": true,
+              "pageId": "main",
+              "passed": true,
+              "selector": ".slide.active"
+            },
+            {
+              "action": "assert_text",
+              "actual": "Semiconductors at End-2026",
+              "expected": "Semiconductors at End-2026",
+              "ok": true,
+              "pageId": "main",
+              "passed": true,
+              "selector": ".slide.active h1"
+            },
+            {
+              "action": "assert_count",
+              "actual": 10,
+              "expected": 10,
+              "ok": true,
+              "pageId": "main",
+              "passed": true,
+              "selector": ".slide"
+            },
+            {
+              "action": "click",
+              "ok": true,
+              "pageId": "main",
+              "selector": "#next"
+            },
+            {
+              "action": "assert_text",
+              "actual": "Executive Summary",
+              "expected": "Executive Summary",
+              "ok": true,
+              "pageId": "main",
+              "passed": true,
+              "selector": ".slide.active h2"
+            },
+            {
+              "action": "assert_text",
+              "actual": "2 / 10",
+              "expected": "2 / 10",
+              "ok": true,
+              "pageId": "main",
+              "passed": true,
+              "selector": "#counter"
+            },
+            {
+              "action": "press",
+              "key": "ArrowRight",
+              "ok": true,
+              "pageId": "main",
+              "selector": "body"
+            },
+            {
+              "action": "assert_text",
+              "actual": "Demand Drivers",
+              "expected": "Demand Drivers",
+              "ok": true,
+              "pageId": "main",
+              "passed": true,
+              "selector": ".slide.active h2"
+            },
+            {
+              "action": "press",
+              "key": "ArrowLeft",
+              "ok": true,
+              "pageId": "main",
+              "selector": "body"
+            },
+            {
+              "action": "assert_text",
+              "actual": "Executive Summary",
+              "expected": "Executive Summary",
+              "ok": true,
+              "pageId": "main",
+              "passed": true,
+              "selector": ".slide.active h2"
+            },
+            {
+              "action": "press",
+              "key": "End",
+              "ok": true,
+              "pageId": "main",
+              "selector": "body"
+            },
+            {
+              "action": "assert_text",
+              "actual": "Sources & Disclaimer",
+              "expected": "Sources & Disclaimer",
+              "ok": true,
+              "pageId": "main",
+              "passed": true,
+              "selector": ".slide.active h2"
+            },
+            {
+              "action": "assert_text",
+              "actual": "10 / 10",
+              "expected": "10 / 10",
+              "ok": true,
+              "pageId": "main",
+              "passed": true,
+              "selector": "#counter"
+            },
+            {
+              "action": "press",
+              "key": "Home",
+              "ok": true,
+              "pageId": "main",
+              "selector": "body"
+            },
+            {
+              "action": "assert_text",
+              "actual": "Semiconductors at End-2026",
+              "expected": "Semiconductors at End-2026",
+              "ok": true,
+              "pageId": "main",
+              "passed": true,
+              "selector": ".slide.active h1"
+            },
+            {
+              "action": "click",
+              "ok": true,
+              "pageId": "main",
+              "selector": "#prev"
+            },
+            {
+              "action": "assert_text",
+              "actual": "Semiconductors at End-2026",
+              "expected": "Semiconductors at End-2026",
+              "ok": true,
+              "pageId": "main",
+              "passed": true,
+              "selector": ".slide.active h1"
+            }
+          ],
+          "testedFiles": [
+            {
+              "path": "imports/artifact-18bcaf6317d04e46b24d1c699ee677d3/index.html",
+              "sha256": "d6bd02955b8c89ea561ddfaa7b0fd00d732f081122c2f6a886886368dabcbe0d"
+            },
+            {
+              "path": "imports/artifact-8c6d0d22b1ea4f8ca8724fa4390a1206/styles.css",
+              "sha256": "f923d531371e6e877369882a6d65f94d4628c5cb539e4e0beb2da21ac42ad65b"
+            },
+            {
+              "path": "imports/artifact-92added1f5154be78d55a9b2ce3a03f2/app.js",
+              "sha256": "0a80458efa6be4601c4109360731b5c515d4419d196468552f13f057f0e9f662"
+            }
+          ],
+          "version": "156.0.8078.4"
+        },
+        "durationMs": 5095,
+        "exitCode": 0,
+        "isolation": {
+          "containerId": "evo-e2b9ea773035413daa6d4d6e5cdfaeb3",
+          "hostFallback": false,
+          "imports": "explicit_read_only",
+          "namespaceId": "ns-1e75e0576964b1c3d09d",
+          "network": "none",
+          "ownerAgentId": "risk",
+          "resourceScope": "per_invocation",
+          "runId": "run-a7bbed97021941ad",
+          "workspace": "private_per_agent_run"
+        },
+        "ok": true,
+        "outputLimitExceeded": false,
+        "runtime": "browser",
+        "sandboxId": "evo-e2b9ea773035413daa6d4d6e5cdfaeb3",
+        "stderr": "",
+        "stdout": "{\"engine\":\"chromium\",\"executed\":true,\"entry\":{\"path\":\"imports/artifact-18bcaf6317d04e46b24d1c699ee677d3/index.html\",\"sha256\":\"d6bd02955b8c89ea561ddfaa7b0fd00d732f081122c2f6a886886368dabcbe0d\"},\"testedFiles\":[{\"path\":\"imports/artifact-18bcaf6317d04e46b24d1c699ee677d3/index.html\",\"sha256\":\"d6bd02955b8c89ea561ddfaa7b0fd00d732f081122c2f6a886886368dabcbe0d\"},{\"path\":\"imports/artifact-8c6d0d22b1ea4f8ca8724fa4390a1206/styles.css\",\"sha256\":\"f923d531371e6e877369882a6d65f94d4628c5cb539e4e0beb2da21ac42ad65b\"},{\"path\":\"imports/artifact-92added1f5154be78d55a9b2ce3a03f2/app.js\",\"sha256\":\"0a80458efa6be4601c4109360731b5c515d4419d196468552f13f057f0e9f662\"}],\"assertions\":[{\"action\":\"assert_visible\",\"pageId\":\"main\",\"selector\":\".slide.active\",\"expected\":true,\"actual\":true,\"passed\":true},{\"action\":\"assert_text\",\"pageId\":\"main\",\"selector\":\".slide.active h1\",\"expected\":\"Semiconductors at End-2026\",\"actual\":\"Semiconductors at End-2026\",\"passed\":true},{\"action\":\"assert_count\",\"pageId\":\"main\",\"selector\":\".slide\",\"expected\":10,\"actual\":10,\"passed\":true},{\"action\":\"assert_text\",\"pageId\":\"main\",\"selector\":\".slide.active h2\",\"expected\":\"Executive Summary\",\"actual\":\"Executive Summary\",\"passed\":true},{\"action\":\"assert_text\",\"pageId\":\"main\",\"selector\":\"#counter\",\"expected\":\"2 / 10\",\"actual\":\"2 / 10\",\"passed\":true},{\"action\":\"assert_text\",\"pageId\":\"main\",\"selector\":\".slide.active h2\",\"expected\":\"Demand Drivers\",\"actual\":\"Demand Drivers\",\"passed\":true},{\"action\":\"assert_text\",\"pageId\":\"main\",\"selector\":\".slide.active h2\",\"expected\":\"Executive Summary\",\"actual\":\"Executive Summary\",\"passed\":true},{\"action\":\"assert_text\",\"pageId\":\"main\",\"selector\":\".slide.active h2\",\"expected\":\"Sources & Disclaimer\",\"actual\":\"Sources & Disclaimer\",\"passed\":true},{\"action\":\"assert_text\",\"pageId\":\"main\",\"selector\":\"#counter\",\"expected\":\"10 / 10\",\"actual\":\"10 / 10\",\"passed\":true},{\"action\":\"assert_text\",\"pageId\":\"main\",\"selector\":\".slide.active h1\",\"expected\":\"Semiconductors at End-2026\",\"actual\":\"Semiconductors at End-2026\",\"passed\":true},{\"action\":\"assert_text\",\"pageId\":\"main\",\"selector\":\".slide.active h1\",\"expected\":\"Semiconductors at End-2026\",\"actual\":\"Semiconductors at End-2026\",\"passed\":true}],\"assertionCount\":11,\"assertionsPassed\":11,\"steps\":[{\"action\":\"assert_visible\",\"pageId\":\"main\",\"selector\":\".slide.active\",\"expected\":true,\"actual\":true,\"passed\":true,\"ok\":true},{\"action\":\"assert_text\",\"pageId\":\"main\",\"selector\":\".slide.active h1\",\"expected\":\"Semiconductors at End-2026\",\"actual\":\"Semiconductors at End-2026\",\"passed\":true,\"ok\":true},{\"action\":\"assert_count\",\"pageId\":\"main\",\"selector\":\".slide\",\"expected\":10,\"actual\":10,\"passed\":true,\"ok\":true},{\"action\":\"click\",\"pageId\":\"main\",\"selector\":\"#next\",\"ok\":true},{\"action\":\"assert_text\",\"pageId\":\"main\",\"selector\":\".slide.active h2\",\"expected\":\"Executive Summary\",\"actual\":\"Executive Summary\",\"passed\":true,\"ok\":true},{\"action\":\"assert_text\",\"pageId\":\"main\",\"selector\":\"#counter\",\"expected\":\"2 / 10\",\"actual\":\"2 / 10\",\"passed\":true,\"ok\":true},{\"action\":\"press\",\"pageId\":\"main\",\"selector\":\"body\",\"key\":\"ArrowRight\",\"ok\":true},{\"action\":\"assert_text\",\"pageId\":\"main\",\"selector\":\".slide.active h2\",\"expected\":\"Demand Drivers\",\"actual\":\"Demand Drivers\",\"passed\":true,\"ok\":true},{\"action\":\"press\",\"pageId\":\"main\",\"selector\":\"body\",\"key\":\"ArrowLeft\",\"ok\":true},{\"action\":\"assert_text\",\"pageId\":\"main\",\"selector\":\".slide.active h2\",\"expected\":\"Executive Summary\",\"actual\":\"Executive Summary\",\"passed\":true,\"ok\":true},{\"action\":\"press\",\"pageId\":\"main\",\"selector\":\"body\",\"key\":\"End\",\"ok\":true},{\"action\":\"assert_text\",\"pageId\":\"main\",\"selector\":\".slide.active h2\",\"expected\":\"Sources & Disclaimer\",\"actual\":\"Sources & Disclaimer\",\"passed\":true,\"ok\":true},{\"action\":\"assert_text\",\"pageId\":\"main\",\"selector\":\"#counter\",\"expected\":\"10 / 10\",\"actual\":\"10 / 10\",\"passed\":true,\"ok\":true},{\"action\":\"press\",\"pageId\":\"main\",\"selector\":\"body\",\"key\":\"Home\",\"ok\":true},{\"action\":\"assert_text\",\"pageId\":\"main\",\"selector\":\".slide.active h1\",\"expected\":\"Semiconductors at End-2026\",\"actual\":\"Semiconductors at End-2026\",\"passed\":true,\"ok\":true},{\"action\":\"click\",\"pageId\":\"main\",\"selector\":\"#prev\",\"ok\":true},{\"action\":\"assert_text\",\"pageId\":\"main\",\"selector\":\".slide.active h1\",\"expected\":\"Semiconductors at End-2026\",\"actual\":\"Semiconductors at End-2026\",\"passed\":true,\"ok\":true}],\"console\":[],\"pageErrors\":[],\"blockedRequests\":[],\"httpErrors\":[],\"chromiumSandbox\":false,\"pages\":[{\"pageId\":\"main\",\"entryPath\":\"imports/artifact-18bcaf6317d04e46b24d1c699ee677d3/index.html\"}],\"faults\":[],\"readFaults\":[],\"dialogResponses\":[],\"version\":\"156.0.8078.4\",\"faultCoverageComplete\":true,\"readFaultCoverageComplete\":true,\"dialogCoverageComplete\":true,\"screenshotCaptured\":true,\"screenshotPageId\":\"main\",\"ok\":true}",
+        "test": true,
+        "timedOut": false
+      }
+    }
+  ]
+}
