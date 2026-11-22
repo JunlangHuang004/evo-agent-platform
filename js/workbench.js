@@ -1,5 +1,5 @@
-import { AGENTS } from './data.js';
-import { getState, subscribe, setTeam, setChannel, setParticipants, setMode, setMemoryEnabled, sendMessage, resetChannel, pauseRun, resumeRun, cancelRun, recoverRun, retryTask, resolveApproval, refreshHistory, loadHistoryRun } from './store.js';
+import { AGENTS, AVAILABLE_PROFILES } from './data.js';
+import { getState, subscribe, setTeam, createTeam, setChannel, setParticipants, setMode, setMemoryEnabled, sendMessage, resetChannel, pauseRun, resumeRun, cancelRun, recoverRun, retryTask, resolveApproval, refreshHistory, loadHistoryRun, setRolePrompts } from './store.js';
 import { escapeHtml as h, formatDuration, badge, openDrawer, closeDrawer, downloadArtifact, isHtmlArtifact, runToMarkdown, failureSummaryHtml, taskOutputHtml } from './view.js';
 
 const ACTIVE=['running','waiting_human','waiting_children','paused','interrupted'];
@@ -13,6 +13,77 @@ const text=value=>typeof value==='string'?value:JSON.stringify(value ?? '',null,
 const brief=value=>text(value).slice(0,240);
 const stamp=value=>typeof value==='number'?value:Date.parse(value);
 const elapsed=run=>run?Math.max(0,(run.finishedAt?stamp(run.finishedAt):Date.now())-stamp(run.startedAt)) || 0:0;
+const LIVE_TASK=new Set(['running','assigned','retrying','waiting_children']);
+const DONE_TASK=new Set(['done','partial','failed','cancelled','skipped','rejected']);
+function mergedIntervals(intervals){
+  const rows=intervals.filter(([start,end])=>Number.isFinite(start)&&Number.isFinite(end)&&end>start).sort((left,right)=>left[0]-right[0]);
+  const merged=[];
+  for(const row of rows){
+    const last=merged.at(-1);
+    if(!last || row[0]>last[1])merged.push([row[0],row[1]]);
+    else last[1]=Math.max(last[1],row[1]);
+  }
+  return merged;
+}
+function overlapMs(start,end,intervals){
+  let total=0;
+  for(const [from,to] of intervals){
+    const left=Math.max(start,from),right=Math.min(end,to);
+    if(right>left)total+=right-left;
+  }
+  return total;
+}
+function humanWaitIntervals(run,task,now){
+  const intervals=[];
+  for(const approval of run?.approvals || []){
+    if(approval?.taskId!==task.id)continue;
+    const start=stamp(approval.createdAt);
+    if(!Number.isFinite(start))continue;
+    let end=approval.status==='pending'?now:stamp(approval.resolvedAt);
+    if(!Number.isFinite(end))end=stamp(approval.clarificationReceipt?.receivedAt);
+    if(!Number.isFinite(end))end=stamp(approval.lateResponse?.receivedAt);
+    if(!Number.isFinite(end) && approval.status==='expired')end=stamp(approval.expiredAt ?? approval.expiresAt);
+    if(!Number.isFinite(end)){
+      const times=(run.events || []).filter(event=>event?.payload?.approvalId===approval.id).map(event=>stamp(event.time)).filter(Number.isFinite);
+      if(times.length)end=Math.max(...times);
+    }
+    if(Number.isFinite(end) && end>start)intervals.push([start,end]);
+  }
+  return mergedIntervals(intervals);
+}
+export function taskTiming(run,task,now=Date.now()){
+  const idle={text:'未开始',live:false,started:'',finished:'',wait:'0'};
+  if(!run || !task || task.status==='pending')return idle;
+  const marks=[];
+  const push=value=>{const time=stamp(value);if(Number.isFinite(time))marks.push(time);};
+  push(task.startedAt);
+  for(const event of run.events || [])if(event?.payload?.taskId===task.id)push(event.time);
+  for(const call of run.calls || []){
+    if(call?.taskId!==task.id)continue;
+    push(call.requestStartedAt);
+    if(Number.isFinite(call.requestStartedAt) && Number.isFinite(call.durationMs))push(call.requestStartedAt+call.durationMs);
+  }
+  const started=Number.isFinite(task.startedAt)?task.startedAt:(marks.length?Math.min(...marks):null);
+  if(!Number.isFinite(started))return idle;
+  let finished=Number.isFinite(task.finishedAt)?task.finishedAt:null;
+  if(finished==null && DONE_TASK.has(task.status) && marks.length)finished=Math.max(...marks);
+  const waiting=task.status==='waiting_human';
+  const live=LIVE_TASK.has(task.status) && !Number.isFinite(finished);
+  const end=Number.isFinite(finished)?finished:(live || waiting?now:started);
+  const wait=overlapMs(started,end,humanWaitIntervals(run,task,now));
+  return {text:formatDuration(Math.max(0,end-started-wait)),live,started:String(started),finished:Number.isFinite(finished)?String(finished):'',wait:String(wait)};
+}
+function taskClockHtml(run,task){
+  const timing=taskTiming(run,task);
+  return `<time class="task-clock" data-task-clock data-live="${timing.live?'1':'0'}" data-started="${h(timing.started)}" data-wait="${h(timing.wait)}" data-finished="${h(timing.finished)}">${h(timing.text)}</time>`;
+}
+function tickTaskClocks(now=Date.now()){
+  for(const node of document.querySelectorAll('[data-task-clock][data-live="1"]')){
+    const started=Number(node.dataset.started),wait=Number(node.dataset.wait)||0;
+    if(!Number.isFinite(started))continue;
+    node.textContent=formatDuration(Math.max(0,now-started-wait));
+  }
+}
 function timeText(value){const date=new Date(value);return Number.isNaN(date.getTime())?'':date.toLocaleTimeString('zh-CN',{hour12:false,hour:'2-digit',minute:'2-digit',second:'2-digit'});}
 function findMemory(hit){const owner=hit.ownerAgentId || hit.agentId;return [...(AGENTS.find(agent=>agent.id===owner)?.memories || []),...(getState().learnedMemories[owner] || [])].find(memory=>memory.id===hit.memoryId);}
 function remainingWallTime(run,now=Date.now()){
@@ -28,7 +99,7 @@ export function runProgressText(run,now=Date.now()){
   return `${base} · Token ${run.tokenUsage ?? 0}/${limit(run.budget.tokens)} · 模型调用 ${run.modelCalls ?? 0}/${limit(run.budget.modelCalls)} · 墙钟剩余 ${remaining===null?'未记录':formatDuration(remaining)}（含等待与暂停）`;
 }
 export function canRetryTask(run,task,now=Date.now()){
-  if(!run || !task || !['partial','failed'].includes(run.status) || task.status!=='failed' || task.outputs?.length)return false;
+  if(!run || !task || !['partial','failed'].includes(run.status) || !['failed','partial'].includes(task.status) || task.outputs?.length)return false;
   if(Number.isFinite(task.progress?.turnLimit) && task.turns>=task.progress.turnLimit)return false;
   if(run.budget?.profile==='time_only' && remainingWallTime(run,now)===0)return false;
   return true;
@@ -38,6 +109,21 @@ export function mountWorkbench(){
   const options=document.getElementById('participantOptions'),input=document.getElementById('messageInput');
   options.addEventListener('change',()=>{if(!setParticipants([...options.querySelectorAll('input:checked')].map(element=>element.value)))renderParticipants();});
   document.getElementById('teamSelect').addEventListener('change',event=>{drafts.set(draftKey(),input.value);void setTeam(event.target.value);});
+  const createTeamForm=document.getElementById('createTeamForm'),createTeamName=document.getElementById('createTeamName'),createTeamError=document.getElementById('createTeamError');
+  document.getElementById('createTeam').addEventListener('click',()=>{createTeamError.textContent='';createTeamForm.hidden=false;createTeamName.focus();});
+  document.getElementById('cancelCreateTeam').addEventListener('click',()=>{createTeamForm.hidden=true;createTeamName.value='';createTeamError.textContent='';});
+  createTeamForm.addEventListener('submit',async event=>{
+    event.preventDefault();
+    const name=createTeamName.value.trim();
+    if(!name){createTeamError.textContent='请填写团队名称。';return;}
+    createTeamError.textContent='正在创建…';
+    try{
+      const team=await createTeam(name);
+      createTeamForm.hidden=true;createTeamName.value='';createTeamError.textContent='';
+      drafts.set(draftKey(),input.value);
+      await setTeam(team.id);
+    }catch(error){createTeamError.textContent=error.message || '新建团队失败。';}
+  });
   document.getElementById('channelSelect').addEventListener('change',event=>{drafts.set(draftKey(),input.value);setChannel(event.target.value);});
   document.addEventListener('click',event=>{const menu=document.getElementById('participantsControl');if(menu.open && !menu.contains(event.target))menu.open=false;});
   document.getElementById('participantsControl').addEventListener('keydown',event=>{if(event.key==='Escape'){event.currentTarget.open=false;event.currentTarget.querySelector('summary').focus();}});
@@ -58,7 +144,7 @@ export function mountWorkbench(){
   });
   document.getElementById('dialogBody').addEventListener('click',async event=>{
     const button=event.target.closest('[data-retry-task]');if(!button)return;
-    button.disabled=true;if(await retryTask(button.dataset.retryTask,button.dataset.retryRun))closeDrawer();else button.disabled=false;
+    if(await continueTask(button))closeDrawer();
   });
   document.getElementById('dialogBody').addEventListener('click',event=>{
     const button=event.target.closest('[data-export-history]'),state=getState(),run=state.history.selected;if(!button || !run)return;
@@ -69,7 +155,9 @@ export function mountWorkbench(){
   tabs.addEventListener('keydown',event=>{const buttons=[...tabs.querySelectorAll('[role=tab]')],index=buttons.indexOf(event.target);if(index<0 || !['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;event.preventDefault();const next=event.key==='Home'?0:event.key==='End'?buttons.length-1:(index+(event.key==='ArrowRight'?1:-1)+buttons.length)%buttons.length;selectTab(buttons[next].dataset.inspectorTab);buttons[next].focus();});
   document.getElementById('approvalArea').addEventListener('input',event=>{const id=event.target.dataset.approvalInput;if(!id)return;const key=`${getState().teamId}:${id}`,value=approvalDrafts.get(key)||{};value[event.target.dataset.field]=event.target.value;approvalDrafts.set(key,value);});
   document.getElementById('approvalArea').addEventListener('click',event=>{const button=event.target.closest('[data-approval-choice]');if(button)void replyToApproval(button);});
-  document.getElementById('inspectorContent').addEventListener('click',event=>{
+  document.getElementById('inspectorContent').addEventListener('click',async event=>{
+    const retryButton=event.target.closest('[data-retry-task]');
+    if(retryButton){event.preventDefault();await continueTask(retryButton);return;}
     const run=session().run;if(!run)return;
     const callButton=event.target.closest('[data-call]'),taskButton=event.target.closest('[data-task]'),artifactButton=event.target.closest('[data-artifact]'),memoryButton=event.target.closest('[data-memory-hit]');
     if(callButton){const call=run.calls?.[Number(callButton.dataset.call)];if(call)openDrawer(`调用 · ${call.tool}`,`<p>${badge(call.status)}</p><dl class="detail-list"><dt>任务 / Agent</dt><dd>${h(call.taskId)} / ${h(agentName(call.agentId))}</dd><dt>耗时 / 沙箱</dt><dd>${h(formatDuration(call.durationMs))} / ${h(call.sandboxId || '服务网关')}</dd></dl><h3>参数</h3><pre>${h(text(call.args))}</pre><h3>结构化结果</h3><pre>${h(text(call.result))}</pre>`);}
@@ -78,7 +166,49 @@ export function mountWorkbench(){
     if(memoryButton){const hit=run.memoryHits?.[Number(memoryButton.dataset.memoryHit)];if(hit){const memory=findMemory(hit);openDrawer('本次记忆',`<h3>${h(memory?.title || hit.memoryId)}</h3><p>${h(memory?.lesson || hit.reason || '')}</p><dl class="detail-list"><dt>归属 / 本次采用者</dt><dd>${h(agentName(hit.ownerAgentId || hit.agentId))} / ${h(agentName(hit.agentId))}</dd><dt>来源 / 关联任务</dt><dd>${h(memory?.sourceTaskId || '')} / ${h(hit.taskId)}</dd><dt>采用状态</dt><dd>${hit.applied?'已采用':'仅检索'}</dd><dt>依据</dt><dd>${h(text(memory?.evidence || hit.reason))}</dd></dl><p class="text-small muted">记忆参与执行不等于效果提升；效果须由独立对照验证。</p>`);}}
   });
   const unsubscribe=subscribe(render);render();
-  const timer=setInterval(()=>{const run=session().run;document.getElementById('runElapsed').textContent=run?formatDuration(elapsed(run)):'';document.getElementById('runProgress').textContent=runProgressText(run);},1000);
+  const rolePromptsFields=document.getElementById('rolePromptsFields');
+  rolePromptsFields.addEventListener('input',event=>{
+    const agent=event.target.dataset.rolePromptAgent;if(!agent)return;
+    writeEdit(rolePromptKey(getState().teamId,agent),'prompt',event.target.value);
+    renderRolePrompts();
+  });
+  rolePromptsFields.addEventListener('change',event=>{
+    const agent=event.target.dataset.rolePromptProfile;if(!agent)return;
+    const boxes=[...rolePromptsFields.querySelectorAll(`[data-role-prompt-profile="${CSS.escape(agent)}"]`)];
+    const selected=boxes.filter(box=>box.checked).map(box=>box.value);
+    if(!selected.length){event.target.checked=true;rolePromptsStatus='每个 Agent 至少保留一个能力 profile。';rolePromptsStatusTeam=getState().teamId;renderRolePrompts();return;}
+    writeEdit(rolePromptKey(getState().teamId,agent),'profile',selected);
+    const container=document.getElementById('rolePromptsFields');container.dataset.renderKey='';
+    renderRolePrompts();
+  });
+  document.getElementById('revertRolePrompts').addEventListener('click',()=>{
+    const team=getState().teamId;for(const key of [...rolePromptEdits.keys()])if(key.startsWith(team+':'))rolePromptEdits.delete(key);
+    const container=document.getElementById('rolePromptsFields');container.dataset.renderKey='';
+    rolePromptsStatus='已撤销未保存的修改。';rolePromptsStatusTeam=team;renderRolePrompts();
+  });
+  document.getElementById('saveRolePrompts').addEventListener('click',async()=>{
+    const state=getState(),team=state.teamId;
+    const customizable=AGENTS.filter(agent=>agent.rolePromptCustomizable);
+    if(!customizable.length)return;
+    const payload={};let anyEdit=false;
+    for(const agent of customizable){
+      const key=rolePromptKey(team,agent.id);
+      const edit=readEdit(key);
+      if(!('prompt' in edit) && !('profile' in edit))continue;
+      const entry={};
+      if('prompt' in edit)entry.prompt=edit.prompt;
+      if('profile' in edit)entry.profile=edit.profile;
+      payload[agent.id]=entry;anyEdit=true;
+    }
+    if(!anyEdit){rolePromptsStatus='没有未保存的修改。';rolePromptsStatusTeam=team;renderRolePrompts();return;}
+    const ok=await setRolePrompts(payload);
+    if(ok){for(const agent of customizable)rolePromptEdits.delete(rolePromptKey(team,agent.id));rolePromptsStatus='已保存角色提示词与 profile；工具权限仍由后端 profile 表控制。';}
+    else rolePromptsStatus=getState().client.error||'保存失败，请查看终端。';
+    rolePromptsStatusTeam=team;
+    const container=document.getElementById('rolePromptsFields');container.dataset.renderKey='';
+    renderRolePrompts();
+  });
+  const timer=setInterval(()=>{const run=session().run;document.getElementById('runElapsed').textContent=run?formatDuration(elapsed(run)):'';document.getElementById('runProgress').textContent=runProgressText(run);tickTaskClocks();},1000);
   return()=>{unsubscribe();clearInterval(timer);};
 }
 async function submit(){
@@ -91,6 +221,7 @@ function renderTeams(){
   const state=getState(),picker=document.getElementById('teamSelect'),next=JSON.stringify(state.teams);
   if(teamsKey!==next){picker.innerHTML=state.teams.length?state.teams.map(team=>`<option value="${h(team.id)}">${h(team.name)}</option>`).join(''):'<option value="default">连接后加载团队…</option>';teamsKey=next;}
   picker.value=state.teamId;picker.disabled=Boolean(state.client.pendingAction)||!state.teams.length;
+  const createButton=document.getElementById('createTeam');if(createButton)createButton.disabled=Boolean(state.client.pendingAction)||!state.client.reachable;
   document.getElementById('teamDescription').textContent=(state.teamDescription?state.teamDescription+' ':'')+'同组后续任务保留上下文；不同团队的数据分别保存。';
   const nextRoster=JSON.stringify(AGENTS.map(agent=>[agent.id,agent.name,agent.label]));
   if(rosterKey!==nextRoster){
@@ -106,6 +237,51 @@ function renderTeams(){
   document.getElementById('openHistoryRun').disabled=!past.value || history.loading;
   document.getElementById('refreshHistory').disabled=history.loading || !state.client.reachable;
   document.getElementById('historyError').textContent=history.error || (history.loading?'正在读取本团队历史…':'查看以往任务的对话、产物和调用；导出 JSON / Markdown 供复核。');
+  renderRolePrompts();
+}
+let rolePromptEdits=new Map(),rolePromptsStatus='',rolePromptsStatusTeam='';
+function rolePromptKey(teamId,agentId){return `${teamId}:${agentId}`;}
+function rolePromptsBusy(state){return Object.values(state.sessions || {}).some(session=>ACTIVE.includes(session?.run?.status));}
+function readEdit(key){const current=rolePromptEdits.get(key);return current && typeof current==='object'?current:{};}
+function writeEdit(key,field,value){const current=readEdit(key),next={...current,[field]:value};rolePromptEdits.set(key,next);}
+function hasPendingEdit(team){return [...rolePromptEdits.entries()].some(([key,value])=>key.startsWith(team+':') && value && (('prompt' in value) || ('profile' in value)));}
+function renderRolePrompts(){
+  const state=getState(),control=document.getElementById('rolePromptsControl');if(!control)return;
+  const customizable=AGENTS.filter(agent=>agent.rolePromptCustomizable);
+  if(!customizable.length){control.hidden=true;control.open=false;return;}
+  control.hidden=false;
+  const injectedCount=customizable.filter(agent=>agent.rolePromptInjected).length;
+  document.getElementById('rolePromptsBadge').textContent=`已注入 ${injectedCount}/${customizable.length}`;
+  const container=document.getElementById('rolePromptsFields');
+  const profileSig=AVAILABLE_PROFILES.map(p=>[p.id,p.label,p.description,p.tools.length]);
+  const nextKey=JSON.stringify([state.teamId,customizable.map(a=>[a.id,a.name,a.rolePromptInjected,a.rolePrompt,a.profileIds||a.profileId]),profileSig]);
+  if(container.dataset.renderKey!==nextKey){
+    container.dataset.renderKey=nextKey;
+    const chosen=agent=>{const edit=readEdit(rolePromptKey(state.teamId,agent.id));const raw=edit.profile!==undefined?edit.profile:(agent.profileIds||(agent.profileId?[agent.profileId]:[]));const ids=Array.isArray(raw)?raw:[raw];return ids.filter(id=>AVAILABLE_PROFILES.some(profile=>profile.id===id));};
+    const unionTools=ids=>{const tools=[];for(const id of ids){const profile=AVAILABLE_PROFILES.find(item=>item.id===id);for(const tool of profile?.tools||[])if(!tools.includes(tool))tools.push(tool);}return tools;};
+    container.innerHTML=customizable.map(agent=>{
+      const stored=agent.rolePromptInjected?(agent.rolePrompt||''):'';
+      const edit=readEdit(rolePromptKey(state.teamId,agent.id));
+      const promptValue=edit.prompt!==undefined?edit.prompt:stored;
+      const profileIds=chosen(agent);
+      const toolsHint=unionTools(profileIds).join(', ');
+      const injectedClass=agent.rolePromptInjected?' is-injected':'';
+      const options=AVAILABLE_PROFILES.map(profile=>`<label><input type="checkbox" data-role-prompt-profile="${h(agent.id)}" value="${h(profile.id)}"${profileIds.includes(profile.id)?' checked':''}>${h(profile.label)}</label>`).join('');
+      return `<div class="role-prompt-field${injectedClass}" data-agent="${h(agent.id)}">
+        <label for="rolePrompt-${h(agent.id)}">${h(agent.name)} · ${h(agent.id)}</label>
+        <div class="role-prompt-profile"><span class="text-small muted">能力 profile（可多选，工具取并集）</span>
+          <div class="profile-options">${options || '<span class="text-small muted">等待后端加载 profile</span>'}</div></div>
+        <p class="role-prompt-tools text-small muted">工具白名单：<code>${h(toolsHint||'（未知）')}</code></p>
+        <textarea id="rolePrompt-${h(agent.id)}" data-role-prompt-agent="${h(agent.id)}" rows="6" placeholder="粘贴该 Agent 的角色提示词；留空即恢复占位。">${h(promptValue)}</textarea>
+      </div>`;
+    }).join('');
+  }
+  const status=document.getElementById('rolePromptsStatus');
+  if(rolePromptsStatusTeam===state.teamId && rolePromptsStatus) status.textContent=rolePromptsStatus;
+  else{status.textContent=rolePromptsBusy(state)?'任务进行中，暂不能修改。保存将在空闲时才被接受。':'每个 Agent 可勾选多个能力 profile，工具和能力取并集。再粘贴角色提示词。保存后立即生效。';rolePromptsStatus='';}
+  const pending=Boolean(state.client.pendingAction);
+  document.getElementById('saveRolePrompts').disabled=pending || rolePromptsBusy(state);
+  document.getElementById('revertRolePrompts').disabled=pending || !hasPendingEdit(state.teamId);
 }
 function render(){
   const state=getState(),current=session(),run=current.run,channel=state.activeChannel,pending=Boolean(state.client.pendingAction),busy=ACTIVE.includes(run?.status),ready=state.client.reachable;
@@ -157,7 +333,7 @@ function historyHtml(run){
 function renderApprovals(run){
   const host=document.getElementById('approvalArea'),pending=ACTIVE.includes(run?.status)?(run.approvals || []).filter(approval=>approval.type==='clarification'?canReplyToApproval(approval,run):approval.status==='pending'):[],team=getState().teamId,nextKey=JSON.stringify([team,getState().activeChannel,run?.id,run?.status,pending]);
   if(nextKey!==approvalsKey){
-    host.innerHTML=pending.map(approval=>{const draft=approvalDrafts.get(`${team}:${approval.id}`)||{},permission=approval.type==='permission',labels={permission:'操作审批',clarification:'需求澄清',budget:'资源预算',reconciliation:'状态核对'},choices=(approval.choices || []).filter(choice=>choice.id!=='modify');return `<section class="approval-card" data-approval-card="${h(approval.id)}"><div class="item-topline"><h3>${h(approval.title)}</h3><span class="tag warning">${h(labels[approval.type] || approval.type)}</span></div><p>${h(approval.description)}</p>${approvalTimingHtml(approval)}${permission?`<details class="approval-parameters"><summary>操作参数与修改</summary><label class="text-small" for="args-${h(approval.id)}">修改后的参数（JSON）</label><textarea id="args-${h(approval.id)}" data-approval-input="${h(approval.id)}" data-field="args" rows="5">${h(draft.args ?? text(approval.args || {}))}</textarea><button type="button" class="button quiet small" data-approval="${h(approval.id)}" data-approval-choice="modify">提交修改并重新审批</button><p class="text-small muted">修改参数会生成新的审批请求，不会立即执行。</p></details>`:''}<label class="sr-only" for="answer-${h(approval.id)}">回复或补充说明</label><textarea id="answer-${h(approval.id)}" data-approval-input="${h(approval.id)}" data-field="answer" rows="2" placeholder="${permission?'补充说明（可选）':'输入答复…'}">${h(draft.answer || '')}</textarea><div class="approval-actions">${choices.map((choice,index)=>`<button type="button" class="button ${choice.id==='deny'?'quiet':index===0?'primary':'quiet'}" data-approval="${h(approval.id)}" data-approval-choice="${h(choice.id)}">${h(choice.label)}</button>`).join('')}${approval.type==='clarification'?`<button type="button" class="button primary" data-approval="${h(approval.id)}" data-approval-choice="answer">发送答复</button>`:''}</div><p class="approval-error" data-approval-error></p></section>`;}).join('');approvalsKey=nextKey;
+    host.innerHTML=pending.map(approval=>{const draft=approvalDrafts.get(`${team}:${approval.id}`)||{},permission=approval.type==='permission',labels={permission:'操作审批',clarification:'需求澄清',budget:'资源预算',reconciliation:'状态核对',protocol_repair:'格式修复'},choices=(approval.choices || []).filter(choice=>choice.id!=='modify');return `<section class="approval-card" data-approval-card="${h(approval.id)}"><div class="item-topline"><h3>${h(approval.title)}</h3><span class="tag warning">${h(labels[approval.type] || approval.type)}</span></div><p>${h(approval.description)}</p>${approvalTimingHtml(approval)}${permission?`<details class="approval-parameters"><summary>操作参数与修改</summary><label class="text-small" for="args-${h(approval.id)}">修改后的参数（JSON）</label><textarea id="args-${h(approval.id)}" data-approval-input="${h(approval.id)}" data-field="args" rows="5">${h(draft.args ?? text(approval.args || {}))}</textarea><button type="button" class="button quiet small" data-approval="${h(approval.id)}" data-approval-choice="modify">提交修改并重新审批</button><p class="text-small muted">修改参数会生成新的审批请求，不会立即执行。</p></details>`:''}<label class="sr-only" for="answer-${h(approval.id)}">回复或补充说明</label><textarea id="answer-${h(approval.id)}" data-approval-input="${h(approval.id)}" data-field="answer" rows="2" placeholder="${permission?'补充说明（可选）':'输入答复…'}">${h(draft.answer || '')}</textarea><div class="approval-actions">${choices.map((choice,index)=>`<button type="button" class="button ${choice.id==='deny'?'quiet':index===0?'primary':'quiet'}" data-approval="${h(approval.id)}" data-approval-choice="${h(choice.id)}">${h(choice.label)}</button>`).join('')}${approval.type==='clarification'?`<button type="button" class="button primary" data-approval="${h(approval.id)}" data-approval-choice="answer">发送答复</button>`:''}</div><p class="approval-error" data-approval-error></p></section>`;}).join('');approvalsKey=nextKey;
   }
   for(const card of host.querySelectorAll('[data-approval-card]')){const approval=pending.find(item=>item.id===card.dataset.approvalCard);card.querySelectorAll('button,textarea').forEach(input=>input.disabled=Boolean(getState().client.pendingAction)||!getState().client.reachable||!canReplyToApproval(approval,run));}
 }
@@ -169,10 +345,16 @@ async function replyToApproval(button){
   if(button.dataset.approvalChoice==='modify'){try{modifiedArgs=JSON.parse(card.querySelector('[data-field="args"]').value);if(!modifiedArgs || typeof modifiedArgs!=='object' || Array.isArray(modifiedArgs))throw new Error();}catch{error.textContent='参数必须是有效的 JSON 对象。';return;}}
   if(await resolveApproval(id,button.dataset.approvalChoice,answer,modifiedArgs,channel))approvalDrafts.delete(key);
 }
+async function continueTask(button){
+  button.disabled=true;
+  const ok=await retryTask(button.dataset.retryTask,button.dataset.retryRun);
+  if(!ok)button.disabled=false;
+  return ok;
+}
 function retryTaskHtml(task){
   const run=session().run;
   if(!canRetryTask(run,task))return '';
-  return `<p><button type="button" class="button small" data-retry-task="${h(task.id)}" data-retry-run="${h(run.id)}">重试此步骤</button></p><p class="text-small muted">保留失败记录和已完成工作，预算不增加。后端会检查是否能够安全继续。</p>`;
+  return `<p><button type="button" class="button small" data-retry-task="${h(task.id)}" data-retry-run="${h(run.id)}">从这里继续</button></p><p class="text-small muted">从这一步接着做。失败记录、已完成步骤和错误经验都保留，预算不增加。</p>`;
 }
 function openTask(task){openDrawer(`子任务 · ${task.title}`,`${retryTaskHtml(task)}<p>${badge(task.status)}</p><dl class="detail-list"><dt>编号 / 负责人</dt><dd>${h(task.id)} / ${h(agentName(task.agentId))}</dd><dt>派单者</dt><dd>${h(agentName(task.delegatedBy))}</dd><dt>依赖</dt><dd>${h((task.dependsOn || []).join('、') || '无')}</dd><dt>尝试 / 重试</dt><dd>${h(task.attempts || 0)} / ${h(task.retries || 0)}</dd><dt>已用轮数 / 上限</dt><dd>${h(task.turns ?? 0)} / ${task.progress?.turnLimit===null?'不限':h(task.progress?.turnLimit ?? '未记录')}</dd></dl><h3>目标与验收条件</h3><pre>${h(text({goal:task.goal,acceptanceCriteria:task.acceptanceCriteria}))}</pre>${taskOutputHtml(task)}<h3>输入 / 输出</h3><pre>${h(text({inputs:task.inputs,outputs:task.outputs}))}</pre><h3>结果与错误</h3><pre>${h(text({result:task.result,error:task.error,feedback:task.feedback}))}</pre><h3>独立验收</h3><pre>${h(text(task.validation || '尚无独立验收记录'))}</pre>`);}
 function deliveryHtml(run){
@@ -186,6 +368,6 @@ function renderInspector(){
   else if(tab==='dialogue')html=dialogueHtml(run);
   else if(tab==='calls')html=(run.calls || []).length?`<div class="record-list">${run.calls.map((call,index)=>`<button type="button" class="record-button" data-call="${index}"><div class="item-topline"><code>${h(call.tool)}</code>${badge(call.status)}</div><div class="record-meta"><span>${h(agentName(call.agentId))}</span><span>${h(formatDuration(call.durationMs))}</span></div><p>${h(brief(call.result || '等待返回'))}</p></button>`).join('')}</div>`:'<div class="empty-state"><p>暂无调用记录。</p></div>';
   else if(tab==='memory')html=(run.memoryHits || []).length?`<div class="record-list">${run.memoryHits.map((hit,index)=>`<button type="button" class="record-button" data-memory-hit="${index}"><div class="item-topline"><strong>${h(findMemory(hit)?.title || hit.memoryId)}</strong><span class="tag ${hit.applied?'info':'muted'}">${hit.applied?'已采用':'仅检索'}</span></div><div class="record-meta">${h(agentName(hit.agentId))} · ${h(hit.taskId)}</div><p>${h(hit.reason || '')}</p></button>`).join('')}</div><p class="text-small muted">使用记忆不代表已证明效果提升。</p>`:`<div class="empty-state"><p>${run.memoryEnabled===false?'本任务已关闭记忆。':'当前任务暂无记忆检索记录。'}</p></div>`;
-  else html=`<ol class="task-list">${(run.steps || []).map(task=>`<li class="task-row"><button type="button" class="task-detail-button" data-task="${h(task.id)}"><span class="item-topline"><strong>${h(task.title)}</strong>${badge(task.status)}</span><span class="task-meta">${h(agentName(task.agentId))} · 派单：${h(agentName(task.delegatedBy))}</span><span class="task-meta">依赖：${h((task.dependsOn || []).map(id=>run.steps.find(step=>step.id===id)?.title || id).join('、') || '无')} · 输出 ${task.outputs?.length || 0} 项</span>${task.error?`<span class="task-error">${h(brief(task.error))}</span>`:''}</button></li>`).join('') || '<li class="text-small muted">正在建立任务计划…</li>'}</ol><section class="artifact-section">${deliveryHtml(run)}<h3>产物</h3>${(run.artifacts || []).map(artifactHtml).join('') || '<p class="text-small muted">暂无文本产物。</p>'}</section><details data-events ${eventsOpen?'open':''}><summary>执行事件 · ${run.events?.length || 0} 条</summary><ol class="event-list">${(run.events || []).map(event=>`<li><span class="muted">${h(timeText(event.time))}</span> <code>${h(event.type)}</code><p>${h(event.message)}</p></li>`).join('')}</ol></details>`;
+  else html=`<ol class="task-list">${(run.steps || []).map(task=>`<li class="task-row"><button type="button" class="task-detail-button" data-task="${h(task.id)}"><span class="item-topline"><strong>${h(task.title)}</strong><span class="task-topline-status">${badge(task.status)}${taskClockHtml(run,task)}</span></span><span class="task-meta">${h(agentName(task.agentId))} · 派单：${h(agentName(task.delegatedBy))}</span><span class="task-meta">依赖：${h((task.dependsOn || []).map(id=>run.steps.find(step=>step.id===id)?.title || id).join('、') || '无')} · 输出 ${task.outputs?.length || 0} 项</span>${task.error?`<span class="task-error">${h(brief(task.error))}</span>`:''}</button>${canRetryTask(run,task)?`<button type="button" class="button small task-retry" data-retry-task="${h(task.id)}" data-retry-run="${h(run.id)}">从这里继续</button>`:''}</li>`).join('') || '<li class="text-small muted">正在建立任务计划…</li>'}</ol><section class="artifact-section">${deliveryHtml(run)}<h3>产物</h3>${(run.artifacts || []).map(artifactHtml).join('') || '<p class="text-small muted">暂无文本产物。</p>'}</section><details data-events ${eventsOpen?'open':''}><summary>执行事件 · ${run.events?.length || 0} 条</summary><ol class="event-list">${(run.events || []).map(event=>`<li><span class="muted">${h(timeText(event.time))}</span> <code>${h(event.type)}</code><p>${h(event.message)}</p></li>`).join('')}</ol></details>`;
   if(host.innerHTML!==html){const scrollTop=host.scrollTop;host.innerHTML=html;host.scrollTop=scrollTop;}
 }

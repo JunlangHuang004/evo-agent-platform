@@ -79,10 +79,10 @@ class TeamServerTests(unittest.TestCase):
 
     def test_team_inventory_is_lazy_and_each_team_has_real_roles(self):
         inventory = self.request('/api/teams')
-        self.assertEqual({item['id'] for item in inventory['teams']}, {'default', 'software', 'newsroom', 'fund'})
+        self.assertEqual({item['id'] for item in inventory['teams']}, {'default', 'software', 'newsroom', 'fund', 'exam'})
         self.assertEqual(inventory['defaultTeamId'], 'default')
         self.assertEqual(self.created, [])
-        for team in ('software', 'newsroom', 'fund'):
+        for team in ('software', 'newsroom', 'fund', 'exam'):
             state = self.request('/api/state?team=' + team)
             self.assertEqual(state['teamId'], team)
             self.assertEqual(set(state['sessions']), {'group', *get_team_agents(team)})

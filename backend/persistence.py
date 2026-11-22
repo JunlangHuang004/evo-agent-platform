@@ -78,6 +78,9 @@ class Repository:
                 memory_id TEXT NOT NULL, owner TEXT NOT NULL, source_task TEXT NOT NULL,
                 success INTEGER NOT NULL, created_at TEXT NOT NULL,
                 PRIMARY KEY(memory_id,owner,source_task));
+            CREATE TABLE IF NOT EXISTS handoffs (
+                id INTEGER PRIMARY KEY CHECK (id = 1),
+                payload TEXT NOT NULL);
         ''')
         with self.lock, self.db:
             for memory_id, owner, payload in self.db.execute('SELECT id,owner,payload FROM memories').fetchall():
@@ -103,6 +106,22 @@ class Repository:
     def load_state(self):
         with self.lock:
             row = self.db.execute('SELECT payload FROM state WHERE id=1').fetchone()
+            return json.loads(row[0]) if row else None
+
+    def save_handoff(self, record):
+        """Keep the latest group-task handoff in this team's own database."""
+        if not isinstance(record, dict) or not isinstance(record.get('runId'), str) or not record['runId']:
+            raise ValueError('Handoff requires a run id.')
+        payload = json.dumps(record, ensure_ascii=False, sort_keys=True)
+        with self.lock, self.db:
+            self.db.execute(
+                'INSERT INTO handoffs(id,payload) VALUES(1,?) '
+                'ON CONFLICT(id) DO UPDATE SET payload=excluded.payload',
+                (payload,))
+
+    def load_handoff(self):
+        with self.lock:
+            row = self.db.execute('SELECT payload FROM handoffs WHERE id=1').fetchone()
             return json.loads(row[0]) if row else None
 
     def save_state(self, state):

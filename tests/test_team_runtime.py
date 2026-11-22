@@ -102,7 +102,7 @@ class TeamRuntimeTests(unittest.TestCase):
         return run
 
     def test_all_teams_expose_independent_registries_and_full_role_contract(self):
-        self.assertEqual([item['id'] for item in list_teams()],['default','software','newsroom','fund'])
+        self.assertEqual([item['id'] for item in list_teams()],['default','software','newsroom','fund','exam'])
         with self.assertRaises(ValueError):get_team_agents('unknown')
         for team in ('software','newsroom','fund'):
             with self.subTest(team=team):
@@ -119,11 +119,17 @@ class TeamRuntimeTests(unittest.TestCase):
                 with self.assertRaises(ProtocolError):
                     normalize_plan({'tasks':missing},list(agents),lambda prefix:prefix+str(next(self.ids)),8,agents=agents)
                 system=planning_prompt([{'id':key,**value} for key,value in agents.items()],8)
+                self.assertIn('Do not require a strict file from every step', system)
+                self.assertIn('at most one concise evidence brief', system)
+                self.assertIn('Same-run public web snapshots', system)
+                self.assertIn('independent-review task is optional, not required', system)
+                self.assertIn('reviewOf does not require a capability named review', system)
                 for role,agent in agents.items():
                     self.assertIn(agent['rolePrompt'],system)
                     definitions=ToolGateway(Config(Path(self.temp.name)/('schema-'+team),{'LLM_API_KEY':'fake'}),agents=agents).definitions(role)
                     prompt=action_prompt(agent,definitions)
                     self.assertIn(agent['rolePrompt'],prompt)
+                    self.assertIn('imports/web-source-', prompt)
                     self.assertIn('expectedSha256',prompt)
                     self.assertIn('offline Docker only',prompt)
                     if any(item['name'].startswith('code.') for item in definitions):
@@ -135,6 +141,14 @@ class TeamRuntimeTests(unittest.TestCase):
                         self.assertIn('"timeout"',prompt)
                         self.assertIn('"args"',prompt)
         self.assertEqual(set(AGENTS),{'coordinator','research','executor','reviewer'})
+        plain=planning_prompt([
+            {'id':'agent1','name':'Agent 1','capabilities':['planning','synthesis'],'rolePrompt':'Lead.'},
+            {'id':'agent2','name':'Agent 2','capabilities':['research','source_verification'],'rolePrompt':'Reporter.'},
+            {'id':'agent3','name':'Agent 3','capabilities':['coding','testing'],'rolePrompt':'Checker.'},
+            {'id':'agent4','name':'Agent 4','capabilities':['editing','writing'],'rolePrompt':'Editor.'},
+        ], 11)
+        self.assertIn('reviewOf does not require a capability named review', plain)
+        self.assertNotIn('explicit selected agent with review capability', plain)
 
     ids=iter(range(1000))
 

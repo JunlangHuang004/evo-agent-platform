@@ -323,10 +323,16 @@ class EngineTests(unittest.TestCase):
         self.assertTrue(app.wait_for_idle(3))
         memories = app.memory.list('executor')
         candidates = [memory for memory in memories if memory['kind'] == 'procedural']
-        self.assertEqual(len(candidates), 1)
-        self.assertEqual(candidates[0]['status'], 'candidate')
+        # The reflection must be stored as a candidate; a success-pattern memory
+        # may also be present but is likewise still a candidate on first success.
+        self.assertTrue(candidates)
+        reflection_candidate = next(memory for memory in candidates
+                                    if memory.get('lesson') == reflection['lesson'])
+        self.assertEqual(reflection_candidate['status'], 'candidate')
+        for memory in candidates:
+            self.assertEqual(memory['status'], 'candidate')
         self.assertEqual(app.memory.recall('executor', 'offline dependency Python'), [])
-        app.action({'action': 'memory_confirm', 'agentId': 'executor', 'memoryId': candidates[0]['id'], 'confirmed': True})
+        app.action({'action': 'memory_confirm', 'agentId': 'executor', 'memoryId': reflection_candidate['id'], 'confirmed': True})
         self.assertEqual(len(app.memory.recall('executor', 'offline dependency Python')), 1)
         self.assertFalse(self.current_run(app)['memoryHits'])
 
@@ -535,7 +541,11 @@ class EngineTests(unittest.TestCase):
         self.assertEqual(source['shareConfirmation']['id'], 'explicit-publish')
         self.assertFalse(any(event['type'] in ('memory_feedback', 'memory_feedback_skipped') and event['payload'].get('memoryId') == candidate['id'] for event in run['events']))
         own_records = app.memory.list('executor')
-        self.assertTrue(all(item['owner'] == 'executor' and item['kind'] == 'episodic' for item in own_records))
+        self.assertTrue(own_records)
+        # Executor may now also carry its own success-pattern procedural memory,
+        # but nothing in its ledger should be owned by another agent.
+        self.assertTrue(all(item['owner'] == 'executor' for item in own_records))
+        self.assertTrue(all(item['kind'] in ('episodic', 'procedural', 'semantic') for item in own_records))
         self.assertFalse(any(item.get('source_task') == 'source-task' for item in own_records), 'no foreign strategy is copied into personal memory')
         explicit = app.memory.recall('executor', title, include_shared=True)
         self.assertEqual([item['id'] for item in explicit], [candidate['id']], 'legacy administrative opt-in remains explicit')

@@ -27,7 +27,7 @@ class _WorkerConfig:
         if (url.scheme != 'https' or url.username or url.password or url.query or url.fragment
                 or not any(url.hostname == host or (url.hostname or '').endswith('.' + host) for host in domains)):
             raise ValueError('Invalid provider URL')
-        for name, upper in (('model_timeout', 180), ('max_completion_tokens', 8000)):
+        for name, upper in (('model_timeout', 180), ('max_completion_tokens', 384000)):
             value = values.get(name)
             if isinstance(value, bool) or not isinstance(value, (int, float)) or not 0 < value <= upper:
                 raise ValueError('Invalid provider limit')

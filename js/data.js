@@ -7,6 +7,7 @@ export const AGENTS = [
 ].map(agent => ({...agent, tools:[], memories:[], sandbox:{id:'未连接',policy:'等待后端配置',workspace:'未连接',memory:'未连接'}}));
 
 export const EVALUATION = {mode:'real',dataset:'实际任务运行记录',runs:[]};
+export const AVAILABLE_PROFILES = [];
 
 export function updateMetadata(snapshot) {
   if (Array.isArray(snapshot.agents)) {
@@ -15,4 +16,6 @@ export function updateMetadata(snapshot) {
     })));
   }
   if (snapshot.evaluation) Object.assign(EVALUATION, snapshot.evaluation, {runs:snapshot.evaluation.runs || []});
+  AVAILABLE_PROFILES.splice(0, AVAILABLE_PROFILES.length,
+    ...(Array.isArray(snapshot.availableProfiles) ? snapshot.availableProfiles : []));
 }

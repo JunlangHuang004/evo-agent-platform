@@ -99,10 +99,22 @@ class RetryTaskTests(unittest.TestCase):
         self.assertEqual(qa['status'],'done');self.assertTrue(any(c['taskId']==qa['id'] and c['tool']=='file.read' for c in run['calls']))
         summary=next(t for t in run['steps'] if t.get('finalSummary'))
         self.assertEqual(summary['attemptHistory'][0]['status'],'partial');self.assertGreater(summary['turns'],summary['attemptHistory'][0]['turns'])
+        self.assertIn('Retained error fact: code=runtime', '\n'.join(model.resumed_context['task']['feedback']))
+        self.assertIn('Known bookkeeping failure', '\n'.join(model.resumed_context['task']['feedback']))
         self.assertEqual(len(run['deliveries']),1);self.assertEqual(run['deliveries'][0]['semanticQuality'],'unassessed')
         self.assertEqual(export.read_bytes(),original_export)
         self.assertEqual(len([e for e in run['events'] if e['type']=='task_retry_requested']),1)
         self.assertEqual(self.app.repo.get_run(run['id'])['calls'],run['calls'])
+
+    def test_partial_step_without_outputs_continues_and_keeps_its_error(self):
+        model,run,target=self.failed()
+        target['status']='partial'
+        target['error']={'code':'budget','message':'已达到人工扩展后的资源预算。'}
+        self.app.action(self.payload(run,target));self.assertTrue(self.app.wait_for_idle(5))
+        run=self.app.state['sessions']['group']['run'];self.assertEqual(run['status'],'done',run.get('summary'))
+        self.assertEqual(target['attemptHistory'][0]['status'],'partial')
+        self.assertEqual(target['attemptHistory'][0]['error']['message'],'已达到人工扩展后的资源预算。')
+        self.assertIn('已达到人工扩展后的资源预算。','\n'.join(model.resumed_context['task']['feedback']))
 
     def test_active_stale_missing_ids_and_live_workers_are_rejected_without_mutation(self):
         _,run,target=self.failed();payload=self.payload(run,target)
