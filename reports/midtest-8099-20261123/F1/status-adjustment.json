@@ -1,0 +1,17 @@
+{
+  "type": "operator_completion_override",
+  "id": "evt-7f41fd56c15f4e05",
+  "actor": "operator",
+  "agentId": "operator",
+  "time": "2026-11-22T22:51:00.400756+00:00",
+  "message": "按用户明确要求标记完成；原 partial 仅来自打包阶段重复审核关联检查。未新增测试或审核结论。",
+  "payload": {
+    "previousStatus": "partial",
+    "originalAcceptanceGaps": [
+      "Package proposal, risks and introduction：最新代码 revision / 产物尚无匹配的审核角色独立验收。"
+    ],
+    "basis": "User instruction in Codex chat",
+    "newStatus": "done",
+    "newVerificationCreated": false
+  }
+}

@@ -633,6 +633,8 @@ class Platform:
                                      timeBasis='wall',deadlineAt=run['startedAt']+self.config.max_run_seconds*1000)
             if mode == 'chat':
                 run['steps'] = [self._new_task('基础对话', text.strip(), actor, participants, agent=actor)]
+            if mode=='task' and self.config.agent_initial_turns:
+                run['budget']['taskTurnPolicy']={'initial':self.config.agent_initial_turns,'extra':self.config.agent_extra_turns}
             session['run'] = run
             if (channel=='group' and mode=='task' and previous_run and previous_run.get('mode')=='task'
                     and previous_run.get('artifacts') and hasattr(self.artifacts,'carry_forward')):
@@ -868,6 +870,11 @@ class Platform:
         return time.monotonic()+self._remaining_ms(run)/1000 if self._time_only(run) else None
 
     def _task_turn_limit(self,run,task):
+        policy=run.get('budget',{}).get('taskTurnPolicy')
+        if policy:
+            start=task.get('_revisionStartTurn',0)
+            extra=policy['extra'] if task.get('_extraTurnsRevision')==task.get('revision',0) else 0
+            return start+policy['initial']+extra
         if self._time_only(run):return None
         period=run.get('budget',{}).get('agentTurns',self.config.max_agent_turns)
         if period is None:
@@ -2083,14 +2090,14 @@ class Platform:
         limit=self._task_turn_limit(run,task)
         time_only=self._time_only(run);remaining_ms=self._remaining_ms(run)
         closing_ms=min(120000,max(30000,(self.config.model_timeout+5)*1000))
-        final_phase=(remaining_ms<=closing_ms) if time_only else task['turns']>=limit
+        final_phase=((remaining_ms<=closing_ms) if time_only else False) or (limit is not None and task['turns']>=limit and (not run.get('budget',{}).get('taskTurnPolicy') or task.get('_extraTurnsRevision')==task.get('revision',0) or not run['budget']['taskTurnPolicy']['extra']))
         stage=stage_control(run,task,clock_ms())
         if stage:
             if task.get('_stagePhase')!=stage['phase']:
                 self._event(run,'stage_transition',task['agentId'],'固定墙钟阶段检查点推进；未判定业务成功。',
                             {'taskId':task['id'],'previousPhase':task.get('_stagePhase'),**stage})
                 task['_stagePhase']=stage['phase']
-        receipt={'turn':task['turns'],'turnLimit':limit,'remainingAfterThisTurn':None if time_only else max(0,limit-task['turns']),
+        receipt={'turn':task['turns'],'turnLimit':limit,'remainingAfterThisTurn':None if limit is None else max(0,limit-task['turns']),
                  'turnsWithoutNewOutputOrTest':stagnant,'privateFiles':[{'path':path,'sha256':digest} for path,digest in sorted(files.items())],
                  'publishedOutputs':outputs,'successfulTestCallIds':list(tests.values()),'completedChildren':children,
                  'recentToolFailures':failures[-3:],'fileReads':list(reads.values())[-8:],
@@ -2139,6 +2146,14 @@ class Platform:
                   'For web failures, use the actual error and retryable flag; '
                   'a blocked/unread source is not evidence and must not be cited as read. Do not replay completed tools or bypass approvals.')
         feedback={**receipt,'instruction':instruction,'closingRequired':closing}
+        policy=run.get('budget',{}).get('taskTurnPolicy')
+        if policy:
+            used=task['turns']-task.get('_revisionStartTurn',0)
+            from .turn_handoff import window
+            feedback['turnHandoff']=window(run,task)
+            feedback['turnPolicy']=dict(policy,extraGranted=task.get('_extraTurnsRevision')==task.get('revision',0))
+            feedback['instruction']+=f" This revision has {policy['initial']} initial action turns and at most one {policy['extra']}-turn continuation if no valid final has completed. Read only necessary inputs; implement, publish and submit required review promptly. Do not repeat successful work. From turn {max(1,policy['initial']-3)} close scope and hand off; the absolute last turn accepts final only. Missing mandatory evidence stays partial."
+            if used>=max(1,policy['initial']-3):feedback['closingRequired']=True
         if closing:feedback['instruction']+=(' Use remaining wall time to publish existing usable files, '
                                              if time_only else ' Use remaining turns to publish existing usable files, ')
         if closing:feedback['instruction']+=(
@@ -2304,6 +2319,16 @@ class Platform:
         while True:
             run=self._gate(channel,run_id)
             limit=self._task_turn_limit(run,task)
+            policy=run.get('budget',{}).get('taskTurnPolicy')
+            if (policy and task['turns']>=limit and policy['extra']
+                    and task.get('_extraTurnsRevision')!=task.get('revision',0)):
+                with self.lock:
+                    self._gate(channel,run_id)
+                    task['_extraTurnsRevision']=task.get('revision',0)
+                    self._event(run,'task_turn_extension',task['agentId'],'初始轮次内尚未完成有效 final，给予一次收尾轮次；总时限和验收不变。',
+                                {'taskId':task['id'],'revision':task.get('revision',0),'initial':policy['initial'],'extra':policy['extra']})
+                    self._persist()
+                limit=self._task_turn_limit(run,task)
             if limit is not None and task['turns']>=limit:break
             with self.lock:
                 for item in run.get('messages',[])[task.get('_mailCursor',0):]:
@@ -2327,7 +2352,7 @@ class Platform:
                     task['_messages'].append({'role':'user','content':'最后收尾约束：浏览器诊断恢复。'+json.dumps(
                         self.config.scrub(diagnostic_checkpoint),ensure_ascii=False,separators=(',',':'))})
                 if final_only:
-                    if self._time_only(run):
+                    if self._time_only(run) and not run.get('budget',{}).get('taskTurnPolicy'):
                         if task.get('_timeFinalRevision')==task.get('revision',0) and not task.get('generationCooldown'):
                             raise BudgetExceeded('时间收尾已尝试一次；不在原截止时间外增加模型请求。')
                         task['_timeFinalRevision']=task.get('revision',0)
@@ -2335,7 +2360,7 @@ class Platform:
                         'Return ONE final action only: {"type":"final","status":"done|partial|failed","text":"Actual output IDs, verification and missing work"}. '
                         'No new tools, reads, delegation, questions or approvals will execute. Use done only if the original output contract is truly met; otherwise partial/failed. '
                         'A test pass or published file does not prove independent acceptance. Do not invent success.'+
-                        (' Time-only phase: this is the one closing request before the fixed wall deadline; no numeric turn cap was added.' if self._time_only(run) else '')})
+                        (' Turn policy: at most one continuation; no tools on the final turn.' if run.get('budget',{}).get('taskTurnPolicy') else ' Time-only phase: this is the one closing request before the fixed wall deadline; no numeric turn cap was added.' if self._time_only(run) else '')})
                 self._persist()
             try:
                 content=self._model_retry(channel,run_id,task,task['_messages'])
@@ -2435,6 +2460,14 @@ class Platform:
             review_closing=bool(review_checkpoint and self._review_checkpoint(run,task))
             diagnostic_closing=bool(diagnostic_checkpoint and current_browser_diagnostic_checkpoint(run,task,self.agents))
             current_stage=stage_control(run,task,clock_ms())
+            from .turn_handoff import feedback as turn_handoff_feedback
+            turn_feedback=turn_handoff_feedback(run,task,action) if not final_only else None
+            if turn_feedback is not None:
+                with self.lock:
+                    task['_messages'].append({'role':'user','content':'轮次收尾要求：'+json.dumps(turn_feedback,ensure_ascii=False)})
+                    self._event(run,'turn_handoff_blocked',task['agentId'],'最后轮次只保留本地产出与交接，未执行新的搜索抓取或委派。',{'taskId':task['id'],'revision':task.get('revision',0),**turn_feedback})
+                    self._persist()
+                continue
             protocol_feedback=_action_not_tool_feedback(action)
             phase_feedback=stage_action_feedback(current_stage,action)
             source_admission=None
@@ -3813,6 +3846,9 @@ class Platform:
             four_role=run.get('mode')=='task' and set(run.get('participants',[]))==set(self.agents)
             if four_role:
                 for task in tasks:
+                    # Packaging is validated by its delivery contract and source
+                    # checks; it does not require a second independent verdict.
+                    if (task.get('outputContract') or {}).get('kind')=='delivery':continue
                     if ('review' not in self.agents.get(task.get('agentId'),{}).get('capabilities',[])
                             and task.get('status') in ('done','partial') and (self._has_code_work(run,task) or self._requires_browser(run,task)) and not self._valid_review(run,task)):
                         binding=self._current_packaging_binding(run,task)

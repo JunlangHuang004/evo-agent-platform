@@ -68,6 +68,10 @@ class Config:
         self.git_username = values.get('GIT_USERNAME', 'x-access-token')
         self.max_model_calls = max(2, min(240, int(values.get('MAX_MODEL_CALLS', '28'))))
         self.max_agent_turns = max(2, min(32, int(values.get('MAX_AGENT_TURNS', '8'))))
+        self.agent_initial_turns = int(values.get('AGENT_INITIAL_TURNS','0'))
+        self.agent_extra_turns = int(values.get('AGENT_EXTRA_TURNS','8'))
+        if not 0<=self.agent_initial_turns<=100 or not 0<=self.agent_extra_turns<=100:
+            raise ValueError('Agent turn policy must be within 0–100.')
         self.model_timeout = max(5, min(180, int(values.get('MODEL_TIMEOUT', '120'))))
         # 384000 is DeepSeek V4's own maximum output. The platform does not impose a lower cap.
         self.max_completion_tokens = max(256, min(384000, int(values.get('MODEL_MAX_TOKENS', '6000'))))

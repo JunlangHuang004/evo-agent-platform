@@ -1,0 +1,26 @@
+{
+  "agentId": "editor",
+  "createdAt": 1795379369278,
+  "entrypoint": "fact-check-article.md",
+  "files": [
+    {
+      "artifactId": "artifact-1e683fbcc6bb4d1c88de8c88b787fbd9",
+      "inherited": false,
+      "path": "fact-check-article.md",
+      "sha256": "08d1bcf436efdefdbbe3746a6db8ea80d60afff2983820e1af3e7bf67a357423",
+      "size": 9403,
+      "sourceRevision": 0,
+      "sourceTaskId": "task-9b5075f3f1954fb9"
+    }
+  ],
+  "id": "delivery-0178083f22814c09b8b659d0d8fa3ea6",
+  "instructions": "Open fact-check-article.md to read the fact-check. It is a single Markdown article for students and faculty: read top to bottom — the claim, the verdict (Not supported as stated), the evidence sections, what the evidence does not establish, the recommendation, the confidence note, and the sources. All 2023-2024 figures are labeled as historical and attributed-but-unverified (retrieved second-hand via a vendor review and news reporting; primary sources not read directly).",
+  "purpose": "Published product candidate; independent review and formal delivery remain separate.",
+  "reviewStatusAtCreation": "pending",
+  "runId": "run-c26997fdf3864734",
+  "semanticQuality": "unassessed",
+  "status": "candidate",
+  "taskId": "task-9b5075f3f1954fb9",
+  "taskRevision": 0,
+  "version": 1
+}

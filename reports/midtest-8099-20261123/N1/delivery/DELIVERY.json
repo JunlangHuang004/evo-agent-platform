@@ -1,0 +1,51 @@
+{
+  "agentId": "editor",
+  "createdAt": 1795378621997,
+  "entrypoint": "web-article.md",
+  "files": [
+    {
+      "artifactId": "artifact-b5d27cca6f654b9caa54bb92a113f26a",
+      "inherited": false,
+      "path": "web-article.md",
+      "sha256": "57c362362688c7e5af4c5ed7a0d2dfbcb069624be4835f3502a251ac55954471",
+      "size": 5702,
+      "sourceRevision": 0,
+      "sourceTaskId": "task-8a3b1bb751884d05"
+    },
+    {
+      "artifactId": "artifact-098b517151aa46de91cad76a873d9a53",
+      "inherited": false,
+      "path": "newsletter.md",
+      "sha256": "4f59d1cbab33883def81a8670027e6bd7a653872e2561bc9039e474508ff8613",
+      "size": 1741,
+      "sourceRevision": 0,
+      "sourceTaskId": "task-8a3b1bb751884d05"
+    },
+    {
+      "artifactId": "artifact-6c0769a9a5d14859a4645cea1893e902",
+      "inherited": false,
+      "path": "social.md",
+      "sha256": "8ef0b36a02d3d29538941cc79be121c3bfe63d56149c095a0b32d71e5199d26a",
+      "size": 1451,
+      "sourceRevision": 0,
+      "sourceTaskId": "task-8a3b1bb751884d05"
+    },
+    {
+      "artifactId": "artifact-7f92f33802034013a9ddec9e4ff2c18d",
+      "inherited": false,
+      "path": "PUBLICATION-NOTES.md",
+      "sha256": "80d4868b32736d3393506246e4644a7bcd64cc3a1d7c1c8ee7e471f75b5daefa",
+      "size": 2960,
+      "sourceRevision": 0,
+      "sourceTaskId": "task-8a3b1bb751884d05"
+    }
+  ],
+  "id": "delivery-e85c3fe8b76047a9a8db0492ea213ddb",
+  "instructions": "Channel-ready publication package for the HKUST AI Common Core Program story. (1) WEB: publish web-article.md as the full news story (byline 'Staff report'; header distinguishes report date 22 Nov 2026 from the 14 Jul 2026 announcement). (2) NEWSLETTER: use newsletter.md — copy the subject line and preview text into the email fields; the text below the divider is the blurb. (3) SOCIAL: choose from the five ready-to-post variants in social.md (announcement, student, faculty, why-it-matters, open-questions); each is under 280 characters. (4) Read PUBLICATION-NOTES.md first for editorial limitations: all claims are attributed to HKUST's own announcement (single-source, official pages only); the Prof. Jimmy Fung quote is paraphrased, not verbatim; department allocation, credit split, assessment, current-student impact and integrity/privacy are flagged as unconfirmed open questions. Do not present those as settled.",
+  "runId": "run-0005bd701419416b",
+  "semanticQuality": "unassessed",
+  "status": "packaged",
+  "taskId": "task-8a3b1bb751884d05",
+  "taskRevision": 0,
+  "version": 1
+}

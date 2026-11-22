@@ -1,0 +1,62 @@
+{
+  "agentId": "fund_manager",
+  "createdAt": 1795387078204,
+  "entrypoint": "deck/index.html",
+  "files": [
+    {
+      "artifactId": "artifact-18bcaf6317d04e46b24d1c699ee677d3",
+      "inherited": false,
+      "path": "deck/index.html",
+      "sha256": "d6bd02955b8c89ea561ddfaa7b0fd00d732f081122c2f6a886886368dabcbe0d",
+      "size": 7491,
+      "sourceRevision": 0,
+      "sourceTaskId": "task-3c4b9221c3aa4859"
+    },
+    {
+      "artifactId": "artifact-8c6d0d22b1ea4f8ca8724fa4390a1206",
+      "inherited": false,
+      "path": "deck/styles.css",
+      "sha256": "f923d531371e6e877369882a6d65f94d4628c5cb539e4e0beb2da21ac42ad65b",
+      "size": 1918,
+      "sourceRevision": 0,
+      "sourceTaskId": "task-3c4b9221c3aa4859"
+    },
+    {
+      "artifactId": "artifact-92added1f5154be78d55a9b2ce3a03f2",
+      "inherited": false,
+      "path": "deck/app.js",
+      "sha256": "0a80458efa6be4601c4109360731b5c515d4419d196468552f13f057f0e9f662",
+      "size": 1080,
+      "sourceRevision": 0,
+      "sourceTaskId": "task-3c4b9221c3aa4859"
+    },
+    {
+      "artifactId": "artifact-1daffd82759f4feb9b552591a1496164",
+      "inherited": false,
+      "path": "deck/README.md",
+      "sha256": "fcfde4bb2d1df334d741e855f94a5e323600c87509e8d244188bb649e22d5530",
+      "size": 1905,
+      "sourceRevision": 0,
+      "sourceTaskId": "task-3c4b9221c3aa4859"
+    },
+    {
+      "artifactId": "artifact-b4bdc4be83644021af8191c81b09dc2d",
+      "inherited": false,
+      "path": "deck/slides.md",
+      "sha256": "6d86f9acc1a428ba1f7656d702d25a11e2e25c61bd732c855ac970d68bc98c5b",
+      "size": 3232,
+      "sourceRevision": 0,
+      "sourceTaskId": "task-3c4b9221c3aa4859"
+    }
+  ],
+  "id": "delivery-151cb3ea03f24177a4c0cf04c4a7564e",
+  "instructions": "Open deck/index.html in a browser. Navigate with ArrowRight/Space/PageDown (next), ArrowLeft/PageUp (previous), Home/End (first/last), or the on-screen Prev/Next buttons. 10 slides cover outlook, investment implications and key risks. See deck/README.md for sources and limitations.",
+  "purpose": "Published product candidate; independent review and formal delivery remain separate.",
+  "reviewStatusAtCreation": "pending",
+  "runId": "run-a7bbed97021941ad",
+  "semanticQuality": "unassessed",
+  "status": "candidate",
+  "taskId": "task-3c4b9221c3aa4859",
+  "taskRevision": 0,
+  "version": 1
+}

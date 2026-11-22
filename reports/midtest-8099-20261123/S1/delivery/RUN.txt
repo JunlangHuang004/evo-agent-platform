@@ -1,0 +1,11 @@
+Meeting Room Booking System v1.0.0 — how to use:
+
+1. Download/unzip the package and open app/index.html in a desktop browser (no build step, no server required).
+2. Check availability: pick a date in the Availability panel; each room (A–E) shows its booked slots for that date.
+3. Book a room: fill in room, date, start time, end time, your name, and a title, then click Book. Times are 30-minute slots between 08:00 and 18:00. Overlapping bookings for the same room/date are hard-blocked with a clear message.
+4. Cancel a booking: find it in the list, type the same booker name used to create it, and click Cancel. Only the original booker can cancel.
+5. Bookings persist in browser localStorage (key meetingRoomBookings.v1) and survive reloads.
+
+Files: app/index.html (entrypoint), app/app.js (logic), app/styles.css (styling), README.md (usage), RELEASE_NOTES.md (version + notes).
+
+Verification: independently QA-tested in real Chromium (verdict PASS) covering availability, booking, double-booking prevention, owner-only cancel, persistence, and storage read/write failure handling. Known limits: no mobile-overflow or two-page stale-tab test; data is per-browser.

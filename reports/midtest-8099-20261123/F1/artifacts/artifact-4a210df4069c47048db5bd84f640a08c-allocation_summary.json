@@ -1,0 +1,52 @@
+{
+  "task": "task-9307ccf5a078485e",
+  "title": "Confirm assumptions and finalize allocation",
+  "date": "2026-11-22",
+  "clarificationReceiptId": "human-reply-304fadbc5ac74880",
+  "assumptions": {
+    "age": 25,
+    "capital_hkd": 1000000,
+    "market": "US-listed equities/ETFs",
+    "horizon_years": "10+",
+    "risk_tolerance": "moderately_aggressive",
+    "objective": "long_term_capital_growth",
+    "currency": "USD assets acceptable; HKD/USD peg limits FX risk",
+    "liquidity": "no large withdrawal within 5 years",
+    "access": "US broker; ETF-based, no stock picking",
+    "constraints": "no ESG exclusions, no leverage, no crypto",
+    "confirmation_status": "confirmed_by_client_use_defaults"
+  },
+  "allocation": [
+    {"sleeve": "US broad market core", "weight": 0.45, "example": "VTI/ITOT"},
+    {"sleeve": "US large-cap growth/tech", "weight": 0.15, "example": "QQQ/VUG"},
+    {"sleeve": "Developed ex-US equities", "weight": 0.15, "example": "VEA/IEFA"},
+    {"sleeve": "Emerging markets", "weight": 0.10, "example": "VWO/IEMG"},
+    {"sleeve": "US investment-grade bonds", "weight": 0.10, "example": "BND/AGG"},
+    {"sleeve": "Cash/T-bills", "weight": 0.05, "example": "SGOV/BIL"}
+  ],
+  "equity_weight": 0.85,
+  "fixed_income_cash_weight": 0.15,
+  "total_weight": 1.0,
+  "rationale": [
+    "Long 10+ year horizon supports high equity weight",
+    "Moderately aggressive tolerance supports 85/15 split and growth tilt",
+    "Global diversification reduces single-market concentration",
+    "Low-cost ETFs match client preference and reduce fee drag"
+  ],
+  "trade_offs": [
+    "Higher equity weight raises expected return but larger drawdowns (~30-40%)",
+    "Growth/tech tilt raises return but increases concentration/volatility",
+    "International sleeves add diversification but currency/geopolitical risk",
+    "Bond sleeve reduces volatility but caps bull-market upside",
+    "No leverage/crypto bounds risk but forgoes higher-risk options"
+  ],
+  "risks": [
+    "market risk",
+    "concentration risk",
+    "currency risk",
+    "inflation risk",
+    "behavioral risk",
+    "liquidity risk"
+  ],
+  "limitations": "Simulated proposal, not personalized financial advice. ETF tickers illustrative. No live market data fetched in this task."
+}
