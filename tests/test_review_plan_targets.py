@@ -53,18 +53,23 @@ class ReviewPlanTargetsTests(unittest.TestCase):
         plan['tasks'][3]['dependsOn']=['Review','Draft']
         with self.assertRaisesRegex(ProtocolError,'direct dependsOn'):self.normalize(plan)
 
-    def test_declared_review_requires_distinct_explicit_qualified_owners(self):
-        for mode in ('same_owner','unknown_producer','unknown_reviewer','no_review_capability'):
+    def test_declared_review_requires_distinct_explicit_owners(self):
+        for mode in ('same_owner','unknown_producer','unknown_reviewer'):
             with self.subTest(mode=mode):
                 # Three participants avoid the separate mandatory-four-role guard.
                 plan={'tasks':[task('Draft','research'),{**task('Review','reviewer',['Draft']),'reviewOf':['Draft']}]}
                 if mode=='same_owner':plan['tasks'][0]['agentId']='reviewer'
                 elif mode=='unknown_producer':plan['tasks'][0].pop('agentId')
-                elif mode=='unknown_reviewer':plan['tasks'][1].pop('agentId')
-                else:plan['tasks'][1]['agentId']='coordinator'
+                else:plan['tasks'][1].pop('agentId')
                 ids=itertools.count()
                 with self.assertRaises(ProtocolError):
                     normalize_plan(plan,['research','reviewer','coordinator'],lambda _:str(next(ids)),12)
+        plan={'tasks':[task('Draft','research'),{**task('Review','coordinator',['Draft']),'reviewOf':['Draft']}]}
+        ids=itertools.count()
+        rows=normalize_plan(plan,['research','reviewer','coordinator'],lambda _:str(next(ids)),12)
+        self.assertEqual(rows[1]['agentId'],'coordinator')
+        self.assertEqual(rows[1]['reviewOf'],[rows[0]['id']])
+        self.assertNotIn('review',rows[1]['requiredCapabilities'])
 
     def test_context_compaction_preserves_review_targets_exactly(self):
         rows=self.normalize(self.plan());review=rows[2]

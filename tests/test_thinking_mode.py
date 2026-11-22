@@ -99,5 +99,22 @@ class ThinkingModeTests(unittest.TestCase):
         self.assertEqual(self.app.repo.get_run(run['id'])['calls'][0]['transport'],call['transport'])
         self.assertNotIn(config.api_key,json.dumps(run))
 
+    def test_reasoning_content_is_kept_apart_from_the_visible_reply(self):
+        raw=json.dumps({'model':'fixture-reported-model','choices':[{'finish_reason':'stop','message':{
+            'content':'pong','reasoning_content':'Think sk-abcdefghijklmnopqrstuvwxyz then answer.'}}],
+            'usage':{'total_tokens':3}}).encode()
+        class Reasoning(Response):
+            def __init__(self):
+                self.raw=raw
+                self.headers={'Content-Length':str(len(self.raw))}
+        config=self.config()
+        with patch('backend.provider.urllib.request.build_opener') as build:
+            build.return_value.open.return_value=Reasoning()
+            result=ModelClient(config).complete([{'role':'user','content':'fixture'}])
+        self.assertEqual(result['content'],'pong')
+        self.assertIn('Think',result['reasoning'])
+        self.assertNotIn('sk-',result['reasoning'])
+        self.assertIn('[REDACTED]',result['reasoning'])
+
 
 if __name__=='__main__':unittest.main()

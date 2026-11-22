@@ -2,6 +2,7 @@
 import copy
 import hashlib
 import json
+import time
 from pathlib import Path
 import tempfile
 import unittest
@@ -9,7 +10,7 @@ from unittest.mock import patch
 
 from backend.config import Config
 from backend.engine import Platform
-from backend.runtime import ProtocolError, parse_object
+from backend.runtime import ProtocolError, parse_object, rewrite_single_action, rewrite_single_tool_markup
 from backend.tools import ToolGateway
 
 
@@ -51,17 +52,36 @@ class ProtocolRecoveryTests(unittest.TestCase):
             self.app.shutdown();self.app.wait_for_idle(3);self.app.repo.close()
         self.temp.cleanup()
 
-    def run_model(self,responses,**settings):
+    def run_model(self,responses,wait=True,**settings):
         config=Config(Path(self.temp.name),{'LLM_API_KEY':'fixture-key-must-not-leak','MAX_RETRIES':'0',
                      'MAX_MODEL_CALLS':'20','MAX_AGENT_TURNS':'8','MAX_RUN_TOKENS':'200000',**settings})
         model=ProtocolModel(responses);tools=LocalFiles(config)
         self.app=Platform(config,provider=model,tools=tools)
         self.app.action({'action':'send','channelId':'group','mode':'task','participants':['coordinator'],
                          'text':'Complete a general task and report only actual results.'})
+        if not wait:
+            return model,tools,None,None
         self.assertTrue(self.app.wait_for_idle(4),'format recovery must terminate')
         run=self.app.snapshot()['sessions']['group']['run']
         task=next(item for item in run['steps'] if item.get('kind')!='planning')
         return model,tools,run,task
+
+    def pending_repair(self):
+        deadline=time.monotonic()+4
+        while time.monotonic()<deadline:
+            run=self.app.snapshot()['sessions']['group'].get('run')
+            approval=next((item for item in (run or {}).get('approvals',[])
+                           if item.get('type')=='protocol_repair' and item.get('status')=='pending'),None)
+            if approval:
+                return run,approval
+            time.sleep(.02)
+        self.fail('expected a pending protocol repair approval')
+
+    def finish(self):
+        self.assertTrue(self.app.wait_for_idle(4),'format recovery must terminate')
+        run=self.app.snapshot()['sessions']['group']['run']
+        task=next(item for item in run['steps'] if item.get('kind')!='planning')
+        return run,task
 
     def test_bad_response_and_specific_error_are_returned_to_agent_and_audited(self):
         bad='{"type":"final",\n"text":}'
@@ -86,19 +106,38 @@ class ProtocolRecoveryTests(unittest.TestCase):
         self.assertEqual(stored_task['protocolErrors'],task['protocolErrors'])
         self.assertTrue(any(item['content']==bad for item in stored_task['_messages']))
 
-    def test_repeated_invalid_json_stops_after_two_repairs_with_protocol_failure(self):
-        model,tools,run,task=self.run_model(['No JSON action was returned.'])
+    def test_repeated_invalid_json_asks_before_failing_and_denial_stops_the_task(self):
+        model,tools,_,_=self.run_model(['No JSON action was returned.'],wait=False)
+        run,approval=self.pending_repair()
+        self.assertEqual(run['status'],'waiting_human')
         self.assertEqual(len(model.action_messages),3)
+        self.app.action({'action':'approval','channelId':'group','runId':run['id'],'approvalId':approval['id'],'choiceId':'deny'})
+        run,task=self.finish()
         self.assertEqual(task['turns'],3)
         self.assertEqual(task['status'],'failed')
         self.assertEqual(task['error']['code'],'protocol')
-        self.assertIn('2 次格式修复',task['error']['message'])
+        self.assertIn('2 次自动格式修复',task['error']['message'])
+        self.assertIn('人工未批准再次格式修复',task['error']['message'])
         self.assertEqual(run['status'],'failed')
         self.assertEqual([item['retrying'] for item in task['protocolErrors']],[True,True,False])
         self.assertEqual(len([event for event in run['events'] if event['type']=='protocol_parse_failed']),3)
+        self.assertFalse(any(event['type']=='protocol_repair_granted' for event in run['events']))
         self.assertEqual(run['modelCalls'],4,'planning and three real fixture responses are all budgeted')
         self.assertEqual(run['tokenUsage'],20)
         self.assertEqual(self.app.state['sessions']['group']['run'].get('_reservedTokens',0),0)
+        self.assertFalse(tools.executed)
+
+    def test_human_can_grant_one_more_format_repair(self):
+        model,tools,_,_=self.run_model(['No JSON action was returned.','No JSON action was returned.','No JSON action was returned.',
+                                        {'type':'final','text':'Recovered after one granted repair.'}],wait=False)
+        run,approval=self.pending_repair()
+        self.app.action({'action':'approval','channelId':'group','runId':run['id'],'approvalId':approval['id'],'choiceId':'allow'})
+        run,task=self.finish()
+        self.assertEqual(run['status'],'done')
+        self.assertEqual(task['status'],'done')
+        self.assertEqual(len(model.action_messages),4)
+        self.assertTrue(any(event['type']=='protocol_repair_granted' for event in run['events']))
+        self.assertTrue(any('humanGranted' in item['content'] for item in model.action_messages[-1] if item['role']=='user'))
         self.assertFalse(tools.executed)
 
     def test_parse_repair_never_replays_a_previously_successful_file_write(self):
@@ -167,6 +206,128 @@ class ProtocolRecoveryTests(unittest.TestCase):
         with patch('backend.runtime.json.JSONDecoder.raw_decode',side_effect=RecursionError('decoder depth limit')):
             with self.assertRaises(ProtocolError) as nested:parse_object('{"x":0}')
         self.assertIn('嵌套过深',str(nested.exception))
+
+    def test_single_tool_markup_is_rewritten_and_executed_without_another_repair(self):
+        markup='<tool><name>file.write</name><args>{"path":"rewritten.md","content":"from markup\\n"}</args></tool>'
+        model,tools,run,task=self.run_model([markup,{'type':'final','text':'Wrote the rewritten file.'}])
+        self.assertEqual(run['status'],'done')
+        self.assertEqual([name for name,_,_ in tools.executed],['file.write'])
+        self.assertEqual((tools.workspace('coordinator',run['id'])/'rewritten.md').read_text(),'from markup\n')
+        self.assertEqual(len(model.action_messages),2)
+        self.assertFalse(task.get('protocolErrors'))
+        event=next(item for item in run['events'] if item['type']=='protocol_format_rewritten')
+        self.assertEqual(event['payload']['original'],markup)
+        self.assertEqual(event['payload']['tool'],'file.write')
+        self.assertTrue(any(item.get('kind')=='model_response' and item.get('text')==markup for item in run['transcript']))
+        call=next(item for item in run['calls'] if item['id']==event['payload']['callId'])
+        self.assertEqual(call['protocolStatus'],'format_rewritten')
+        accepted=next(item['content'] for item in model.action_messages[1] if item['role']=='assistant')
+        self.assertEqual(json.loads(accepted),{'type':'tool','name':'file.write','args':{'path':'rewritten.md','content':'from markup\n'}})
+        self.assertNotIn('<tool>',accepted)
+
+    def test_ambiguous_or_disallowed_markup_is_not_rewritten_or_executed(self):
+        prose='use this <tool><name>file.write</name><args>{"path":"no.md","content":"x"}</args></tool>'
+        _,tools,run,task=self.run_model([prose,{'type':'final','text':'No file was written.'}])
+        self.assertEqual(run['status'],'done')
+        self.assertFalse(tools.executed)
+        self.assertEqual(len(task['protocolErrors']),1)
+        self.assertFalse(any(item['type']=='protocol_format_rewritten' for item in run['events']))
+
+    def test_disallowed_tool_markup_stays_on_the_model_repair_path(self):
+        markup='<tool><name>web.fetch</name><args>{"url":"https://example.com/source"}</args></tool>'
+        _,tools,_,_=self.run_model([markup],wait=False)
+        run,approval=self.pending_repair()
+        self.assertEqual(approval['type'],'protocol_repair')
+        self.app.action({'action':'approval','channelId':'group','runId':run['id'],'approvalId':approval['id'],'choiceId':'deny'})
+        run,task=self.finish()
+        self.assertEqual(task['status'],'failed')
+        self.assertFalse(tools.executed)
+        self.assertFalse(any(item['type']=='protocol_format_rewritten' for item in run['events']))
+        self.assertEqual(len(task['protocolErrors']),3)
+
+    def test_one_extra_closer_restores_the_original_final(self):
+        final={'type':'final','text':'Closed from one extra brace.'}
+        broken=json.dumps(final)+'}'
+        model,_,run,task=self.run_model([broken])
+        self.assertEqual(run['status'],'done')
+        self.assertEqual(task['status'],'done')
+        self.assertFalse(task.get('protocolErrors'))
+        self.assertEqual(len(model.action_messages),1)
+        event=next(item for item in run['events'] if item['type']=='protocol_format_rewritten')
+        self.assertEqual(event['payload']['action'],'final')
+        self.assertEqual(event['payload']['original'],broken)
+        self.assertNotIn('tool',event['payload'])
+
+    def test_one_mismatched_closer_still_writes_the_original_file(self):
+        action={'type':'tool','name':'file.write','args':{'path':'brief.md','content':'see } and ] now\n'}}
+        broken=json.dumps(action,ensure_ascii=False)[:-1]+']'
+        _,tools,run,task=self.run_model([broken,{'type':'final','text':'Wrote the repaired brief.'}])
+        self.assertEqual(run['status'],'done')
+        self.assertEqual([name for name,_,_ in tools.executed],['file.write'])
+        self.assertEqual((tools.workspace('coordinator',run['id'])/'brief.md').read_text(),'see } and ] now\n')
+        self.assertFalse(task.get('protocolErrors'))
+        event=next(item for item in run['events'] if item['type']=='protocol_format_rewritten')
+        self.assertEqual(event['payload']['tool'],'file.write')
+
+
+class ToolMarkupRewriteTests(unittest.TestCase):
+    def rewrite(self, text, allowed=('file.read','file.write','web.fetch')):
+        return rewrite_single_tool_markup(text, set(allowed))
+
+    def test_live_shapes_become_one_tool_action(self):
+        fetch=self.rewrite('<tool><name>web.fetch</name><args>{"url":"https://hkust.edu.hk/news/item"}</args></tool>')
+        self.assertEqual(fetch,{'type':'tool','name':'web.fetch','args':{'url':'https://hkust.edu.hk/news/item'}})
+        spaced=self.rewrite('<think>plan</think>\n<tool>\n<name>file.read</name>\n<args>{"path":"brief.md","find":"a}b"}</args>\n</tool>\n')
+        self.assertEqual(spaced['name'],'file.read')
+        self.assertEqual(spaced['args']['find'],'a}b')
+        embedded=self.rewrite('<tool><name>file.write</name><args>{"path":"a.md","content":"see </args> now"}</args></tool>')
+        self.assertEqual(embedded['args']['content'],'see </args> now')
+
+    def test_ambiguous_markup_is_left_untouched(self):
+        samples=[
+            'Please fetch <tool><name>web.fetch</name><args>{"url":"https://example.com"}</args></tool>',
+            '<tool><name>file.read</name><args>{"path":"a.md"}</args></tool><tool><name>file.list</name><args>{"path":"."}</args></tool>',
+            '<tool><name>file.read</name><args>["a.md"]</args></tool>',
+            '<tool><name>file.read</name><args>not-json</args></tool>',
+            '<tool><args>{"path":"a.md"}</args><name>file.read</name></tool>',
+            '<tool><name>file.read</name><args>{"path":"a.md"}{"path":"b.md"}</args></tool>',
+            '<think><tool><name>file.read</name><args>{"path":"secret.md"}</args></tool></think>',
+            '<tool><name>git.push</name><args>{"remote":"origin","branch":"main","commit":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}</args></tool>',
+            '{"type":"tool","name":"file.read","args":{"path":"a.md"}}',
+        ]
+        for sample in samples:
+            self.assertIsNone(self.rewrite(sample),sample)
+
+
+class SingleActionRewriteTests(unittest.TestCase):
+    def rewrite(self, text, allowed=('file.read','file.write','web.fetch')):
+        return rewrite_single_action(text, set(allowed))
+
+    def test_one_structural_difference_restores_the_same_action(self):
+        final={'type':'final','status':'done','text':'Confirmed brief.'}
+        self.assertEqual(self.rewrite(json.dumps(final)+'}'), final)
+        self.assertEqual(self.rewrite(json.dumps(final)+']'), final)
+        self.assertEqual(self.rewrite('<text>\n'+json.dumps(final)+'\n</text>'), final)
+        self.assertEqual(self.rewrite(json.dumps(final)[:-1]+',}'), final)
+        write={'type':'tool','name':'file.write','args':{'path':'a.md','content':'see } and ]\n'}}
+        self.assertEqual(self.rewrite(json.dumps(write)[:-1]+']'), write)
+        fenced='```json\n'+json.dumps(final)+'}\n```'
+        self.assertEqual(self.rewrite(fenced), final)
+
+    def test_ambiguous_or_prose_replies_stay_unparsed(self):
+        samples=[
+            '<text>I will inspect the artifact.</text>',
+            'use this '+json.dumps({'type':'final','text':'ok'}),
+            json.dumps({'type':'final','text':'ok'})+' thanks',
+            json.dumps({'type':'final','text':'ok'})+'}}',
+            '{"type":"final","text":"ok",,}',
+            '{"a":[1}]',
+            '{"text":"unterminated}',
+            '<text>'+json.dumps({'type':'final','text':'ok'})+'}</text>',
+            '{"type":"file.write","args":{"path":"a.md","content":"x"}}',
+        ]
+        for sample in samples:
+            self.assertIsNone(self.rewrite(sample),sample)
 
 
 if __name__=='__main__':unittest.main()

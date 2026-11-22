@@ -100,7 +100,18 @@ class SerpSearchTests(unittest.TestCase):
         request.assert_called_once();self.assertEqual(result['provider'],'SerpAPI')
         self.assertEqual([r['url'] for r in result['results']],['https://example.edu/paper','https://example.org/other'])
         self.assertTrue(result['resultsAreUnfetched']);self.assertNotIn('snippet',result['results'][0])
+        self.assertNotIn('sources',result)
         self.assertNotIn('test-serp-secret',str(result));self.assertNotIn('api_key',result['sourceUrl'])
+
+    def test_google_redirects_keep_titles_without_unfetchable_urls(self):
+        goto='https://www.google.com/goto?url='+'A'*400
+        rows=[{'title':'Redirected event','link':goto},
+              {'title':'Direct event','link':'https://example.edu/event'}]
+        with patch.object(self.gateway,'_serp_response',return_value={'organic_results':rows}):
+            result=self.gateway.execute('research','search-test','web.search',{'query':'HKUST event','max_results':5})
+        self.assertEqual(result['results'],[{'title':'Direct event','url':'https://example.edu/event'}])
+        self.assertEqual(result['unresolvedRedirectTitles'],['Redirected event'])
+        self.assertNotIn(goto,str(result))
 
     def test_real_empty_results_are_not_provider_failure(self):
         with patch.object(self.gateway,'_serp_response',return_value={'organic_results':[]}):result=self.call()

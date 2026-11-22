@@ -186,13 +186,15 @@ class MemoryService:
         return copy.deepcopy(memory)
 
     def propose(self, agent_id, lesson, trigger, source_task, source_run, evidence,
-                conditions='', kind='procedural', channel_id='group', supersedes=None):
+                conditions='', kind='procedural', channel_id='group', supersedes=None,
+                signature=None):
         if isinstance(lesson, dict):
             specification = lesson
             lesson = specification.get('lesson', '')
             trigger = specification.get('trigger', trigger)
             conditions = specification.get('conditions', conditions)
             supersedes = specification.get('supersedes', supersedes)
+            signature = specification.get('signature', signature)
         if kind not in ('procedural', 'semantic'):
             raise ValueError('Only procedural/semantic strategies can be proposed; episodes use record_episode.')
         memory = self._base(agent_id, kind, channel_id)
@@ -208,8 +210,27 @@ class MemoryService:
                       conditions=self._text(conditions, 'conditions'), source_task=source_task, sourceTaskId=source_task,
                       source_run=source_run, sourceRunId=source_run, evidence=copy.deepcopy(evidence if isinstance(evidence, list) else [evidence]) if evidence else [],
                       supersedes=list(dict.fromkeys(replacements)))
+        if isinstance(signature, str) and signature.strip():
+            memory['sourceSignature'] = signature.strip()[:200]
         self.repo.add_memory(agent_id, memory)
         return copy.deepcopy(memory)
+
+    def find_by_signature(self, agent_id, signature, channel_id='group', kind='procedural'):
+        """Return the agent's current memory for this task signature, if any.
+
+        Used by success-based auto-learning to stay idempotent: the same task
+        type never produces more than one candidate per agent per channel.
+        """
+        if not isinstance(signature, str) or not signature.strip():
+            return None
+        target = signature.strip()[:200]
+        for memory in self.repo.memories(self._owner(agent_id)):
+            if (memory.get('sourceSignature') == target
+                    and memory.get('kind') == kind
+                    and memory.get('channelId') == channel_id
+                    and memory.get('status') not in ('archived', 'superseded', 'rejected')):
+                return copy.deepcopy(memory)
+        return None
 
     def confirm(self, memory_id, owner, confirmed: bool, reason=''):
         if type(confirmed) is not bool:
@@ -252,6 +273,48 @@ class MemoryService:
                 raise ValueError('Sharing requires a verified strategy and explicit human approval.')
             memory.update(visibility='shared', shareConfirmation={**receipt, 'confirmedAt': self._iso(self._now())})
             return self.repo.update_memory(owner, memory)
+
+    def record_success_streak(self, memory_id, owner, source_task, source_run,
+                              *, threshold=2, reason=None):
+        """Count real success observations for a candidate; auto-confirm at threshold.
+
+        Each distinct source_task adds one success observation. Reaching the
+        threshold while the memory is still a candidate promotes it with an
+        explicit ``result:<id>`` receipt (never a model self-report). Already
+        verified memories gain feedback only; a memory that was rejected or
+        archived is left untouched. Idempotent per source_task.
+        """
+        if not isinstance(threshold, int) or threshold < 2:
+            raise ValueError('Auto-confirm needs at least two distinct successes.')
+        task_id = self._text(source_task, 'source_task', True, 300)
+        run_id = self._text(source_run, 'source_run', True, 300)
+        with self.repo.lock:
+            memory = self._get(memory_id, owner)
+            if memory.get('kind') not in ('procedural', 'semantic'):
+                raise ValueError('Only procedural/semantic strategies accept success streaks.')
+            if memory.get('status') in ('archived', 'superseded', 'rejected'):
+                return {'applied': False, 'memory': copy.deepcopy(memory),
+                        'reason': 'non_active_status'}
+            witnesses = list(memory.get('successWitnesses') or [])
+            if task_id in witnesses:
+                return {'applied': False, 'memory': copy.deepcopy(memory),
+                        'reason': 'duplicate_witness'}
+            witnesses.append(task_id)
+            memory['successWitnesses'] = witnesses[-10:]
+            memory['successStreak'] = len(memory['successWitnesses'])
+            now = self._iso(self._now())
+            memory.update(lastActivityAt=now, updatedAt=now)
+            self.repo.update_memory(owner, memory)
+        promoted = False
+        if (memory['successStreak'] >= threshold
+                and memory.get('status') == 'candidate'
+                and not _verified(memory)):
+            receipt_id = (reason if isinstance(reason, str) and reason.startswith('result:')
+                          else 'result:' + run_id + ':' + task_id)
+            memory = self.confirm(memory_id, owner, True, receipt_id)
+            promoted = True
+        return {'applied': True, 'memory': memory, 'promoted': promoted,
+                'streak': memory.get('successStreak', 0)}
 
     def feedback(self, agent_id, memory_id, success, source_task):
         if type(success) is not bool:

@@ -10,7 +10,7 @@ import threading
 
 from .config import Config
 from .engine import Platform, ActionError
-from .teams import DEFAULT_TEAM, get_team_agents, list_teams
+from .teams import DEFAULT_TEAM, create_custom_team, get_team_agents, list_teams, load_custom_teams
 from .delivery import delivery_zip
 
 PUBLIC_FILES = {'index.html', 'styles.css', 'panels.css', 'js/main.js', 'js/view.js',
@@ -25,6 +25,13 @@ class TeamHub:
         self.platforms = {DEFAULT_TEAM: default_platform} if default_platform is not None else {}
         self.lock = threading.RLock()
         self.closing = False
+        load_custom_teams(config.data_dir)
+
+    def create(self, name):
+        with self.lock:
+            if self.closing:
+                raise ActionError('服务正在停止。', 503)
+            return create_custom_team(name)
 
     def get(self, team_id=DEFAULT_TEAM):
         if not isinstance(team_id, str):
@@ -179,7 +186,8 @@ def make_handler(platform):
                 return self._json(403, {'error': '拒绝跨站请求。'})
             if self.headers.get('X-EvoMAC-Client') != '1':
                 return self._json(403, {'error': '缺少客户端请求标记。'})
-            if urlsplit(self.path).path != '/api/action':
+            path = urlsplit(self.path).path
+            if path not in ('/api/action', '/api/teams'):
                 return self._json(404, {'error': 'Not found'})
             if self.headers.get_content_type() != 'application/json':
                 return self._json(415, {'error': '请使用 application/json。'})
@@ -190,6 +198,9 @@ def make_handler(platform):
                 payload = json.loads(self.rfile.read(size))
                 if not isinstance(payload, dict):
                     raise ActionError('请求必须为 JSON 对象。')
+                if path == '/api/teams':
+                    team = hub.create(payload.get('name'))
+                    return self._json(200, {'team': team, 'teams': list_teams()})
                 selected = hub.get(payload.get('team', DEFAULT_TEAM))
                 return self._json(200, selected.action({key: value for key, value in payload.items() if key != 'team'}))
             except (json.JSONDecodeError, UnicodeError, ValueError) as error:
@@ -214,8 +225,10 @@ def main():
     port = args.port or config.port
     # Local development service. Exposing this on a public interface requires authentication.
     server = ThreadingHTTPServer(('127.0.0.1', port), make_handler(hub))
+    config.terminal_trace = True
     print(f'EvoMAC: http://127.0.0.1:{port}/#workspace', flush=True)
     print(f'Provider: {config.provider} | Model: {config.model} | API configured: {bool(config.api_key)}', flush=True)
+    print('终端跟踪已打开：平台事件、工具结果，以及 DeepSeek 的思考和回复都会写在这个终端。', flush=True)
     if delivery_limits is not None:
         print('Delivery profile limits (upper bounds, not estimated usage): ' + json.dumps(delivery_limits), flush=True)
     if time_limits is not None:

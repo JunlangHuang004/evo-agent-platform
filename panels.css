@@ -31,6 +31,13 @@
 @media (min-width: 721px) { .message-list { max-height: max(240px, calc(100vh - 455px)); } }
 .panel-head > div { min-width: 0; }
 .panel-head p, .task-row p { overflow-wrap: anywhere; }
+.task-row { display: flex; align-items: flex-start; gap: 8px; }
+.task-row .task-detail-button { flex: 1; min-width: 0; text-align: left; }
+.task-row .task-retry { flex-shrink: 0; margin-top: 8px; }
+.task-row .item-topline { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+.task-row .item-topline strong { min-width: 0; }
+.task-topline-status { display: inline-flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.task-clock { color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .agent-option {
   min-width: 0;
   padding: 15px;
@@ -112,6 +119,8 @@
 .team-description { margin: -4px 0 12px; line-height: 1.65; }
 .team-picker { display: flex; align-items: center; gap: 8px; }
 .team-picker select { max-width: 270px; }
+.create-team-form:not([hidden]) { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.create-team-form input { width: 168px; }
 .history-control { margin-bottom: 16px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; }
 .history-control > summary { cursor: pointer; font-size: 13px; }
 .history-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 10px; }

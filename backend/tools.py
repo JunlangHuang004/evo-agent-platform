@@ -26,6 +26,7 @@ from .sandbox import (ToolError, SandboxManager, MAX_FILE_BYTES, SAFE_TEXT_SUFFI
                       read_text, write_text, delete_file, run_process, check_deadline, bounded_timeout)
 
 MAX_WEB_BYTES = 512 * 1024
+_PUBLIC_WEB_SNAPSHOT = re.compile(r'web-source-[a-f0-9]{64}/body\.txt\Z')
 MAX_READ_WINDOW_BYTES = 32 * 1024
 MAX_READ_WINDOW_LINES = 200
 MAX_FIND_MATCHES = 20
@@ -76,7 +77,7 @@ _SCHEMAS = {
     'git.push': _schema({'remote': {'type': 'string', 'maxLength': 2048}, 'branch': {'type': 'string', 'maxLength': 240}, 'commit': {'type': 'string', 'pattern': '^[a-f0-9]{40,64}$'}}, ['remote', 'branch', 'commit']),
 }
 _DESCRIPTIONS = {
-    'file.read': 'Read UTF-8 in this private workspace or granted imports. Use find:"functionName" with contextLines, or 1-based inclusive startLine/endLine to inspect targeted code instead of repeatedly reading whole modules. Full read remains the default. sha256 always hashes the complete file. Window results preserve exact UTF-8/line endings with actual ranges and partial-line flags; find returns matches[].content. mode identifies partial reads; truncated means a safety limit omitted requested text/matches, not that the requested window is the whole file.',
+    'file.read': 'Read UTF-8 in this private workspace, granted imports, or a same-run public web snapshot fetched by a teammate (imports/web-source-.../body.txt). Use find:"functionName" with contextLines, or 1-based inclusive startLine/endLine to inspect targeted code instead of repeatedly reading whole modules. Full read remains the default. sha256 always hashes the complete file. Window results preserve exact UTF-8/line endings with actual ranges and partial-line flags; find returns matches[].content. mode identifies partial reads; truncated means a safety limit omitted requested text/matches, not that the requested window is the whole file. A shared snapshot read is your own read, not a new fetch or acceptance.',
     'file.list': 'List public files in this private workspace or read-only imports.',
     'file.write': 'Create UTF-8 text. Existing-file replacement requires human approval bound to its SHA256; prefer patch.',
     'file.patch': 'Apply one unique exact old→new text replacement; requires human approval and unchanged original SHA256.',
@@ -575,8 +576,8 @@ class ToolGateway:
                 'truncated': result.get('truncated') is True,
                 'scope': 'same_agent_same_run_readonly',
                 'instruction': 'This is the actual fetched text snapshot, not a live update or verified claim. '
-                    'Use file.read with find/contextLines or startLine/endLine to recover missing passages; '
-                    'check sha256 and cite the original URL. A reference alone is not source evidence.'}}
+                    'Any teammate in this run may file.read this path and check sha256; that read is their own read, not a new fetch or acceptance. '
+                    'Use find/contextLines or startLine/endLine to recover missing passages and cite the original URL. A reference alone is not source evidence.'}}
         except (ToolError, OSError, ValueError):
             return {'sourceSnapshotUnavailable': 'snapshot_storage_unavailable'}
 
@@ -594,6 +595,31 @@ class ToolGateway:
         confined_path(base, relative, allow_root)
         return base, relative
 
+    def _public_web_snapshot(self, agent_id, run_id, path):
+        """Read-only body of a same-run public fetch. Private imports stay put."""
+        if not isinstance(path, str) or not path.startswith('imports/'):
+            return None
+        relative = path[len('imports/'):]
+        if _PUBLIC_WEB_SNAPSHOT.fullmatch(relative) is None:
+            return None
+        own = confined_path(self.sandbox.imports(agent_id, run_id), relative)
+        if own.is_symlink():
+            return None
+        if own.is_file():
+            return None
+        for other in self.agents:
+            if other == agent_id:
+                continue
+            try:
+                base = self.sandbox.imports(other, run_id)
+                target = confined_path(base, relative)
+            except ToolError:
+                continue
+            if target.is_symlink() or not target.is_file():
+                continue
+            return other, base, relative
+        return None
+
     def _approval(self, name, args, title, description):
         return {'ok': False, 'needsApproval': True, 'tool': name, 'args': dict(args), 'approval': {'title': title, 'description': description}}
 
@@ -603,6 +629,13 @@ class ToolGateway:
         base, relative = self._location(agent_id, run_id, value, writable=name not in ('file.read', 'file.list'), allow_root=name == 'file.list')
         path = confined_path(base, relative, allow_root=name == 'file.list')
         if name == 'file.read':
+            shared = self._public_web_snapshot(agent_id, run_id, value)
+            if shared is not None:
+                owner, shared_base, shared_relative = shared
+                content = read_text(shared_base, shared_relative)
+                result = _read_selection(value, content, args)
+                result.update(sharedWebSnapshot=True, snapshotOwnerAgentId=owner)
+                return result
             content = read_text(base, relative)
             return _read_selection(value, content, args)
         if name == 'file.list':
@@ -795,7 +828,7 @@ class ToolGateway:
         if not isinstance(rows, list):
             raise ToolError('search_unavailable', 'SerpAPI returned malformed organic results.', True)
         source_url = 'https://serpapi.com/search.json?' + urlencode({'engine': 'google', 'q': query})
-        results, seen = [], set()
+        results, seen, unresolved = [], set(), []
         for row in rows[:100]:
             if not isinstance(row, dict):
                 continue
@@ -805,15 +838,24 @@ class ToolGateway:
                     or self._serpapi_api_key in title or self._serpapi_api_key in target):
                 continue
             seen.add(target)
+            parsed = urlsplit(target)
+            if (parsed.hostname or '').lower() in ('google.com', 'www.google.com') and parsed.path.startswith('/goto'):
+                unresolved.append(title.strip()[:160])
+                continue
             results.append({'title': title.strip()[:300], 'url': target})
             if len(results) >= args.get('max_results', 5):
                 break
-        return {'ok': True, 'query': query, 'results': results, 'sources': results, 'provider': 'SerpAPI',
+        # results is the only link list. A second identical sources copy doubled every URL in context.
+        result = {'ok': True, 'query': query, 'results': results, 'provider': 'SerpAPI',
                 'sourceUrl': source_url,
                 'providerAttempts': [{'provider': 'SerpAPI', 'sourceUrl': source_url,
                                       'status': 'success', 'resultCount': len(results)}],
                 'resultsAreUnfetched': True,
                 'evidenceMeaning': 'Search returned discovery links only. Fetch/read each target before verifying claims.'}
+        if unresolved:
+            result['unresolvedRedirectTitles'] = unresolved[:8]
+            result['unresolvedRedirectMeaning'] = 'Titles only. These hits were Google redirect links without a fetchable URL; do not fetch google.com/goto.'
+        return result
 
     @staticmethod
     def _check_remote_format(remote):

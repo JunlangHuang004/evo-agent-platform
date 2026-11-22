@@ -212,9 +212,13 @@ class ModelClient:
                 content=''  # Reasoning can consume the cap before visible JSON.
             if not isinstance(content, str) or (not content.strip() and reason!='length'):
                 raise failure('模型没有返回有效的文本响应。','response_schema')
-            return {'content': self.config.scrub(content), 'usage': self.config.scrub(result.get('usage', {})),
+            returned = {'content': self.config.scrub(content), 'usage': self.config.scrub(result.get('usage', {})),
                     'model': result.get('model', self.config.model), 'finish_reason':reason,
                     'transport':self.config.scrub({**details,'elapsedMs':round((time.monotonic()-started)*1000,3)})}
+            reasoning = message.get('reasoning_content')
+            if isinstance(reasoning, str) and reasoning.strip():
+                returned['reasoning'] = self.config.scrub(reasoning)
+            return returned
         except urllib.error.HTTPError as error:
             # Do not echo provider response bodies; they may contain credentials or request content.
             details.update(headersReceived=True,httpStatus=error.code)

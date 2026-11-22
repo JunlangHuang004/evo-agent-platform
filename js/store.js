@@ -79,6 +79,11 @@ export async function setTeam(teamId){
   publish();
   const result=await refreshState();void refreshHistory();return result;
 }
+export async function createTeam(name){
+  const body=await request('/api/teams',{method:'POST',headers:{'Content-Type':'application/json','X-EvoMAC-Client':'1'},body:JSON.stringify({name})});
+  if(!body.team || !body.team.id || !Array.isArray(body.teams))throw new Error('后端没有返回新建的团队。');
+  state.teams=body.teams;publish();return body.team;
+}
 export async function refreshTeams(){
   try{const result=await request('/api/teams');if(!Array.isArray(result.teams))throw new Error('后端未提供团队列表。');state.teams=result.teams;publish();return true;}
   catch(error){state.client.loading=false;state.client.error=error.message;state.client.errorSource='connection';publish();return false;}
@@ -137,3 +142,4 @@ export const recoverRun=(channelId=state.activeChannel)=>action('recover',{},cha
 export const retryTask=(taskId,runId,channelId=state.activeChannel)=>action('retry_task',{taskId,runId},channelId);
 export const resolveApproval=(approvalId,choiceId,answer='',modifiedArgs,channelId=state.activeChannel)=>action('approval',{approvalId,choiceId,answer,...(modifiedArgs?{modifiedArgs}:{})},channelId);
 export const confirmMemory=(agentId,memoryId,confirmed)=>action('memory_confirm',{agentId,memoryId,confirmed});
+export const setRolePrompts=rolePrompts=>action('set_role_prompts',{rolePrompts});

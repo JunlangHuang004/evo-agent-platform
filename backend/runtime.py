@@ -3,6 +3,7 @@ import hashlib
 import json
 import re
 from .agents import AGENTS
+from .teams import SHARED_PROFILE_REQUIREMENT
 from .contracts import normalize_output_contract
 from .web_context import collect_web_records, project_web_record, full_web_view
 from .tool_context import compact_browser_result
@@ -17,14 +18,33 @@ def fingerprint(value):
     return hashlib.sha256(json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(',', ':')).encode()).hexdigest()
 
 
+def _model_visible_text(text):
+    """Apply the parser's existing normalization. This is not a format repair."""
+    text = re.sub(r'<think>.*?</think>', '', text, flags=re.S).strip()
+    if text.startswith('```'):
+        text = re.sub(r'^```(?:json)?\s*', '', text)
+        text = re.sub(r'\s*```$', '', text).strip()
+    return text
+
+
+def _one_json_object(text):
+    text = text.strip()
+    if not text.startswith('{'):
+        return None
+    try:
+        value, end = json.JSONDecoder().raw_decode(text)
+    except (json.JSONDecodeError, RecursionError):
+        return None
+    if not isinstance(value, dict) or text[end:].strip():
+        return None
+    return value
+
+
 def parse_object(text):
     if not isinstance(text, str):
         raise ProtocolError('模型响应必须为文本 JSON。')
-    text = re.sub(r'<think>.*?</think>', '', text, flags=re.S).strip()
+    text = _model_visible_text(text)
     # Accept fenced JSON, but require exactly one object rather than evaluating model code.
-    if text.startswith('```'):
-        text = re.sub(r'^```(?:json)?\s*', '', text)
-        text = re.sub(r'\s*```$', '', text)
     decoder = json.JSONDecoder()
     start = text.find('{')
     if start < 0:
@@ -38,6 +58,118 @@ def parse_object(text):
     if not isinstance(value, dict) or text[start+end:].strip():
         raise ProtocolError('模型应只返回一个 JSON 对象。')
     return value
+
+
+def rewrite_single_tool_markup(text, allowed_names):
+    """Turn one unambiguous tool tag into a tool action. Anything else stays unparsed."""
+    if not isinstance(text, str):
+        return None
+    text = re.sub(r'<think>.*?</think>', '', text, flags=re.S).strip()
+    if text.count('<tool>') != 1 or not text.startswith('<tool>') or not text.endswith('</tool>'):
+        return None
+    inner = text[len('<tool>'):-len('</tool>')]
+    matched = re.fullmatch(r'\s*<name>\s*([A-Za-z][A-Za-z0-9_.]*)\s*</name>\s*<args>(.*)</args>\s*', inner, re.S)
+    if matched is None or matched.group(1) not in allowed_names:
+        return None
+    raw_args = matched.group(2).strip()
+    try:
+        args, end = json.JSONDecoder().raw_decode(raw_args)
+    except json.JSONDecodeError:
+        return None
+    if raw_args[end:].strip() or not isinstance(args, dict):
+        return None
+    return {'type': 'tool', 'name': matched.group(1), 'args': args}
+
+
+def _unwrap_text_markup(text):
+    if text.count('<text>') != 1 or not text.startswith('<text>') or not text.endswith('</text>'):
+        return None
+    inner = text[len('<text>'):-len('</text>')]
+    return _one_json_object(inner)
+
+
+def _drop_one_closer(text):
+    if not text or text[-1] not in '}]':
+        return None
+    return _one_json_object(text[:-1])
+
+
+def _swap_one_closer(text):
+    """Replace the one closer that does not match its opener."""
+    stack = []
+    mismatched = []
+    in_string = False
+    escaped = False
+    for index, char in enumerate(text):
+        if in_string:
+            if escaped:
+                escaped = False
+            elif char == '\\':
+                escaped = True
+            elif char == '"':
+                in_string = False
+            continue
+        if char == '"':
+            in_string = True
+        elif char in '{[':
+            stack.append(char)
+        elif char in '}]':
+            if not stack:
+                return None
+            expected = '}' if stack.pop() == '{' else ']'
+            if char != expected:
+                mismatched.append((index, expected))
+    if in_string or stack or len(mismatched) != 1:
+        return None
+    index, expected = mismatched[0]
+    return _one_json_object(text[:index] + expected + text[index+1:])
+
+
+def _drop_one_trailing_comma(text):
+    indexes = []
+    in_string = False
+    escaped = False
+    for index, char in enumerate(text):
+        if in_string:
+            if escaped:
+                escaped = False
+            elif char == '\\':
+                escaped = True
+            elif char == '"':
+                in_string = False
+            continue
+        if char == '"':
+            in_string = True
+        elif char == ',':
+            rest = text[index+1:].lstrip()
+            if rest.startswith(('}', ']')):
+                indexes.append(index)
+    if in_string or len(indexes) != 1:
+        return None
+    index = indexes[0]
+    return _one_json_object(text[:index] + text[index+1:])
+
+
+def rewrite_single_action(text, allowed_names):
+    """Repair one unambiguous format defect into the original JSON action."""
+    if not isinstance(text, str):
+        return None
+    visible = _model_visible_text(text)
+    if not visible:
+        return None
+    found = []
+    seen = set()
+    for value in (rewrite_single_tool_markup(visible, allowed_names), _unwrap_text_markup(visible),
+                  _drop_one_closer(visible), _swap_one_closer(visible), _drop_one_trailing_comma(visible)):
+        if not isinstance(value, dict):
+            continue
+        key = json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(',', ':'))
+        if key not in seen:
+            seen.add(key)
+            found.append(value)
+    if len(found) != 1:
+        return None
+    return found[0]
 
 
 def strings(value, limit=12, width=1000):
@@ -143,8 +275,8 @@ def normalize_plan(value, participants, make_id, max_tasks, agents=None):
     for reviewer in tasks:
         if 'reviewOf' not in reviewer:continue
         owner=reviewer['agentId']
-        if owner is None or 'review' not in registry[owner].get('capabilities',[]):
-            raise ProtocolError('A reviewOf task needs an explicit selected agent with review capability.')
+        if not owner:
+            raise ProtocolError('A reviewOf task needs an explicit selected agent.')
         for target_id in reviewer['reviewOf']:
             target=by_id[target_id]
             if target_id==reviewer['id'] or target['agentId'] in (None,owner):
@@ -159,54 +291,62 @@ def normalize_plan(value, participants, make_id, max_tasks, agents=None):
                 raise ProtocolError('reviewOf cannot target final synthesis. Add the actual draft producer before independent review; final synthesis reports reviewed results.')
             if target_id not in reviewer['dependsOn']:
                 raise ProtocolError('Each reviewOf producer must be a direct dependsOn task so its delivered artifacts can use the existing authorized handoff. No dependency or access was added automatically.')
-        reviewer['requiredCapabilities']=list(dict.fromkeys([*reviewer['requiredCapabilities'],'review']))
+        if owner and 'review' in registry.get(owner,{}).get('capabilities',[]):
+            reviewer['requiredCapabilities']=list(dict.fromkeys([*reviewer['requiredCapabilities'],'review']))
     return tasks
 
 
 def planning_prompt(agents, limit):
     roles=', '.join(agent['id']+' ('+agent.get('name',agent['id'])+'; capabilities: '+','.join(agent.get('capabilities',[]))+')' for agent in agents)
     lead=next((agent['id'] for agent in agents if 'planning' in agent.get('capabilities',[])), agents[0]['id'])
+    review_rule=('A separate independent-review task is optional, not required. '
+                 'reviewOf does not require a capability named review; assign the check to the role that should do it. ')
     contract = ''
     if len(agents)==4:
         contract = (' Include real tasks for all selected roles, according to their identities and capabilities. '
-                    'The role with review capability independently assesses delivered work; code requires its own test evidence. '
+                    'Code requires its own test evidence when the request is code. '
                     'End with a synthesis task for '+lead+' depending directly/transitively on ALL other role tasks. '
                     'Do not force code/tests for a purely non-code task.')
     return ('Plan an executable task DAG. Reply only JSON. Use only these agents: '+roles+'. '
             f'Max {limit} tasks. Format: '+
             '{"summary":"brief","tasks":[{"id":"a","title":"goal","agentId":"'+agents[0]['id']+'","dependsOn":[],"acceptanceCriteria":["check"]}]}. '
-            'Return a compact plan, not implementation, code, long analysis or full task answers. Use short titles/goals and at most two concise acceptance criteria per task. '
+            'Return the smallest plan that covers the request, not implementation, code, long analysis or full answers. The task maximum is a ceiling, not a target. '
+            'Use short titles and at most two concise acceptance criteria. Combine confirmation, collection and note-taking; do not split them into successive formatted deliveries. '
+            'Do not require a strict file from every step. Confirmation, review and synthesis use final.text or a text contract. '
+            'Declare an artifact contract only for the requested product (draft, publication package, code, slides or download) and for at most one concise evidence brief another role must read. '
             'Optional task outputContract: {"kind":"text"}, {"kind":"artifact","extensions":[".html"],"minCount":1}, '
             '{"kind":"json","requiredKeys":["result"]}, or {"kind":"delivery"} for a final runnable/downloadable product package. '
             'For the actual product producer, artifact may additionally set candidateDelivery:true: publish its explicit entrypoint/assets/use instructions as a downloadable pending-review candidate before QA. Do not mark research notes or briefs as product candidates. '
             'Use a json output contract only for requested machine-readable data or an actual downstream parser. Ordinary review conclusions use a text contract for final.text; the required review action carries the structured verdict/evidence, and all actions remain JSON. '
             'For requested files/HTML/software deliverables declare a matching artifact contract; choose the formats from the actual request. '
-            'For a product request, prefer a compact requirements/design, implementation, independent validation, and packaging/delivery loop owned by the actual roles. '
+            'For a product request, prefer a compact requirements/design, implementation, and packaging/delivery loop owned by the actual roles. '
+            'Add independent validation only when the request needs that separate check. '
             'For an ordinary small runnable product with four roles, combine clarification and design in one lead-owned task; '
             'usually use five real tasks: lead requirements/design, developer implementation with candidate package, independent QA, release packaging, and final lead synthesis. '
+            'Omit the independent QA task when the request does not need a separate check. '
             'Adapt this guide to the actual task and selected capabilities; do not add a separate clarification task before the design task. '
             'The task maximum is a ceiling, not a target. Combine closely related implementation work and publish any design files needed by another role. '
             'Do not preallocate repeated fix/retest tasks; let an actual reviewer request bounded rework when evidence shows a defect. '
             'A usable product needs a real entrypoint, required assets and usage instructions; design notes alone are not a finished product. '
-            'Implementation tasks publish actual source artifacts and a declared candidate bundle before independent QA; candidate is not acceptance or formal release. For runnable software or website products, '
+            'When the plan includes independent QA, implementation tasks publish actual source artifacts and a declared candidate bundle before that QA; candidate is not acceptance or formal release. For runnable software or website products, '
             'give the final packaging task a delivery contract even if the user did not explicitly ask for a ZIP download; pure analysis needs no forced package. '
             'The packaging role must have authorized access to all required source snapshots; final synthesis receives ancestor outputs. '
-            'For written reports and presentations, independently review all substantive draft artifacts before packaging, not just their introductions. '
-            'For each independent review task, declare reviewOf:[producer task ids] and put those same producers in its direct dependsOn. '
-            'Assign producer and reviewer to different explicit agents. A substantive report/proposal/deck draft must exist as a producer task before that review; '
-            'include the actual full draft and companion introduction/social text, not just research notes. Final lead synthesis reports the reviewed result rather than first creating the product after its review. '
+            +review_rule+
+            'When you do add an independent review task, declare reviewOf:[producer task ids] and put those same producers in its direct dependsOn. '
+            'Assign producer and reviewer to different explicit agents. Review the substantive draft, not only research notes. '
             'reviewOf binds planned targets and ordering only: it does not prove completeness, grant extra access or record a verdict. '
-            'Checking research notes alone does not validate claims added later by the writer; plan a final-draft review and let the reviewer request author rework when needed. '
-            'Give that review explicit dependencies on the draft and relevant research/source-producing tasks so their published evidence can be granted through the existing handoff rules. A task title or unseen ancestor does not authorize access. '
-            'Final lead synthesis uses a text contract and reports existing products, reviews and gaps; put substantive product writing before its independent review, not in final synthesis. '
-            'Research handoffs need bounded evidence and explicit gaps. Where appropriate, let an independent reviewer publish a scoped usable-evidence brief for downstream writing; do not silently narrow mandatory user requirements or treat the original partial research as done. '
+            'Give that review explicit dependencies on the draft and relevant research tasks so published evidence can use the existing handoff. A task title or unseen ancestor does not authorize access. '
+            'Final lead synthesis uses a text contract and reports existing products and gaps; put substantive product writing in a producer task, not in final synthesis. '
+            'Research handoffs need bounded evidence and explicit gaps. Do not add a task only to republish research, and do not treat partial research as done. '
             'Choose only necessary tasks; dependencies use task ids, no cycles. Determine the approach from the actual request and prior context. '
             'Handle consequential clarification inside the responsible task before affected work; do not make a separate DAG task for every question. '
             'Reuse saved humanClarifications and ask only for unresolved consequential requirements or contradictions. '
             'Start concise evidence notes early, before the server stageControl acquisition cutoff. Plan explicit synthesis and handoff time; '
             'research is not finished merely because more URLs were fetched. '
-            'For upstream research/design consumed by other roles, declare a matching .md/.txt artifact contract and publish a concise '
-            'brief with actual source references, findings and gaps before final; a private file or prose claim alone is not shared delivery. '
+            'For upstream research consumed by other roles, publish at most one concise .md/.txt evidence brief with source references, findings and gaps. '
+            'Do not also require a formatted file from the preceding confirmation or from the reviewer. '
+            'Same-run public web snapshots are already readable with file.read by teammates; do not add a task whose only purpose is to republish or refetch those pages. '
+            'A private workspace file or unreified prose claim is still not a shared product. '
             'Use actual public sources for current claims; never invent future events, prices or source content. '
             'The current UTC date and prior conversation are in the user context. HTML/CSS/JavaScript deliverables are permitted. '+contract+
             '\n\nOfficial role identities (verbatim; identities do not grant tools):\n'+
@@ -243,7 +383,7 @@ def action_prompt(agent, definitions, task=None):
     source_guidance=(
         'For a necessary missing source after acquisition closes, request {"type":"tool","name":"web.fetch","args":{"url":"actual-known-url"},"evidenceGap":"specific missing fact or omitted body"}. '
         'The controller admits only URLs in this run actual human text or your current-task successful search/fetch links or actual file.read text; no free search or new permission. '
-        'Prefer authorized snapshot file.read when available; URL/SHA alone is not read content. The original global final_only still forbids fetch. '
+        'Prefer file.read of a same-run public web snapshot, including one fetched by a teammate, when its path and SHA256 are known; URL/SHA alone is not read content. Do not refetch a URL only because another teammate already fetched it. The original global final_only still forbids fetch. '
         ) if 'web.fetch' in allowed else ''
     code_review=('Code acceptance needs your own successful code.test callId bound to current artifacts; '
                  'For web products, derive checks from the requirements: exercise key user workflows, relevant failure branches, '
@@ -268,6 +408,7 @@ def action_prompt(agent, definitions, task=None):
     summary_guidance=('This final summary has an explicit text contract: readonly inspection and final.text only; do not rewrite, publish, repackage or execute products. '
         if isinstance(task,dict) and task.get('finalSummary') is True and (task.get('outputContract') or {}).get('kind')=='text' else '')
     return (agent.get('rolePrompt','You are '+agent['name']+'. '+agent.get('description',''))+'\n\n'
+        +SHARED_PROFILE_REQUIREMENT+'\n\n'
         'Reply one complete JSON action per turn, no prose. Use small modular files and exact file.patch edits; one file/change per turn. '
         'Tool action: {"type":"tool","name":"file.write","args":{"path":"x.py","content":"source"}}. '
         'Other actions: publish_artifact(path); publish_artifacts(paths); package_delivery(artifactIds,entrypoint,instructions); '
@@ -307,6 +448,7 @@ def action_prompt(agent, definitions, task=None):
         'Use the supplied date; label forecasts/scenarios, never invent future facts or source access. '
         +execution+
         'Workspace is private; imports are read-only (/imports/... in Docker). Copy granted imports into your workspace before modifying. '
+        'A same-run public web snapshot at imports/web-source-.../body.txt may be read with file.read by any teammate. That read is your own read, not a new fetch or acceptance. Private files, chat, memory and unpublished drafts stay private. '
         'file.write is private. Share with {"type":"publish_artifact","path":"relative/file.md"} or '
         '{"type":"publish_artifacts","paths":["app/index.html","app/app.js"]} (1–12 paths); check every result for partial failure. '
         'Actual returned artifact.id values enter task.outputs for handoff. '
@@ -513,7 +655,7 @@ def _compact_initial_context(content, limit, minimal=False):
     # disposable context fields and replace the task with an empty shell.
     context_fields={'task','runGoal','dependencyResults','authorizedArtifacts','ownArtifacts','previousArtifacts',
                     'humanClarifications','sourceReferences','groupHistory','memories','personalLearning','participants','teamId',
-                    'currentDateUTC','previousRunId','artifactRule','recentCalls','taskBoard','progressReceipt','stageControl','_contextTruncated','_omitted'}
+                    'currentDateUTC','previousRunId','artifactRule','recentCalls','taskBoard','teamBoard','progressReceipt','stageControl','_contextTruncated','_omitted'}
     task_source=source.get('task')
     server_context=(isinstance(task_source,dict) and isinstance(task_source.get('id'),str)
                     or isinstance(source.get('runGoal'),str) and isinstance(source.get('groupHistory'),list))
@@ -948,7 +1090,17 @@ def compress_messages(messages, limit, trusted_feedback=None):
         tail=[item for index,item in enumerate(copied[max(2,len(copied)-4):],max(2,len(copied)-4)) if index not in protected]
         remaining-=protected_cost
         initial_limit=remaining if not tail else max(remaining//2,len(minimum))
-        initial = {**copied[1], 'content': _compact_initial_context(copied[1]['content'], initial_limit)}
+        try:
+            initial_text=_compact_initial_context(copied[1]['content'], initial_limit)
+        except ProtocolError:
+            # A progress-receipt tail splits the slot in half. Width zero still
+            # keeps that receipt verbatim, so it can miss a limit the minimal
+            # projection already satisfied. Use that projection; do not drop
+            # task, dependency, or clarification indexes to squeeze it in.
+            if not tail or len(minimum)>initial_limit:
+                raise
+            initial_text=minimum
+        initial = {**copied[1], 'content': initial_text}
         result.append(initial)
         remaining -= len(initial['content'])
     for index, item in enumerate(tail):

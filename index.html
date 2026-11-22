@@ -31,6 +31,14 @@
         <section id="workspacePage" data-page="workspace" aria-label="工作台">
           <div class="workspace-toolbar">
             <label class="team-picker" for="teamSelect"><span class="muted text-small">团队场景</span><select id="teamSelect"><option value="default">连接后加载团队…</option></select></label>
+            <button id="createTeam" class="button quiet small" type="button">新建团队</button>
+            <form id="createTeamForm" class="create-team-form" hidden>
+              <label class="sr-only" for="createTeamName">团队名称</label>
+              <input id="createTeamName" maxlength="40" placeholder="团队名称" autocomplete="off">
+              <button class="button small" type="submit">创建</button>
+              <button id="cancelCreateTeam" class="button quiet small" type="button">取消</button>
+              <span id="createTeamError" class="text-small" role="status"></span>
+            </form>
             <label class="channel-picker" for="channelSelect"><span class="muted text-small">对话范围</span><select id="channelSelect"><option value="group">群聊 · 协作团队</option></select></label>
             <details id="participantsControl" class="participants-control">
               <summary>参与 Agent <span id="participantCount">4/4</span></summary>
@@ -43,6 +51,18 @@
             <span id="channelPrivacy" class="text-small muted">群聊任务可由所选 Agent 分工协作。</span>
           </div>
           <p id="teamDescription" class="team-description text-small muted">同一团队的后续任务保留协作上下文；不同团队的数据分别保存。</p>
+          <details id="rolePromptsControl" class="role-prompts-control" hidden>
+            <summary>注入角色提示词与能力 profile <span id="rolePromptsBadge" class="text-small muted"></span></summary>
+            <div class="role-prompts-panel">
+              <p class="text-small muted">每个 Agent 可以勾选多个能力 profile，工具和调度能力取并集。再粘贴老师给的角色提示词（决定模型看到的身份叙述）。工具白名单仍只来自后端 profile 表，模型无法通过提示词扩大权限。至少保留一个 profile。保存后立即生效，运行中无法修改。</p>
+              <div id="rolePromptsFields" class="role-prompts-fields"></div>
+              <div class="role-prompts-actions">
+                <button id="saveRolePrompts" class="button" type="button">保存角色提示词与 profile</button>
+                <button id="revertRolePrompts" class="button quiet small" type="button">撤销修改</button>
+                <span id="rolePromptsStatus" class="text-small muted" role="status" aria-live="polite"></span>
+              </div>
+            </div>
+          </details>
           <details class="history-control"><summary>历史任务与导出</summary><div class="history-toolbar"><label for="historyRunSelect" class="sr-only">历史任务</label><select id="historyRunSelect"><option value="">暂无历史任务</option></select><button id="refreshHistory" class="button quiet small" type="button">刷新</button><button id="openHistoryRun" class="button quiet small" type="button" disabled>查看 / 导出</button></div><p id="historyError" class="text-small muted" role="status"></p></details>
           <div class="workspace-grid">
             <section class="panel conversation" aria-label="对话">

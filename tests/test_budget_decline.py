@@ -7,7 +7,7 @@ import tempfile
 import unittest
 
 from backend.config import Config
-from backend.engine import Platform, BudgetExceeded, clock_ms
+from backend.engine import Platform, BudgetExceeded, clock_ms, token_reservation, BUDGET_COMPLETION_RESERVE
 
 
 class NoTools:
@@ -97,15 +97,30 @@ class BudgetDeclineTests(unittest.TestCase):
         with self.assertRaises(BudgetExceeded):self.app._budget('group',self.run['id'],self.run['steps'][1],1)
         self.assertEqual(len(self.run['approvals']),1)
 
-    def test_allow_remains_exactly_one_explicit_bounded_extension(self):
+    def test_each_exhausted_budget_can_be_extended_again_until_that_amount_is_refused(self):
         original=copy.deepcopy(self.run['budget']);self.start(self.run['steps'][0]);self.answer(self.pending(),'allow');self.join()
         self.assertEqual(self.failures,[]);self.assertEqual(self.run['budgetExtensions'],1)
         self.assertEqual(self.run['budget']['modelCalls'],original['modelCalls']*2)
         self.assertEqual(self.run['budget']['tokens'],original['tokens']*2)
         self.assertNotIn('budgetExtensionDecision',self.run)
         self.run['modelCalls']=self.run['budget']['modelCalls']
+        self.failures.clear();self.threads.clear()
+        self.start(self.run['steps'][1]);approval=self.pending()
+        self.assertEqual(len(self.run['approvals']),2)
+        self.answer(approval,'deny');self.join()
+        self.assertEqual(len(self.failures),1);self.assertEqual(self.run['budgetExtensions'],1)
+        self.assertEqual(self.run['budget']['tokens'],original['tokens']*2)
         with self.assertRaises(BudgetExceeded):self.app._budget('group',self.run['id'],self.run['steps'][1],1)
-        self.assertEqual(len(self.run['approvals']),1)
+        self.assertEqual(len(self.run['approvals']),2)
+
+
+class TokenReservationTests(unittest.TestCase):
+    def test_provider_output_ceiling_is_not_reserved_in_full(self):
+        messages=[{'content':'x'*1000}]
+        self.assertEqual(token_reservation(messages,1000),500+1000+128)
+        reserved=token_reservation(messages,384000)
+        self.assertEqual(reserved,500+BUDGET_COMPLETION_RESERVE+128)
+        self.assertLess(reserved,500+384000+128)
 
 
 if __name__=='__main__':unittest.main()

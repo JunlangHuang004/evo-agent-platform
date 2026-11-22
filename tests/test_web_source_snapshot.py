@@ -49,15 +49,30 @@ class WebSourceSnapshotTests(unittest.TestCase):
         self.assertEqual(read['sha256'], snapshot['sha256'])
         self.assertEqual(found['matches'][0]['content'], read['content'])
 
-    def test_not_accessible_to_other_agents_runs_or_mutation_tools_even_if_approved(self):
+    def test_same_run_teammate_can_read_public_snapshot_without_refetch_or_private_access(self):
         snapshot = self.fetch()['sourceSnapshot']
-        for actor, run in [('executor', 'run1'), ('research', 'run2')]:
-            with self.subTest(actor=actor, run=run), self.assertRaises(ToolError):
-                self.gateway.execute(actor, run, 'file.read', {'path': snapshot['path']})
+        private = self.gateway.sandbox.imports('research', 'run1') / 'notes' / 'private.md'
+        private.parent.mkdir()
+        private.write_text('private reporter note')
+        with patch.object(self.gateway, '_web_fetch', side_effect=AssertionError('No refetch')):
+            read = self.gateway.execute('executor', 'run1', 'file.read', {'path': snapshot['path'], 'find': 'material', 'contextLines': 0})
+        self.assertEqual(read['sha256'], snapshot['sha256'])
+        self.assertEqual(read['matches'][0]['content'].strip(), 'A material claim')
+        self.assertTrue(read['sharedWebSnapshot'])
+        self.assertEqual(read['snapshotOwnerAgentId'], 'research')
+        listed = self.gateway.execute('executor', 'run1', 'file.list', {'path': 'imports'})
+        self.assertNotIn('web-source-' + snapshot['path'].split('web-source-')[1].split('/')[0],
+                         [item['name'] for item in listed['entries']])
+        for actor, run, path in (
+                ('research', 'run2', snapshot['path']),
+                ('executor', 'run2', snapshot['path']),
+                ('executor', 'run1', 'imports/notes/private.md')):
+            with self.subTest(actor=actor, run=run, path=path), self.assertRaises(ToolError):
+                self.gateway.execute(actor, run, 'file.read', {'path': path})
         for tool, args in [('file.write', {'content': 'forged'}),
                            ('file.patch', {'old': 'Observed', 'new': 'Forged'}), ('file.delete', {})]:
             with self.subTest(tool=tool), self.assertRaises(ToolError):
-                self.gateway.execute('research', 'run1', tool, {'path': snapshot['path'], **args}, approved=True)
+                self.gateway.execute('executor', 'run1', tool, {'path': snapshot['path'], **args}, approved=True)
         self.assertIn('Observed source', self.gateway.execute('research', 'run1', 'file.read',
             {'path': snapshot['path']})['content'])
 
