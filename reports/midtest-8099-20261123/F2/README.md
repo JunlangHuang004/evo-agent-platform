@@ -3,7 +3,7 @@
 半导体 HTML 幻灯片。平台 done；作为本轮最终展示包提供下载，原平台标签为 candidate。包含 HTML/CSS/JS、slide notes 和说明；未将 candidate 改写为 packaged。
 
 - 原始运行：`run-a7bbed97021941ad`
-- 活跃时间：6.58 分钟；模型调用：49 次。
+- 总耗时（含等待）：**6 分 26 秒**；日志活动计时：6 分 35 秒；模型调用：49 次。
 - [下载原始交付包](delivery.zip) · [解压目录](delivery/) · [运行证据](run-evidence.json)
 - [关键截图](preview.png)
 

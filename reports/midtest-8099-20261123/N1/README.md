@@ -3,7 +3,7 @@
 校园 AI 新闻。平台 done，正式 packaged 包；含网页报道、newsletter、social 和发布说明。
 
 - 原始运行：`run-0005bd701419416b`
-- 活跃时间：13.62 分钟；模型调用：81 次。
+- 总耗时（含等待）：**17 分 12 秒**；日志活动计时：13 分 37 秒；模型调用：81 次。
 - [下载原始交付包](delivery.zip) · [解压目录](delivery/) · [运行证据](run-evidence.json)
 - [关键截图](preview.png)
 
