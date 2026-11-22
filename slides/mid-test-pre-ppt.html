@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EvoMAC — Mid-test pre-slides</title>
+<style>
+  :root {
+    --paper: #f3efe6;
+    --ink: #1b1916;
+    --muted: #5e584e;
+    --line: #d8d0c2;
+    --card: #fffdf8;
+    --accent: #0e5f5c;
+    --accent-soft: #e5f2f1;
+    --warn: #8d342c;
+    --ok: #24633a;
+    --shadow: 0 18px 50px rgba(40, 32, 20, 0.12);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #2a2622; color: var(--ink); font-family: "Avenir Next", "Segoe UI", sans-serif; }
+  button, .deck { font: inherit; }
+  .deck { height: 100%; display: grid; place-items: center; }
+  .frame { width: calc(1120px * var(--s, 1)); height: calc(630px * var(--s, 1)); }
+  .stage {
+    width: 1120px;
+    height: 630px;
+    background: var(--paper);
+    border-radius: 14px;
+    box-shadow: var(--shadow);
+    position: relative;
+    overflow: hidden;
+    transform: scale(var(--s, 1));
+    transform-origin: top left;
+  }
+  .slide {
+    display: none;
+    position: absolute;
+    inset: 0;
+    padding: 42px 52px 64px;
+  }
+  .slide.active { display: flex; flex-direction: column; }
+  .kicker {
+    margin: 0 0 8px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    font-size: 12px;
+    color: var(--accent);
+    font-weight: 700;
+  }
+  h1, h2 { font-family: "Iowan Old Style", Palatino, Georgia, serif; font-weight: 600; letter-spacing: -0.02em; margin: 0; }
+  h1 { font-size: 52px; line-height: 1.05; max-width: 16ch; }
+  h2 { font-size: 32px; line-height: 1.15; }
+  .lede { margin: 16px 0 0; max-width: 62ch; color: var(--muted); font-size: 18px; line-height: 1.45; }
+  .grid { display: grid; gap: 14px; margin-top: 22px; }
+  .grid.two { grid-template-columns: 1.15fr 0.85fr; }
+  .grid.three { grid-template-columns: repeat(3, 1fr); }
+  .grid.four { grid-template-columns: repeat(4, 1fr); }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 14px 16px;
+  }
+  .card h3 { margin: 0 0 6px; font-size: 15px; }
+  .card p, .card li { margin: 0; color: var(--muted); font-size: 13.5px; line-height: 1.4; }
+  .card ul { margin: 0; padding-left: 16px; }
+  .card li + li { margin-top: 4px; }
+  .num { font-variant-numeric: tabular-nums; font-family: "Iowan Old Style", Palatino, Georgia, serif; font-size: 28px; color: var(--ink); }
+  .tag { display: inline-block; border-radius: 999px; padding: 2px 8px; font-size: 11px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
+  .tag.done { background: #e5f3e8; color: var(--ok); }
+  .tag.partial { background: #f8ebe4; color: var(--warn); }
+  .tag.note { background: var(--accent-soft); color: var(--accent); }
+  table { width: 100%; border-collapse: collapse; margin-top: 16px; font-size: 13.5px; }
+  th { text-align: left; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 700; padding: 0 8px 8px 0; }
+  td { padding: 8px 8px 8px 0; border-top: 1px solid var(--line); vertical-align: top; }
+  td.right, th.right { text-align: right; font-variant-numeric: tabular-nums; }
+  .flow { display: flex; align-items: stretch; gap: 8px; margin-top: 18px; }
+  .flow .step {
+    flex: 1;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 12px;
+    min-height: 92px;
+  }
+  .flow .step strong { display: block; font-size: 13px; margin-bottom: 4px; }
+  .flow .step span { color: var(--muted); font-size: 12px; line-height: 1.35; }
+  .arrow { align-self: center; color: var(--accent); font-size: 18px; }
+  .ph {
+    border: 1.5px dashed #b7ad9c;
+    background:
+      linear-gradient(135deg, transparent 46%, rgba(14,95,92,0.08) 46%, rgba(14,95,92,0.08) 54%, transparent 54%),
+      repeating-linear-gradient(0deg, transparent, transparent 11px, rgba(27,25,22,0.04) 12px);
+    border-radius: 10px;
+    min-height: 150px;
+    display: grid;
+    place-items: center;
+    text-align: center;
+    padding: 12px;
+    color: var(--muted);
+  }
+  .ph b { display: block; color: var(--ink); font-size: 13px; margin-bottom: 4px; }
+  .ph span { font-size: 12px; }
+  .foot {
+    position: absolute;
+    left: 52px; right: 52px; bottom: 18px;
+    display: flex; justify-content: space-between; align-items: center;
+    color: var(--muted); font-size: 12px;
+  }
+  .chrome {
+    position: absolute; right: 92px; bottom: 14px; z-index: 2;
+    display: flex; gap: 8px;
+  }
+  .chrome button {
+    border: 1px solid var(--line); background: var(--card); color: var(--ink);
+    border-radius: 999px; padding: 4px 10px; cursor: pointer;
+  }
+  .title-slide { justify-content: flex-end; padding-bottom: 78px; }
+  .title-slide h1 { font-size: 58px; max-width: 14ch; }
+  .meta { margin-top: 22px; display: flex; gap: 18px; color: var(--muted); font-size: 14px; }
+  .bar { height: 8px; border-radius: 99px; background: #e7e0d4; overflow: hidden; margin-top: 8px; }
+  .bar i { display: block; height: 100%; background: var(--accent); }
+  .split { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; flex: 1; }
+  .okli li::marker { color: var(--ok); }
+  .badli li::marker { color: var(--warn); }
+</style>
+</head>
+<body>
+<div class="deck">
+  <div class="frame" id="frame">
+  <div class="stage" id="stage">
+
+    <section class="slide title-slide active" data-title="Title">
+      <p class="kicker">Week 13 pre-slides · Mid-test</p>
+      <h1>A platform that plans, checks, and stops.</h1>
+      <p class="lede">EvoMAC connects a human request to four role-bound agents. The model proposes the next action. The server decides whether that action is allowed, recorded, and finished.</p>
+      <div class="meta">
+        <span>Method</span>
+        <span>R13 results · 16 Nov 2026</span>
+        <span>Reflection</span>
+      </div>
+      <div class="foot"><span>EvoMAC</span><span>01</span></div>
+    </section>
+
+    <section class="slide" data-title="Constraints">
+      <p class="kicker">Method</p>
+      <h2>Design inside the course boundary.</h2>
+      <div class="grid three">
+        <article class="card">
+          <h3>One model family</h3>
+          <p>DeepSeek or HKGAI only. R13 ran on HKGAI. OpenAI and Anthropic are not a backend.</p>
+        </article>
+        <article class="card">
+          <h3>Plain documents</h3>
+          <p>Agent outputs stay Markdown and text. HTML appears only when the task itself asks for slides or an app.</p>
+        </article>
+        <article class="card">
+          <h3>Small interface</h3>
+          <p>A workbench for chat, plans, approvals, and deliveries. Scoring is the orchestration, not the chrome.</p>
+        </article>
+      </div>
+      <div class="grid four" style="margin-top:14px">
+        <article class="card"><h3>Search</h3><p>SerpAPI links, then a pinned public fetch.</p></article>
+        <article class="card"><h3>Files</h3><p>Read, write, patch, delete in a private workspace.</p></article>
+        <article class="card"><h3>Code</h3><p>Python, Node, or browser checks inside Docker.</p></article>
+        <article class="card"><h3>Git</h3><p>Commit locally. Push only after an exact approval.</p></article>
+      </div>
+      <div class="foot"><span>Course constraints</span><span>02</span></div>
+    </section>
+
+    <section class="slide" data-title="Loop">
+      <p class="kicker">Method · control loop</p>
+      <h2>The model chooses. The gateway executes.</h2>
+      <div class="flow">
+        <div class="step"><strong>1. Plan</strong><span>A lead agent emits a task graph. The server checks roles, tools, and dependencies.</span></div>
+        <div class="arrow">→</div>
+        <div class="step"><strong>2. Act</strong><span>The assignee returns one JSON action: tool, message, ask_human, review, or publish.</span></div>
+        <div class="arrow">→</div>
+        <div class="step"><strong>3. Gate</strong><span>Allowlist, schema, budget, SHA binding, and human approval run before any side effect.</span></div>
+        <div class="arrow">→</div>
+        <div class="step"><strong>4. Receipt</strong><span>The real tool result is stored. A written file is not success until it is published and checked.</span></div>
+      </div>
+      <div class="grid two">
+        <article class="card">
+          <h3>What “done” means</h3>
+          <p>done, partial, and failed stay distinct. A ZIP, a long reply, or a green private test cannot promote a task by itself.</p>
+        </article>
+        <article class="card">
+          <h3>What the human sees</h3>
+          <p>Ambiguous questions and critical writes pause the run. Approval is bound to the exact file hash, remote, branch, and commit.</p>
+        </article>
+      </div>
+      <div class="foot"><span>backend/engine.py · backend/tools.py</span><span>03</span></div>
+    </section>
+
+    <section class="slide" data-title="Teams">
+      <p class="kicker">Method · four roles, fixed tools</p>
+      <h2>Identity is a prompt. Permission is a table.</h2>
+      <table>
+        <thead>
+          <tr><th>Team</th><th>Roles</th><th>Who may run code</th><th>Who may push Git</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Software</td><td>Lead, Developer, QA, Release</td><td>Developer, QA, Release</td><td>Release only</td></tr>
+          <tr><td>Newsroom</td><td>Editor-in-Chief, Reporter, Fact-Checker, Editor</td><td>None</td><td>None</td></tr>
+          <tr><td>Fund</td><td>Manager, Research, Risk, Marketing</td><td>Research, Risk</td><td>None</td></tr>
+          <tr><td>Default</td><td>Coordinator, Research, Executor, Reviewer</td><td>Executor, Reviewer</td><td>Executor only</td></tr>
+        </tbody>
+      </table>
+      <p class="lede" style="font-size:15px">Role text is copied from the exam pack. It cannot add tools. Newsroom agents search and write. They do not execute code or touch Git.</p>
+      <div class="foot"><span>backend/teams.py</span><span>04</span></div>
+    </section>
+
+    <section class="slide" data-title="Isolation">
+      <p class="kicker">Method · isolation and handoff</p>
+      <h2>Private files. Explicit copies. No shared shell.</h2>
+      <div class="grid three">
+        <article class="card">
+          <h3>Workspace</h3>
+          <p>Each agent and run gets <code>workspaces/&lt;agent&gt;/&lt;run&gt;</code>. Hidden paths and parent traversal are rejected. <code>imports/</code> is read-only.</p>
+        </article>
+        <article class="card">
+          <h3>Docker</h3>
+          <p><code>code.run</code> and <code>code.test</code> start a network-off container. Python uses <code>python:3.11-alpine</code>. Browser checks use a pinned Chromium image. No host fallback.</p>
+        </article>
+        <article class="card">
+          <h3>Artifacts</h3>
+          <p>Cross-agent delivery is an immutable snapshot plus a grant. The receiver reads the import copy and checks SHA-256. Private edits are not the published bytes.</p>
+        </article>
+      </div>
+      <div class="grid two">
+        <article class="card">
+          <h3>Human gates</h3>
+          <ul>
+            <li>New <code>file.write</code> proceeds. Overwrite, patch, and delete wait.</li>
+            <li><code>git.push</code> must match the configured HTTPS remote, fixed branch, and current commit.</li>
+            <li><code>ask_human</code> is a platform action, not a model feature. No guessed answer is filled in.</li>
+          </ul>
+        </article>
+        <article class="card">
+          <h3>Search is not evidence</h3>
+          <p><code>web.search</code> returns discovery links only. <code>web.fetch</code> stores the delivered text as a same-agent snapshot. A title cannot be cited as a fetched body.</p>
+        </article>
+      </div>
+      <div class="foot"><span>backend/sandbox.py · backend/artifacts.py</span><span>05</span></div>
+    </section>
+
+    <section class="slide" data-title="Memory">
+      <p class="kicker">Method · memory and measurement</p>
+      <h2>Learning is a ledger, not a weight update.</h2>
+      <div class="split">
+        <article class="card">
+          <h3>What gets remembered</h3>
+          <ul>
+            <li>Per-owner memory for private chat, group chat, and explicit shares.</li>
+            <li>Failures become candidate lessons. A later task may retrieve them.</li>
+            <li>A candidate stays unconfirmed until a later run shows it was used and the outcome supports it.</li>
+          </ul>
+        </article>
+        <article class="card">
+          <h3>What gets counted</h3>
+          <ul>
+            <li>Subtask status and overall status, kept separate from product quality.</li>
+            <li>Wall time, model calls, and reported tokens.</li>
+            <li>Acceptance is tied to the revision and the artifact hash under review.</li>
+          </ul>
+        </article>
+      </div>
+      <p class="lede" style="font-size:15px">Offline regression before R13: 951 tests passed, 0 failed, 0 skipped, 330.9 seconds, with Docker browser and agent checks enabled.</p>
+      <div class="foot"><span>backend/memory.py · backend/learning.py · backend/evaluation.py</span><span>06</span></div>
+    </section>
+
+    <section class="slide" data-title="Protocol">
+      <p class="kicker">Mid-test results · protocol</p>
+      <h2>R13 is the result set for these slides.</h2>
+      <div class="grid three">
+        <article class="card"><div class="num">6</div><p>Cases, strict order: software, newsroom, fund. Task 2 continues task 1 inside the team. A new scenario starts clean.</p></article>
+        <article class="card"><div class="num">45 min</div><p>Wall clock per case, human wait included. No run-level turn, call, or token cap. One action still capped at 6,000 output tokens; planning at 3,000.</p></article>
+        <article class="card"><div class="num">0</div><p>Manual edits after the six runs settled. Products were downloaded and checked separately from the workflow status.</p></article>
+      </div>
+      <p class="lede" style="font-size:15px">Source commit <code>26d7df0</code>. Requested model <code>t2_hkgai-v3_fp8_1m_e7</code>; the service reported <code>e10</code> on 526 calls. Later local DeepSeek runs are not mixed into this table.</p>
+      <div class="foot"><span>benchmarks/reports/mid-test-r13-20261116.json</span><span>07</span></div>
+    </section>
+
+    <section class="slide" data-title="Scoreboard">
+      <p class="kicker">Mid-test results · scoreboard</p>
+      <h2>Two finished workflows. Six product shapes.</h2>
+      <table>
+        <thead>
+          <tr><th>Case</th><th class="right">Time</th><th>Workflow</th><th>Package</th><th>What landed</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>S1 Meeting-room booking</td><td class="right">44.86 min</td><td><span class="tag partial">partial</span></td><td>Candidate ZIP</td><td>Book, query, cancel, refresh. Two tabs can still overwrite a booking.</td></tr>
+          <tr><td>S2 Usage dashboard</td><td class="right">20.23 min</td><td><span class="tag partial">partial</span></td><td>Candidate ZIP</td><td>9 live stat checks passed. QA tested a private rewrite, not the published bytes.</td></tr>
+          <tr><td>N1 Campus AI news</td><td class="right">20.03 min</td><td><span class="tag done">done</span></td><td>Formal ZIP</td><td>Multi-channel pack. Fact-checker read 3 official pages. Body about 578 words.</td></tr>
+          <tr><td>N2 AI-detector fact-check</td><td class="right">26.53 min</td><td><span class="tag partial">partial</span></td><td>No ZIP</td><td>About 1,193 words plus social copy. Packaging skipped after a stale rework.</td></tr>
+          <tr><td>F1 Simulated portfolio</td><td class="right">30.74 min</td><td><span class="tag done">done</span></td><td>Formal ZIP</td><td>Allocations sum to HKD 1,000,000. Cash yield explained with a 10-year Treasury rate.</td></tr>
+          <tr><td>F2 Semiconductor slides</td><td class="right">41.84 min</td><td><span class="tag partial">partial</span></td><td>Candidate + formal</td><td>15 offline slides. 31 core and 15 desktop checks passed. New notes lacked a final review.</td></tr>
+        </tbody>
+      </table>
+      <div class="foot"><span>2 done · 4 partial · 3 formal ZIPs · 3 candidate ZIPs</span><span>08</span></div>
+    </section>
+
+    <section class="slide" data-title="Observations">
+      <p class="kicker">Mid-test results · observations</p>
+      <h2>Activity was high. Handoff and version checks were not.</h2>
+      <div class="grid four">
+        <article class="card"><div class="num">556</div><p>Model calls. 11,069,803 reported tokens. 30 calls have unknown usage and are not counted as zero.</p></article>
+        <article class="card"><div class="num">135</div><p>Real browser calls on S1, 108 successful, against one published source. QA made none.</p></article>
+        <article class="card"><div class="num">0</div><p>Dynamic delegation events during execution. The opening plan is not the same as negotiating a reassignment.</p></article>
+        <article class="card"><div class="num">0</div><p>Confirmed memory hits. 24 candidate trials; 21 assessment events stayed unassessed; none proved adoption.</p></article>
+      </div>
+      <div class="grid two">
+        <article class="card">
+          <h3>Against R12</h3>
+          <p>Reported tokens fell about 11.9%. Call count was almost unchanged. Workflow done stayed at 2. Formal packages went from 2 to 3. Product form went from 5/6 to 6/6. The protocols differ, so this is not a stable success rate.</p>
+        </article>
+        <article class="card">
+          <h3>Failures of the transport</h3>
+          <p>31 failed requests: 24 timeouts, 6 HTTP errors, 1 truncated output. Those did not explain the repeated tests or the stale review.</p>
+        </article>
+      </div>
+      <div class="foot"><span>docs/project-status-2026-11-16.md</span><span>09</span></div>
+    </section>
+
+    <section class="slide" data-title="Placeholders">
+      <p class="kicker">Mid-test results · figures to drop in</p>
+      <h2>Replace the frames. Do not redraw the claim.</h2>
+      <div class="grid three">
+        <div class="ph"><div><b>Workbench</b><span>One run: plan, subtask clocks, and a waiting approval.</span></div></div>
+        <div class="ph"><div><b>S1 product</b><span>Booking screen plus the two-tab overwrite note.</span></div></div>
+        <div class="ph"><div><b>F2 slides</b><span>One content slide and the phone overflow.</span></div></div>
+      </div>
+      <div class="grid three" style="margin-top:14px">
+        <div class="ph" style="min-height:120px"><div><b>N1 package</b><span>Article, social copy, and the three fetched sources.</span></div></div>
+        <div class="ph" style="min-height:120px"><div><b>Git history</b><span>Each member’s commits across the term. Required in the final write-up.</span></div></div>
+        <div class="ph" style="min-height:120px"><div><b>Delivery ledger</b><span>Candidate versus formal ZIP, with SHA of the reviewed bytes.</span></div></div>
+      </div>
+      <div class="foot"><span>Placeholders only · no generated product screenshots in this file</span><span>10</span></div>
+    </section>
+
+    <section class="slide" data-title="Worked">
+      <p class="kicker">Reflection · what worked</p>
+      <h2>The gate kept a false pass from looking finished.</h2>
+      <div class="grid two">
+        <article class="card okli">
+          <ul>
+            <li>All six cases produced the intended kind of artifact: app, dashboard, article, fact-check, portfolio, HTML slides.</li>
+            <li>N1 and F1 closed as done with formal packages. N1’s checker actually read three official pages.</li>
+            <li>Private tests did not silently become acceptance. S2’s failing QA run was on the reviewer’s own <code>dashboard.js</code>.</li>
+            <li>F2’s reviewed HTML, CSS, JS, and README matched the formal package byte for byte. The missing review was named instead of waived.</li>
+            <li>Search links, file hashes, and tool receipts stayed inspectable after the run.</li>
+          </ul>
+        </article>
+        <article class="card">
+          <h3>Time inside the cases</h3>
+          <p>S1 used almost the whole 45 minutes. N1 finished a publishable pack in 20 minutes.</p>
+          <div class="bar" title="S1 44.86 of 45"><i style="width:99%"></i></div>
+          <p style="margin-top:10px">N1, 20.03 min</p>
+          <div class="bar"><i style="width:45%"></i></div>
+          <p style="margin-top:10px">The 90-second watchdog queued a diagnosis without an extra model call. It did not stop S1’s 135 browser calls.</p>
+        </article>
+      </div>
+      <div class="foot"><span>What the ledger could already prove</span><span>11</span></div>
+    </section>
+
+    <section class="slide" data-title="Did not">
+      <p class="kicker">Reflection · what did not</p>
+      <h2>The same bytes were tested, reviewed, and handed off too late.</h2>
+      <div class="grid two">
+        <article class="card badli">
+          <h3>Process</h3>
+          <ul>
+            <li>S1 had a candidate at minute 4.5 and then spent the rest on repeated browser calls. QA never opened the browser.</li>
+            <li>N2’s reviewer had read the new article and still filed the old rework. Packaging was skipped.</li>
+            <li>F2’s subtasks were done and the run stayed partial, because notes added at packaging had no review.</li>
+            <li>No mid-run reassignment was recorded. Memory retrieval did not change a later decision in this round.</li>
+          </ul>
+        </article>
+        <article class="card badli">
+          <h3>Product</h3>
+          <ul>
+            <li>S1 and S2 can overwrite stored bookings when a read fails or two tabs submit.</li>
+            <li>N1 is shorter than the requester’s about-800-word preference and misses a closed registration.</li>
+            <li>N2 lacks a detector version and over-generalizes “not reliable” into “no evidential value”.</li>
+            <li>F1 uses a long-bond yield for short cash and does not prove the 5% single-company cap through fund holdings.</li>
+            <li>App-level <code>git.push</code> was not exercised on a real remote in this round.</li>
+          </ul>
+        </article>
+      </div>
+      <div class="foot"><span>Raising time or tokens did not remove these in R10–R13</span><span>12</span></div>
+    </section>
+
+    <section class="slide" data-title="Learned">
+      <p class="kicker">Reflection · what we learned</p>
+      <h2>Bind the test to the bytes you intend to ship.</h2>
+      <div class="grid three">
+        <article class="card">
+          <h3>Version before verdict</h3>
+          <p>A review or browser run must name the artifact hashes it actually opened. A mismatch is feedback, not another silent pass.</p>
+        </article>
+        <article class="card">
+          <h3>Leave a window</h3>
+          <p>The producer cannot keep the wall clock until the last minute. Downstream QA needs a scheduled share of the same 45 minutes.</p>
+        </article>
+        <article class="card">
+          <h3>Close the package</h3>
+          <p>Files added after the last review need a small extra review. Unchanged files can reuse the old evidence.</p>
+        </article>
+      </div>
+      <article class="card" style="margin-top:14px">
+        <h3>The harness can make a weak choice look reasonable</h3>
+        <p>Omitted file bodies, a progress receipt that treats another read as progress, and a token reservation equal to the provider’s maximum output all pushed agents to repeat work or stop early. The next change is in those checks, not in a longer prompt. Memory still needs an on/off comparison on the same tasks before we claim that agents learned.</p>
+      </article>
+      <div class="foot"><span>R13 evidence · later harness notes kept separate from the scoreboard</span><span>13</span></div>
+    </section>
+    <div class="chrome">
+      <button type="button" id="prev">Prev</button>
+      <button type="button" id="next">Next</button>
+    </div>
+  </div>
+  </div>
+</div>
+<script>
+  const slides = [...document.querySelectorAll('.slide')];
+  const frame = document.getElementById('frame');
+  let index = 0;
+  function fit() {
+    const scale = Math.min((window.innerWidth - 28) / 1120, (window.innerHeight - 28) / 630);
+    frame.style.setProperty('--s', String(scale));
+  }
+  function show(next) {
+    index = (next + slides.length) % slides.length;
+    slides.forEach((slide, i) => slide.classList.toggle('active', i === index));
+    document.title = 'EvoMAC · ' + slides[index].dataset.title;
+  }
+  fit();
+  window.addEventListener('resize', fit);
+  document.getElementById('prev').addEventListener('click', () => show(index - 1));
+  document.getElementById('next').addEventListener('click', () => show(index + 1));
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'ArrowRight' || event.key === 'PageDown' || event.key === ' ') { event.preventDefault(); show(index + 1); }
+    if (event.key === 'ArrowLeft' || event.key === 'PageUp') { event.preventDefault(); show(index - 1); }
+    if (event.key === 'Home') show(0);
+    if (event.key === 'End') show(slides.length - 1);
+  });
+</script>
+</body>
+</html>
